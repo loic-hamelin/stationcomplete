@@ -69,9 +69,35 @@ export const isClosed = (w: OsmWay) => w.nodes.length > 3 && w.nodes[0] === w.no
 
 // ---------- Rôles ferroviaires (rapport tags § 3) ----------
 
-export const isPlatform = (t: Tags = {}) =>
-	t.railway === 'platform' ||
-	(t.public_transport === 'platform' && (t.train === 'yes' || t.railway === 'platform'));
+/** Modes de transport autres que le train : leur présence écarte un `public_transport=platform`. */
+const OTHER_MODES = [
+	'bus',
+	'trolleybus',
+	'share_taxi',
+	'tram',
+	'light_rail',
+	'subway',
+	'monorail',
+	'funicular',
+	'ferry',
+	'aerialway',
+	'coach'
+] as const;
+
+/**
+ * Quai de train : `railway=platform`, ou `public_transport=platform` avec `train=yes`, ou
+ * `public_transport=platform` sans aucun autre mode précisé (issue #1 : `train=yes` manque
+ * souvent, et le wiki ne le demande pas). Un quai de bus, de tram, de métro… est écarté.
+ */
+export const isPlatform = (t: Tags = {}) => {
+	if (t.railway === 'platform') return true;
+	if (t.public_transport !== 'platform' || t.train === 'no') return false;
+	if (t.train === 'yes') return true;
+	if (OTHER_MODES.some((m) => t[m] === 'yes')) return false;
+	if (t.highway === 'bus_stop' || t.highway === 'platform') return false;
+	if (t.railway === 'tram_stop' || t.amenity === 'bus_station') return false;
+	return true;
+};
 
 export const isRail = (t: Tags = {}) => t.railway === 'rail';
 

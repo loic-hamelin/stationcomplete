@@ -19,6 +19,7 @@ import { createInterface } from 'node:readline';
 import { dirname } from 'node:path';
 import { COUNTRIES, DEFAULT_COUNTRY, isCountryCode } from '../src/lib/core/countries.ts';
 import { THRESHOLDS, analyzeStation } from '../src/lib/core/quests.ts';
+import { isPlatform } from '../src/lib/core/osm.ts';
 
 function argValue(name) {
 	const i = process.argv.indexOf(name);
@@ -96,12 +97,8 @@ export function isRailStation(t) {
 	if (t.train === 'no') return false;
 	return true;
 }
-export function isTrainPlatform(t) {
-	if (t.railway === 'platform') return true;
-	if (t.public_transport === 'platform' && (t.train === 'yes' || t.railway === 'platform'))
-		return true;
-	return false;
-}
+/** Même règle que l'appli (src/lib/core/osm.ts, issue #1). */
+export const isTrainPlatform = (t) => isPlatform(t);
 /** Ancienne pancarte d'arrêt, selon le schéma du pays (statistiques seulement). */
 const legacyStopSign = (country) => (t) =>
 	t.railway === 'signal' && !!country.stopSigns?.isLegacy(t);
