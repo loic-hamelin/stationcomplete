@@ -483,7 +483,17 @@
 		},
 		"chooseStation": "Scegli una stazione",
 		"more": "Scopri di più sul progetto",
-		"replay": "Rivedi la presentazione"
+		"replay": "Rivedi la presentazione",
+		"lang": {
+			"title": "Scegli la lingua",
+			"titleCountry": "Dove vuoi contribuire?",
+			"text": "Proposta in base al tuo telefono, senza localizzazione.",
+			"country": "Paese delle stazioni",
+			"language": "Lingua dell’interfaccia",
+			"phone": "Lingua del telefono",
+			"onlyCountry": "Stazioni {of}; seguiranno altri paesi.",
+			"later": "Modificabile in qualsiasi momento nelle Impostazioni."
+		}
 	},
 	"about": {
 		"title": "Informazioni — stationcomplete",
@@ -606,7 +616,34 @@
 		"noMatch": "Nessuna stazione corrisponde a «{query}».",
 		"around": "Vicino a me",
 		"recent": "Recenti",
-		"count": "{count} stazioni e fermate {of}. Digita almeno due lettere."
+		"count": "{count} stazioni e fermate {of}. Digita almeno due lettere.",
+		"summary": "{country} · {count} stazioni e fermate",
+		"of": "{done} su {total}",
+		"gaugeNone": "niente da rilevare",
+		"gaugeA11y": "Marciapiedi numerati: {platforms}; binari numerati: {tracks}; lati di marciapiede con tabella: {signs}.",
+		"gauge": {
+			"platforms": "Marciapiedi numerati",
+			"tracks": "Binari numerati",
+			"stopSigns": "Tabelle di fermata"
+		},
+		"fav": "Preferita: {name}",
+		"offline": "Scaricata per l’uso offline",
+		"offlineShort": "offline",
+		"resultsCount": "{count, plural, one {# risultato} other {# risultati}}",
+		"closestFirst": "prima le più vicine",
+		"searchHint": "Accenti, trattini e apostrofi sono ignorati; «St» vale «Saint».",
+		"resume": {
+			"title": "Riprendi",
+			"continue": "Continua: {task}",
+			"open": "Apri la stazione",
+			"allDone": "Tutto compilato: apri la stazione",
+			"pending": "{count, plural, one {# inserimento in attesa di invio} other {# inserimenti in attesa di invio}}"
+		},
+		"relocate": "Aggiorna",
+		"todoTitle": "Da completare vicino a te",
+		"todoCount": "{count} da fare",
+		"favorites": "Preferite",
+		"gaugeNote": "Indicatori marciapiedi · binari · tabelle: stima da OpenStreetMap al {date}, aggiornata ogni settimana; esatti per le stazioni già aperte su questo telefono."
 	},
 	"settings": {
 		"title": "Impostazioni — stationcomplete",
@@ -637,7 +674,10 @@
 		"removeDownload": "Rimuovi {name} dal telefono",
 		"noDownloads": "Nessuna",
 		"noDownloadsHint": "Scarica una stazione dal suo pannello per usarla senza rete.",
-		"aboutLink": "Sicurezza, licenze, contatti"
+		"aboutLink": "Sicurezza, licenze, contatti",
+		"country": "Paese delle stazioni",
+		"countryHint": "Stazioni proposte nella ricerca e vicino a te.",
+		"countryOnly": "Unico paese disponibile per ora."
 	},
 	"contributions": {
 		"title": "I miei contributi — stationcomplete",

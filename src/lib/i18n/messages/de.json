@@ -483,7 +483,17 @@
 		},
 		"chooseStation": "Bahnhof wählen",
 		"more": "Mehr über das Projekt erfahren",
-		"replay": "Einführung erneut ansehen"
+		"replay": "Einführung erneut ansehen",
+		"lang": {
+			"title": "Wähle deine Sprache",
+			"titleCountry": "Wo möchtest du beitragen?",
+			"text": "Vorschlag nach den Einstellungen deines Telefons, ohne Standort.",
+			"country": "Land der Bahnhöfe",
+			"language": "Sprache der Oberfläche",
+			"phone": "Sprache des Telefons",
+			"onlyCountry": "Bahnhöfe {of}; weitere Länder folgen.",
+			"later": "Jederzeit in den Einstellungen änderbar."
+		}
 	},
 	"about": {
 		"title": "Über — stationcomplete",
@@ -606,7 +616,34 @@
 		"noMatch": "Kein Bahnhof passt zu „{query}“.",
 		"around": "In meiner Nähe",
 		"recent": "Zuletzt angesehen",
-		"count": "{count} Bahnhöfe und Haltepunkte {of}. Gib mindestens zwei Buchstaben ein."
+		"count": "{count} Bahnhöfe und Haltepunkte {of}. Gib mindestens zwei Buchstaben ein.",
+		"summary": "{country} · {count} Bahnhöfe und Haltestellen",
+		"of": "{done} von {total}",
+		"gaugeNone": "nichts zu erfassen",
+		"gaugeA11y": "Nummerierte Bahnsteige: {platforms}; nummerierte Gleise: {tracks}; Bahnsteigseiten mit Haltetafel: {signs}.",
+		"gauge": {
+			"platforms": "Nummerierte Bahnsteige",
+			"tracks": "Nummerierte Gleise",
+			"stopSigns": "Haltetafeln"
+		},
+		"fav": "Favorit: {name}",
+		"offline": "Für die Offline-Nutzung heruntergeladen",
+		"offlineShort": "offline",
+		"resultsCount": "{count, plural, one {# Ergebnis} other {# Ergebnisse}}",
+		"closestFirst": "nächste zuerst",
+		"searchHint": "Akzente, Bindestriche und Apostrophe werden ignoriert; „St“ steht für „Saint“.",
+		"resume": {
+			"title": "Fortsetzen",
+			"continue": "Weiter: {task}",
+			"open": "Bahnhof öffnen",
+			"allDone": "Alles erfasst: Bahnhof öffnen",
+			"pending": "{count, plural, one {# Eingabe wartet auf das Senden} other {# Eingaben warten auf das Senden}}"
+		},
+		"relocate": "Aktualisieren",
+		"todoTitle": "In deiner Nähe zu ergänzen",
+		"todoCount": "{count} offen",
+		"favorites": "Favoriten",
+		"gaugeNote": "Anzeigen Bahnsteige · Gleise · Haltetafeln: Schätzung nach OpenStreetMap vom {date}, wöchentlich aktualisiert; genau für Bahnhöfe, die auf diesem Telefon schon geöffnet wurden."
 	},
 	"settings": {
 		"title": "Einstellungen — stationcomplete",
@@ -637,7 +674,10 @@
 		"removeDownload": "{name} vom Telefon entfernen",
 		"noDownloads": "Keine",
 		"noDownloadsHint": "Lade einen Bahnhof über seine Übersicht herunter, um ihn ohne Netz zu nutzen.",
-		"aboutLink": "Sicherheit, Lizenzen, Kontakt"
+		"aboutLink": "Sicherheit, Lizenzen, Kontakt",
+		"country": "Land der Bahnhöfe",
+		"countryHint": "Bahnhöfe in der Suche und in deiner Nähe.",
+		"countryOnly": "Derzeit einziges verfügbares Land."
 	},
 	"contributions": {
 		"title": "Meine Beiträge — stationcomplete",

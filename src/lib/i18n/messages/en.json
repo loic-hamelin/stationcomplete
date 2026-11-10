@@ -483,7 +483,17 @@
 		},
 		"chooseStation": "Choose a station",
 		"more": "Learn more about the project",
-		"replay": "Watch the introduction again"
+		"replay": "Watch the introduction again",
+		"lang": {
+			"title": "Choose your language",
+			"titleCountry": "Where will you contribute?",
+			"text": "Suggested from your phone settings, without location.",
+			"country": "Country of the stations",
+			"language": "Interface language",
+			"phone": "Phone language",
+			"onlyCountry": "Stations {of}; more countries will follow.",
+			"later": "You can change this at any time in Settings."
+		}
 	},
 	"about": {
 		"title": "About — stationcomplete",
@@ -606,7 +616,34 @@
 		"noMatch": "No station matches “{query}”.",
 		"around": "Near me",
 		"recent": "Recent",
-		"count": "{count} stations and halts {of}. Type at least two letters."
+		"count": "{count} stations and halts {of}. Type at least two letters.",
+		"summary": "{country} · {count} stations and halts",
+		"of": "{done} of {total}",
+		"gaugeNone": "nothing to record",
+		"gaugeA11y": "Numbered platforms: {platforms}; numbered tracks: {tracks}; platform sides with a stop marker: {signs}.",
+		"gauge": {
+			"platforms": "Numbered platforms",
+			"tracks": "Numbered tracks",
+			"stopSigns": "Stop markers"
+		},
+		"fav": "Favourite: {name}",
+		"offline": "Downloaded for offline use",
+		"offlineShort": "offline",
+		"resultsCount": "{count, plural, one {# result} other {# results}}",
+		"closestFirst": "closest first",
+		"searchHint": "Accents, hyphens and apostrophes are ignored; “St” matches “Saint”.",
+		"resume": {
+			"title": "Resume",
+			"continue": "Continue: {task}",
+			"open": "Open the station",
+			"allDone": "Everything is filled in: open the station",
+			"pending": "{count, plural, one {# entry waiting to be sent} other {# entries waiting to be sent}}"
+		},
+		"relocate": "Refresh",
+		"todoTitle": "To complete near you",
+		"todoCount": "{count} to do",
+		"favorites": "Favourites",
+		"gaugeNote": "Platform · track · stop marker gauges: estimate from OpenStreetMap as of {date}, updated every week; exact for stations already opened on this phone."
 	},
 	"settings": {
 		"title": "Settings — stationcomplete",
@@ -637,7 +674,10 @@
 		"removeDownload": "Remove {name} from the phone",
 		"noDownloads": "None",
 		"noDownloadsHint": "Download a station from its dashboard to use it without a network.",
-		"aboutLink": "Safety, licences, contact"
+		"aboutLink": "Safety, licences, contact",
+		"country": "Country of the stations",
+		"countryHint": "Stations offered in search and around you.",
+		"countryOnly": "Only country available for now."
 	},
 	"contributions": {
 		"title": "My contributions — stationcomplete",

@@ -76,11 +76,17 @@ jobs:
           osmium tags-filter "pays-$CC.osm.pbf" \
             nwr/railway=station,halt,platform n/railway=signal nwr/public_transport=platform \
             -o "rail-$CC.osm.pbf"
+          # Jauges (quais, voies, pancartes) : quais, voies et signaux, avec les coordonnées des
+          # nœuds dans les ways (OPL), lus par le moteur de quêtes de l'appli (architecture § 13.6).
+          osmium tags-filter "pays-$CC.osm.pbf" \
+            nwr/railway=platform nwr/public_transport=platform w/railway=rail n/railway=signal \
+            -o "jauges-$CC.osm.pbf"
           rm "pays-$CC.osm.pbf"
           osmium export "rail-$CC.osm.pbf" -f geojsonseq --add-unique-id=type_id -o "rail-$CC.geojsonseq"
-          ls -lh "rail-$CC.osm.pbf" "rail-$CC.geojsonseq"
+          osmium add-locations-to-ways "jauges-$CC.osm.pbf" -f opl -o "jauges-$CC.opl"
+          ls -lh "rail-$CC.osm.pbf" "rail-$CC.geojsonseq" "jauges-$CC.osm.pbf" "jauges-$CC.opl"
       - name: Construction de l'index
-        run: node scripts/build-stations.mjs "rail-$CC.geojsonseq" --country "$CC"
+        run: node scripts/build-stations.mjs "rail-$CC.geojsonseq" --country "$CC" --osm "jauges-$CC.opl"
       - name: Taille de l'index
         run: |
           echo "brut : $(stat -c %s '${{ matrix.pays.file }}') octets"

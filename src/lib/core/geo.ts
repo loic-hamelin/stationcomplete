@@ -7,12 +7,15 @@ const R = 6_371_008.8; // rayon moyen de la Terre (m)
 const RAD = Math.PI / 180;
 
 export class LocalProjection {
+	// Champs déclarés à la main (pas de « readonly » en paramètre) : TypeScript « effaçable »,
+	// chargeable par Node sans compilation (scripts/build-stations.mjs, via quests.ts).
+	readonly lon0: number;
+	readonly lat0: number;
 	private readonly kx: number;
 	private readonly ky = R * RAD;
-	constructor(
-		readonly lon0: number,
-		readonly lat0: number
-	) {
+	constructor(lon0: number, lat0: number) {
+		this.lon0 = lon0;
+		this.lat0 = lat0;
 		this.kx = R * RAD * Math.cos(lat0 * RAD);
 	}
 	project(lon: number, lat: number): Pt {

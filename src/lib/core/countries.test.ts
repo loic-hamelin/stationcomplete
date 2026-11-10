@@ -8,6 +8,7 @@ import {
 	DEFAULT_COUNTRY,
 	countryConfig,
 	countryProblems,
+	detectCountry,
 	enabledCountries,
 	imageryOf,
 	imageryOrigins,
@@ -249,5 +250,31 @@ describe('politique de sécurité générée', () => {
 		const d = cspDirectives(['https://data.geopf.fr', 'https://tuiles.example.org']);
 		expect(d['img-src']).toContain('https://tuiles.example.org');
 		expect(d['connect-src']).toContain('https://tuiles.example.org');
+	});
+});
+
+describe('pays proposé au premier lancement (sans localisation)', () => {
+	const both = [COUNTRIES.fr, { ...COUNTRIES.ch, enabled: true }];
+	it('d’après le fuseau horaire, puis la région de la langue', () => {
+		expect(detectCountry({ timeZone: 'Europe/Zurich', languages: ['fr-FR'] }, both)).toBe('ch');
+		expect(detectCountry({ timeZone: 'Europe/Paris', languages: ['de-CH'] }, both)).toBe('fr');
+		expect(detectCountry({ timeZone: 'America/Montreal', languages: ['en', 'fr-CH'] }, both)).toBe(
+			'ch'
+		);
+		expect(detectCountry({ timeZone: 'Asia/Tokyo', languages: ['ja-JP'] }, both)).toBe('fr');
+		expect(detectCountry({}, both)).toBe('fr');
+	});
+	it('seuls les pays activés sont proposés (France seule aujourd’hui)', () => {
+		expect(detectCountry({ timeZone: 'Europe/Zurich', languages: ['de-CH'] })).toBe('fr');
+		expect(enabledCountries().map((c) => c.code)).toEqual(['fr']);
+	});
+	it('noms des départements pour toutes les subdivisions de l’index', async () => {
+		const names = (await COUNTRIES.fr.subdivision.names!()).default;
+		const index = JSON.parse(readFileSync('static/data/stations-fr.json', 'utf8')) as {
+			s: string[][];
+		};
+		const codes = new Set(index.s.map((r) => r[4]).filter(Boolean));
+		expect([...codes].filter((c) => !names[c])).toEqual([]);
+		expect(names['01']).toBe('Ain');
 	});
 });

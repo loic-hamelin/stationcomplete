@@ -24,6 +24,9 @@ test('la présentation se déroule et la carte sécurité ne peut pas être pass
 }) => {
 	const errors = watchErrors(page);
 	await page.goto('/');
+	// Étape 1 (premier lancement) : langue, pré-remplie d'après le téléphone.
+	await expect(page.getByRole('heading', { level: 1 })).toHaveText('Choisissez votre langue');
+	await page.getByRole('button', { name: 'Suivant' }).click();
 	await expect(page.getByRole('heading', { level: 1 })).toHaveText(
 		'Complétez les données de votre gare'
 	);
@@ -50,6 +53,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
 	test(`accessibilité (thème ${colorScheme})`, async ({ page }) => {
 		await page.emulateMedia({ colorScheme });
 		await page.goto('/');
+		await expectAccessible(page); // étape « langue »
+		await page.getByRole('button', { name: 'Suivant' }).click();
 		await expectAccessible(page);
 		await page.getByRole('button', { name: 'Passer' }).click();
 		await expectAccessible(page);
@@ -78,9 +83,8 @@ test('l’appli s’ouvre sans réseau après une première visite', async ({ pa
 	await page.reload(); // la page est désormais contrôlée par le service worker
 	await context.setOffline(true);
 	await page.reload();
-	await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-		'Complétez les données de votre gare'
-	);
+	// Premier lancement pas encore terminé : l'appli rouvre sur l'étape « langue ».
+	await expect(page.getByRole('heading', { level: 1 })).toHaveText('Choisissez votre langue');
 	await page.goto('/a-propos/');
 	await expect(page.getByRole('heading', { level: 1 })).toHaveText('À propos de stationcomplete');
 });

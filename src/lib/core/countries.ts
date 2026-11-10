@@ -88,8 +88,20 @@ export interface Country {
 	imagery: Imagery | null;
 	/** null : pas de schéma OSM établi, quêtes de pancartes désactivées dans ce pays. */
 	stopSigns: StopSignSchema | null;
-	/** Subdivision affichée avec la commune (département, canton). */
-	subdivision: { singular: string; plural: string };
+	/**
+	 * Subdivision affichée avec la commune (département, canton) ; `names` : noms d'après le code
+	 * de l'index (« 01 » → « Ain »), chargés à part (page « Choisir une gare » seulement).
+	 */
+	subdivision: {
+		singular: string;
+		plural: string;
+		names?: () => Promise<{ default: Record<string, string> }>;
+	};
+	/**
+	 * Fuseaux horaires du pays (Intl) : avec la région de la langue du téléphone, ils proposent
+	 * le pays au premier lancement, sans localisation.
+	 */
+	timeZones: string[];
 	/** Règles de quêtes propres au pays. */
 	quests: {
 		/** Q7 : numéro de voie écrit dans `name` ou `ref` d'une voie (« Voie 1 »). */
@@ -137,7 +149,12 @@ const france: Country = {
 		}
 	},
 	stopSigns: frStopSigns,
-	subdivision: { singular: 'département', plural: 'départements' },
+	subdivision: {
+		singular: 'département',
+		plural: 'départements',
+		names: () => import('./subdivisions/fr.ts')
+	},
+	timeZones: ['Europe/Paris'],
 	quests: { misplacedTrackRef: /^\s*(voie|v)\s*\w+/i },
 	languages: ['fr']
 };
@@ -167,6 +184,7 @@ const switzerland: Country = {
 	// TODO(lot P5) : schéma CH-FDV:577…580 (étude § 4), après l'avis du forum OSM suisse.
 	stopSigns: null,
 	subdivision: { singular: 'canton', plural: 'cantons' },
+	timeZones: ['Europe/Zurich'],
 	// Motifs « Gleis N », « voie N », « binario N » (étude § 6.2, point 10) ; usage non mesuré.
 	quests: { misplacedTrackRef: /^\s*(gleis|voie|binario|v)\s*\w+/i },
 	languages: ['de', 'fr', 'it']
@@ -238,3 +256,24 @@ export const imageryOrigins = (): string[] => [
 export const photoCredits = (): Imagery['credit'][] => [
 	...new Map(enabledCountries().map((c) => [c.imagery!.id, c.imagery!.credit])).values()
 ];
+
+/**
+ * Pays proposé au premier lancement d'après le téléphone, sans localisation : fuseau horaire
+ * (Intl), puis région des langues préférées (« fr-CH » → Suisse), sinon le pays par défaut.
+ * Seuls les pays activés sont proposés (`candidates`, réglable pour les tests).
+ */
+export function detectCountry(
+	env: { timeZone?: string; languages?: readonly string[] },
+	candidates: Country[] = enabledCountries()
+): CountryCode {
+	const byZone = candidates.find((c) => env.timeZone && c.timeZones.includes(env.timeZone));
+	if (byZone) return byZone.code;
+	for (const tag of env.languages ?? []) {
+		const region = String(tag).split(/[-_]/)[1]?.toLowerCase();
+		const c = region && candidates.find((x) => x.code === region);
+		if (c) return c.code;
+	}
+	return candidates.some((c) => c.code === DEFAULT_COUNTRY)
+		? DEFAULT_COUNTRY
+		: (candidates[0]?.code ?? DEFAULT_COUNTRY);
+}

@@ -4,6 +4,8 @@
 {"type": "Feature", "id": "n3", "geometry": {"type": "Point", "coordinates": [5.1, 46.1]}, "properties": {"railway": "halt", "name": "Halte du Sud"}}
 {"type": "Feature", "id": "n4", "geometry": {"type": "Point", "coordinates": [5.01, 46.01]}, "properties": {"railway": "station", "station": "subway", "name": "Métro Essai"}}
 {"type": "Feature", "id": "n9", "geometry": {"type": "Point", "coordinates": [5.02, 46.02]}, "properties": {"railway": "station", "name": "Train touristique", "usage": "tourism"}}
-{"type": "Feature", "id": "n6", "geometry": {"type": "Point", "coordinates": [5.0003, 46.0002]}, "properties": {"railway": "signal", "railway:signal:stop": "FR:ARRET_TETE"}}
+{"type": "Feature", "id": "n6", "geometry": {"type": "Point", "coordinates": [5.0003, 46.00035]}, "properties": {"railway": "signal", "railway:signal:stop": "FR:ARRET_TETE"}}
 {"type": "Feature", "id": "n7", "geometry": {"type": "Point", "coordinates": [5.1001, 46.1]}, "properties": {"railway": "signal", "railway:signal:stop": "FR:ARRET"}}
 {"type": "Feature", "id": "n8", "geometry": {"type": "Point", "coordinates": [12.0, 47.0]}, "properties": {"railway": "station", "name": "Gare Lointaine"}}
+{"type": "Feature", "id": "w20", "geometry": {"type": "LineString", "coordinates": [[4.999, 46.00035], [5.0003, 46.00035], [5.001, 46.00035]]}, "properties": {"railway": "rail", "railway:track_ref": "2"}}
+{"type": "Feature", "id": "w21", "geometry": {"type": "LineString", "coordinates": [[4.999, 46.00015], [5.001, 46.00015]]}, "properties": {"railway": "rail"}}

@@ -483,7 +483,17 @@
 		},
 		"chooseStation": "Choisir une gare",
 		"more": "En savoir plus sur le projet",
-		"replay": "Revoir la présentation"
+		"replay": "Revoir la présentation",
+		"lang": {
+			"title": "Choisissez votre langue",
+			"titleCountry": "Où allez-vous contribuer ?",
+			"text": "Proposé d’après votre téléphone, sans localisation.",
+			"country": "Pays des gares",
+			"language": "Langue de l’interface",
+			"phone": "Langue du téléphone",
+			"onlyCountry": "Gares {of} ; d’autres pays suivront.",
+			"later": "Modifiable à tout moment dans Réglages."
+		}
 	},
 	"about": {
 		"title": "À propos — stationcomplete",
@@ -606,7 +616,34 @@
 		"noMatch": "Aucune gare ne correspond à « {query} ».",
 		"around": "Autour de moi",
 		"recent": "Récentes",
-		"count": "{count} gares et haltes {of}. Tapez au moins deux lettres."
+		"count": "{count} gares et haltes {of}. Tapez au moins deux lettres.",
+		"summary": "{country} · {count} gares et haltes",
+		"of": "{done} sur {total}",
+		"gaugeNone": "rien à relever",
+		"gaugeA11y": "Quais numérotés : {platforms} ; voies numérotées : {tracks} ; côtés de quai avec pancarte : {signs}.",
+		"gauge": {
+			"platforms": "Quais numérotés",
+			"tracks": "Voies numérotées",
+			"stopSigns": "Pancartes d’arrêt"
+		},
+		"fav": "Favorite : {name}",
+		"offline": "Téléchargée pour le hors-ligne",
+		"offlineShort": "hors-ligne",
+		"resultsCount": "{count, plural, one {# résultat} other {# résultats}}",
+		"closestFirst": "les plus proches d’abord",
+		"searchHint": "Accents, tirets et apostrophes sont ignorés ; « St » vaut « Saint ».",
+		"resume": {
+			"title": "Reprendre",
+			"continue": "Continuer : {task}",
+			"open": "Ouvrir la gare",
+			"allDone": "Tout est renseigné : ouvrir la gare",
+			"pending": "{count, plural, one {# saisie en attente d’envoi} other {# saisies en attente d’envoi}}"
+		},
+		"relocate": "Actualiser",
+		"todoTitle": "À compléter près de vous",
+		"todoCount": "{count} à faire",
+		"favorites": "Favorites",
+		"gaugeNote": "Jauges quais · voies · pancartes : estimation d’après OpenStreetMap au {date}, mise à jour chaque semaine ; exactes pour les gares déjà ouvertes sur ce téléphone."
 	},
 	"settings": {
 		"title": "Réglages — stationcomplete",
@@ -637,7 +674,10 @@
 		"removeDownload": "Supprimer {name} du téléphone",
 		"noDownloads": "Aucune",
 		"noDownloadsHint": "Téléchargez une gare depuis son tableau de bord pour l’utiliser sans réseau.",
-		"aboutLink": "Sécurité, licences, contact"
+		"aboutLink": "Sécurité, licences, contact",
+		"country": "Pays des gares",
+		"countryHint": "Gares proposées à la recherche et autour de vous.",
+		"countryOnly": "Seul pays disponible pour l’instant."
 	},
 	"contributions": {
 		"title": "Mes contributions — stationcomplete",

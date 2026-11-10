@@ -123,7 +123,7 @@ Notation : `E#` renvoie aux écrans de la section 3.
 
 ### 2.1 Première ouverture + connexion OSM
 
-1. **E1 Bienvenue** : 3 cartes défilables (À quoi ça sert · Sécurité · Vos données dans OSM). La carte Sécurité est obligatoire (bouton « J'ai compris » pour avancer).
+1. **E1 Bienvenue** : étape « langue » (et pays des gares si plusieurs pays sont activés), puis 3 cartes défilables (À quoi ça sert · Sécurité · Vos données dans OSM). La carte Sécurité est obligatoire (bouton « J'ai compris » pour avancer).
 2. **E2 Connexion** : « Se connecter avec OpenStreetMap » (OAuth2, navigateur système) ou « Créer un compte OSM » ou « Explorer sans compte ».
 3. Retour d'OAuth → message « Connecté en tant que @pseudo » → **E3 Choisir une gare**.
 4. _Variante sans compte_ : tout est possible sauf l'envoi ; les contributions restent dans la file locale ; l'invitation à se connecter apparaît sur E8.
@@ -187,6 +187,8 @@ Conventions des wireframes : largeur ~ 360 dp ; `[ Bouton ]` ; `( )` bouton rond
 - **Composants** : carrousel avec pagination, bouton principal bas, lien « Passer » (sauf carte sécurité).
 - **Actions** : Suivant / J'ai compris / Passer.
 - **États** : hors-ligne → aucun impact (contenu embarqué). Pas d'état vide/chargement.
+- **Étape « langue » (7 novembre 2026, piste C des maquettes « Choisir une gare »)** : au premier lancement seulement, une carte précède les trois autres (4 étapes). Langue de l'interface en liste de boutons radio (nom de chaque langue dans sa langue, mention « Langue du téléphone » sous la langue détectée par `navigator.languages`) ; le choix s'applique et s'enregistre aussitôt (`rc:lang`) : la carte se traduit sous les yeux. Pays des gares : contrôle segmenté (code pays + nom, sans drapeau), pré-rempli d'après le fuseau horaire Intl puis la région de la langue (« fr-CH » → Suisse), **jamais par le GPS** ; enregistré (`rc:country`) à « Suivant » ou « Passer ». Seuls les pays activés sont proposés : **avec la France seule, aucun choix n'est montré** — titre « Choisissez votre langue » (au lieu de « Où allez-vous contribuer ? »), et une ligne « FR · Gares de France ; d'autres pays suivront. ». Mention en bas : « Modifiable à tout moment dans Réglages. » « Passer » garde les valeurs proposées. La configuration des pays est chargée après le démarrage (budget de poids de l'accueil).
+- **Utilisateur existant** : présentation déjà vue (préférence `rc:intro`, ou `rc:onboarded`) → ni l'étape « langue » ni l'accueil ne reviennent ; « Revoir la présentation » repart de l'étape « langue ».
 
 ```
 ┌──────────────────────────────┐
@@ -242,30 +244,43 @@ Conventions des wireframes : largeur ~ 360 dp ; `[ Bouton ]` ; `( )` bouton rond
 
 ### E3 — Choisir une gare
 
-- **Objectif** : trouver et sélectionner une gare en < 10 s.
-- **Contenu** : recherche, bouton « Autour de moi », listes Récentes / Favorites / Résultats.
-- **Composants** : champ de recherche (clavier immédiat optionnel), bouton GPS, ligne de résultat (nom, commune, distance, mini-jauge 3 segments), étoile favori.
-- **Actions** : rechercher, localiser, ouvrir une gare, mettre en favori.
-- **États** : vide (première fois : « Cherchez une gare par son nom ou sa commune ») ; chargement (squelettes de lignes) ; erreur (« Recherche indisponible — Réessayer ») ; hors-ligne (seules les gares téléchargées sont listées, mention « Hors-ligne : gares téléchargées uniquement ») ; GPS refusé (« Localisation désactivée — cherchez par nom »).
+Refonte du 7 novembre 2026 : mélange des pistes A (liste enrichie) et C (à compléter) des maquettes validées par Loïc.
+
+- **Objectif** : trouver et sélectionner une gare en < 10 s ; repartir d'un appui sur la gare en cours.
+- **Contenu, de haut en bas** :
+  1. Titre et ligne « France · 3 286 gares et haltes » (pays courant).
+  2. Recherche (nom, commune, code UIC).
+  3. **Reprendre** (champ vide) : gare de la dernière saisie en attente d'envoi, sinon dernière gare ouverte il y a moins de 24 h (`rc:lastOpened`). Nom, subdivision · distance · « hors-ligne », nombre de saisies en attente, trois jauges (quais numérotés, voies numérotées, pancartes d'arrêt) et bouton « Continuer : <première quête> » vers la quête (même ordre et même cible que la liste de E4 : carte centrée sur l'objet, ou dessin d'un quai pour Q0). Jauges et quête viennent de l'analyse locale exacte (données en cache + saisies) ; si la gare n'est plus en cache : jauges de l'index et bouton « Ouvrir la gare ».
+  4. **Autour de moi** : 4 gares les plus proches et bouton « Actualiser ». Position demandée au premier appui sur « Gares autour de moi » ; ensuite (autorisation déjà donnée) obtenue sans fenêtre à l'ouverture de la page. Précision réduite, gardée en mémoire 5 min, jamais enregistrée.
+  5. **À compléter près de vous** (position connue et index avec jauges) : jusqu'à 4 gares à moins de 30 km, triées par « reste à faire » décroissant puis distance. Reste à faire = objets non renseignés des trois jauges, + 1 pour une gare sans quai dans OSM (quai à dessiner).
+  6. **Favorites** puis **Récentes** (sans répéter les favorites).
+  7. Note : « Jauges quais · voies · pancartes : estimation d'après OpenStreetMap au <date de l'index>, mise à jour chaque semaine ; exactes pour les gares déjà ouvertes sur ce téléphone. » (seulement si une jauge est affichée).
+- **Fiche de gare** (toutes les listes) : nom ; badges « Halte » (`railway=halt`), code pays (seulement si plusieurs pays sont activés et que la gare n'est pas du pays courant), icône « téléchargée pour le hors-ligne » ; commune (si différente du nom) · département « Ain (01) » (nom de la subdivision d'après la configuration du pays, chargé à part ; canton plus tard) ; à droite distance (si position connue) ou « N à faire », et **mini-jauge** à trois segments (quais, voies, pancartes ; longueur = part renseignée ; segment vide à filet si rien à relever ; masquée si aucune donnée) avec un texte équivalent pour les lecteurs d'écran ; étoile favori (bouton bascule `aria-pressed`, 44 px, préférence locale `rc:favorites`).
+- **Recherche** : insensible aux accents, à la casse, aux tirets et aux apostrophes ; « st »/« ste » = « saint »/« sainte » dans les deux sens (« st » seul garde aussi sa lecture littérale : Strasbourg). Pertinence : nom exact > début du nom > début d'un mot du nom > début d'un mot de la commune > ailleurs > début du code UIC ; à pertinence égale, la plus proche d'abord (si position), sinon le nom le plus court. Nombre total de résultats, 30 premiers affichés, « les plus proches d'abord » si position. Résultats groupés par pays, pays courant d'abord ; **pas d'en-tête de groupe tant qu'un seul pays est actif**. Aide : « Accents, tirets et apostrophes sont ignorés ; « St » vaut « Saint ». »
+- **Jauges sans données** : l'index publié avant le 7 novembre 2026 n'a pas de comptages : mini-jauges masquées (sauf gares déjà ouvertes sur le téléphone), « À compléter près de vous » absent, jusqu'à la prochaine construction hebdomadaire.
+- **États** : chargement (« Chargement de la liste des gares… ») ; erreur d'index (bandeau) ; aucun résultat ; GPS refusé ou indisponible (bandeau, recherche par nom) ; rien de récent ni de favori (nombre de gares, « tapez au moins deux lettres »).
 
 ```
 ┌──────────────────────────────┐
 │ Choisir une gare             │
+│ France · 3 286 gares et haltes│
 │ ┌──────────────────────────┐ │
-│ │ 🔍 Nom, commune, UIC…    │ │
+│ │ 🔍 Nom de gare ou commune │ │
 │ └──────────────────────────┘ │
-│ [ ◎ Gares autour de moi ]    │
-│                              │
-│ RÉCENTES                     │
-│ Ambérieu-en-Bugey      ☆     │
-│ Ambérieu · ▰▰▱  2 km         │
-│ ──────────────────────────── │
-│ Lyon Part-Dieu         ★     │
-│ Lyon · ▰▱▱                   │
-│ ──────────────────────────── │
-│ Meximieux              ☆     │
-│ Meximieux · ▰▰▰  ✓ complète  │
-│                              │
+│ ┌ REPRENDRE ─────────────☆ ┐ │
+│ │ Ambérieu-en-Bugey         │ │
+│ │ Ain (01) · 2,0 km         │ │
+│ │ ▭ Quais numérotés ████ 4/4│ │
+│ │ # Voies numérotées ███ 8/8│ │
+│ │ ⚑ Pancartes      ░░░░ 0/6│ │
+│ │ [ Continuer : … ›       ] │ │
+│ └───────────────────────────┘ │
+│ AUTOUR DE MOI     ↻ Actualiser│
+│ Ambronay-Priay   4,8 km  ☆   │
+│ Ambronay · Ain (01)  ▰▰▱      │
+│ À COMPLÉTER PRÈS DE VOUS      │
+│ Tenay-Hauteville  7 à faire ☆│
+│ FAVORITES · RÉCENTES          │
 │══════════════════════════════│
 │  Gare     Contributions  ⚙   │
 └──────────────────────────────┘
@@ -516,6 +531,7 @@ Conventions des wireframes : largeur ~ 360 dp ; `[ Bouton ]` ; `( )` bouton rond
   - Hors-ligne : gares téléchargées (taille, date, supprimer), envoi auto au retour du réseau.
   - Mode expert : afficher les tags OSM bruts.
   - Langue, À propos (licences ODbL / IGN, code source), Rappel sécurité.
+  - **Pays des gares** (7 novembre 2026), juste sous la langue : liste des pays activés (préférence `rc:country`, choisie au premier lancement). Avec un seul pays activé, la ligne affiche le pays sans sélecteur (« Seul pays disponible pour l'instant. »).
 - **Composants** : liste de réglages groupés, interrupteurs ≥ 48 dp, sélecteurs.
 - **États** : hors-ligne (déconnexion/connexion indisponibles, le reste fonctionne).
 

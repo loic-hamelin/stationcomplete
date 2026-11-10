@@ -483,7 +483,17 @@
 		},
 		"chooseStation": "Elegir una estación",
 		"more": "Más información sobre el proyecto",
-		"replay": "Volver a ver la presentación"
+		"replay": "Volver a ver la presentación",
+		"lang": {
+			"title": "Elige tu idioma",
+			"titleCountry": "¿Dónde vas a contribuir?",
+			"text": "Propuesto según tu teléfono, sin localización.",
+			"country": "País de las estaciones",
+			"language": "Idioma de la interfaz",
+			"phone": "Idioma del teléfono",
+			"onlyCountry": "Estaciones {of}; seguirán otros países.",
+			"later": "Puedes cambiarlo en cualquier momento en Ajustes."
+		}
 	},
 	"about": {
 		"title": "Acerca de — stationcomplete",
@@ -606,7 +616,34 @@
 		"noMatch": "Ninguna estación coincide con «{query}».",
 		"around": "Cerca de mí",
 		"recent": "Recientes",
-		"count": "{count} estaciones y apeaderos {of}. Escribe al menos dos letras."
+		"count": "{count} estaciones y apeaderos {of}. Escribe al menos dos letras.",
+		"summary": "{country} · {count} estaciones y apeaderos",
+		"of": "{done} de {total}",
+		"gaugeNone": "nada que registrar",
+		"gaugeA11y": "Andenes numerados: {platforms}; vías numeradas: {tracks}; lados de andén con cartel de parada: {signs}.",
+		"gauge": {
+			"platforms": "Andenes numerados",
+			"tracks": "Vías numeradas",
+			"stopSigns": "Carteles de parada"
+		},
+		"fav": "Favorita: {name}",
+		"offline": "Descargada para usar sin conexión",
+		"offlineShort": "sin conexión",
+		"resultsCount": "{count, plural, one {# resultado} other {# resultados}}",
+		"closestFirst": "primero las más cercanas",
+		"searchHint": "Se ignoran tildes, guiones y apóstrofos; «St» equivale a «Saint».",
+		"resume": {
+			"title": "Reanudar",
+			"continue": "Continuar: {task}",
+			"open": "Abrir la estación",
+			"allDone": "Todo completado: abrir la estación",
+			"pending": "{count, plural, one {# dato pendiente de envío} other {# datos pendientes de envío}}"
+		},
+		"relocate": "Actualizar",
+		"todoTitle": "Por completar cerca de ti",
+		"todoCount": "{count} por hacer",
+		"favorites": "Favoritas",
+		"gaugeNote": "Indicadores andenes · vías · carteles: estimación según OpenStreetMap a {date}, actualizada cada semana; exactos para las estaciones ya abiertas en este teléfono."
 	},
 	"settings": {
 		"title": "Ajustes — stationcomplete",
@@ -637,7 +674,10 @@
 		"removeDownload": "Quitar {name} del teléfono",
 		"noDownloads": "Ninguna",
 		"noDownloadsHint": "Descarga una estación desde su panel para usarla sin red.",
-		"aboutLink": "Seguridad, licencias, contacto"
+		"aboutLink": "Seguridad, licencias, contacto",
+		"country": "País de las estaciones",
+		"countryHint": "Estaciones propuestas en la búsqueda y a tu alrededor.",
+		"countryOnly": "Único país disponible por ahora."
 	},
 	"contributions": {
 		"title": "Mis contribuciones — stationcomplete",

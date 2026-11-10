@@ -95,4 +95,13 @@ export function recentIds(): string[] {
 }
 function rememberRecent(id: string) {
 	writePref('recent', [id, ...recentIds().filter((x) => x !== id)].slice(0, 8));
+	writePref('lastOpened', { id, at: Date.now() });
+}
+
+/** Dernière gare ouverte et quand (carte « Reprendre » de E3), si connue. */
+export function lastOpened(): { id: string; at: number } | undefined {
+	const v = readPref<{ id?: unknown; at?: unknown } | null>('lastOpened', null);
+	return v && typeof v.id === 'string' && typeof v.at === 'number'
+		? { id: v.id, at: v.at }
+		: undefined;
 }

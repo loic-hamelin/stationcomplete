@@ -11,8 +11,10 @@
 	import { downloads, reloadDownloads, removeDownload } from '#lib/offline.svelte.js';
 	import { loadAllStations, type Station } from '#lib/stations.js';
 	import { lang, LANGUAGES, setLocale } from '#lib/i18n/i18n.svelte.js';
+	import { enabledCountries } from '#lib/core/countries.js';
+	import { country, setCountry } from '#lib/country.svelte.js';
 	import type { Locale } from '#lib/i18n/locales.js';
-	import { fmtDate, fmtMegabytes, t } from '#lib/i18n/t.js';
+	import { fmtDate, fmtMegabytes, t, tk } from '#lib/i18n/t.js';
 	import { onMount } from 'svelte';
 
 	let mounted = $state(false);
@@ -29,6 +31,8 @@
 		}
 	});
 	const mo = fmtMegabytes;
+	// Pays des gares (E3) : seuls les pays activés sont proposés ; un seul aujourd'hui.
+	const countries = enabledCountries();
 	const total = $derived(downloads.list.reduce((n, d) => n + d.bytes, 0));
 	const THEMES = $derived<[Theme, string][]>([
 		['system', t('settings.theme.system')],
@@ -94,6 +98,33 @@
 						<option value={l.code} lang={l.code}>{l.name}</option>
 					{/each}
 				</select>
+			</div>
+			<div class="row">
+				{#if countries.length > 1}
+					<span class="txt"
+						><label for="country">{t('settings.country')}</label><span
+							class="small"
+							id="country-desc">{t('settings.countryHint')}</span
+						></span
+					>
+					<select
+						id="country"
+						aria-describedby="country-desc"
+						value={country.code}
+						onchange={(e) => setCountry(e.currentTarget.value)}
+					>
+						{#each countries as c (c.code)}
+							<option value={c.code}>{tk(`country.${c.code}.name`)}</option>
+						{/each}
+					</select>
+				{:else}
+					<span class="txt"
+						><span>{t('settings.country')}</span><span class="small"
+							>{t('settings.countryHint')} {t('settings.countryOnly')}</span
+						></span
+					>
+					<span class="value">{tk(`country.${countries[0].code}.name`)}</span>
+				{/if}
 			</div>
 			<div class="row col">
 				<span class="txt"
@@ -280,6 +311,10 @@
 	.small {
 		font-size: 0.875rem;
 		color: var(--text-2);
+	}
+	.value {
+		flex-shrink: 0;
+		font-weight: 600;
 	}
 	fieldset.group {
 		margin: 0;

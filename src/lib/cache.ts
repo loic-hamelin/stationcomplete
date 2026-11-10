@@ -30,6 +30,15 @@ export async function getCachedStation(id: string): Promise<CachedStation | unde
 	}
 }
 
+/** Clés des gares en cache (sans leurs données) : jauges exactes sur la page E3. */
+export async function getCachedStationKeys(): Promise<string[]> {
+	try {
+		return (await (await open()).getAllKeys('stations')).map(String);
+	} catch {
+		return [];
+	}
+}
+
 export async function putCachedStation(entry: CachedStation) {
 	try {
 		await (await open()).put('stations', entry);

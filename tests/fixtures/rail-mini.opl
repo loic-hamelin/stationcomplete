@@ -1,0 +1,5 @@
+n6 v1 dV c0 t2026-01-01T00:00:00Z i0 u Trailway=signal,railway:signal:stop=FR:ARRET_TETE x5.0003 y46.00035
+n7 v1 dV c0 t2026-01-01T00:00:00Z i0 u Trailway=signal,railway:signal:stop=FR:ARRET x5.1001 y46.1
+w2 v1 dV c0 t2026-01-01T00:00:00Z i0 u Trailway=platform,public_transport=platform,ref=1;2 Nn10x4.9996y46.0002,n11x5.0004y46.0002,n12x5.0004y46.0003,n13x4.9996y46.0003,n10x4.9996y46.0002
+w20 v1 dV c0 t2026-01-01T00:00:00Z i0 u Trailway=rail,railway:track_ref=2 Nn20x4.999y46.00035,n6x5.0003y46.00035,n21x5.001y46.00035
+w21 v1 dV c0 t2026-01-01T00:00:00Z i0 u Trailway=rail,name=Voie%20%Sud Nn22x4.999y46.00015,n23x5.001y46.00015

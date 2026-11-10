@@ -3,18 +3,22 @@
 // fois par pays activé (workflow « Index des gares »).
 //
 // Usage : node scripts/build-stations.mjs rail-fr.geojsonseq [--country fr]
-//           [--out …] [--communes …] [--stats …] [--offline]
+//           [--osm jauges-fr.opl] [--out …] [--communes …] [--stats …] [--offline]
 // Fichiers par défaut, extrait Geofabrik, géocodage et pancartes : configuration du pays
 // (src/lib/core/countries.ts, chargée directement par Node).
 //
 // Pour chaque gare : identifiant OSM, nom, nom normalisé, commune, subdivision (département,
 // canton…), UIC, position, type (S = gare, H = halte) et emprise serrée (quais + marge) à
-// demander à l'API OSM.
+// demander à l'API OSM. Avec --osm (extrait OPL des quais, voies et signaux, coordonnées dans
+// les ways : « osmium add-locations-to-ways »), une 11e colonne donne les jauges de la gare
+// (quais numérotés, voies numérotées, côtés de quai avec pancarte : faits/total), calculées par
+// le moteur de quêtes de l'appli lui-même (analyzeStation) sur la même emprise que l'appli.
 
 import { createReadStream, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { dirname } from 'node:path';
 import { COUNTRIES, DEFAULT_COUNTRY, isCountryCode } from '../src/lib/core/countries.ts';
+import { THRESHOLDS, analyzeStation } from '../src/lib/core/quests.ts';
 
 function argValue(name) {
 	const i = process.argv.indexOf(name);
@@ -265,6 +269,153 @@ export function build({ stations, platforms, legacy }, cache = {}) {
 	};
 }
 
+// ---------- Jauges (11e colonne, facultative) ----------
+// Mêmes règles que l'appli : on rassemble pour chaque gare ce que l'API OSM renverrait sur son
+// emprise (ways ayant un nœud dans l'emprise, avec tous leurs nœuds ; nœuds étiquetés proches ;
+// relations dont un way membre est retenu), puis on appelle analyzeStation (src/lib/core/quests.ts).
+// Seuls les objets utiles aux jauges sont dans l'extrait (quais, voies, signaux) : le résultat
+// est celui de l'appli pour les données d'OSM au moment de l'extrait, sans les saisies locales.
+
+/** Décode une valeur OPL (« %20% » → espace ; tout point de code peut être échappé ainsi). */
+const oplText = (s) =>
+	s.replace(/%([0-9a-fA-F]+)%/g, (_, h) => String.fromCodePoint(parseInt(h, 16)));
+
+/** Une ligne OPL (format d'osmium) → objet, ou undefined (ligne vide, type inconnu). */
+export function parseOpl(line) {
+	const parts = line.trim().split(' ');
+	const head = parts[0] ?? '';
+	const type = { n: 'node', w: 'way', r: 'relation' }[head[0]];
+	if (!type) return undefined;
+	const o = { type, id: Number(head.slice(1)), tags: undefined };
+	for (const f of parts.slice(1)) {
+		const v = f.slice(1);
+		switch (f[0]) {
+			case 'T':
+				if (v)
+					o.tags = Object.fromEntries(
+						v.split(',').map((kv) => {
+							const i = kv.indexOf('=');
+							return [oplText(kv.slice(0, i)), oplText(kv.slice(i + 1))];
+						})
+					);
+				break;
+			case 'x':
+				if (v) o.lon = Number(v);
+				break;
+			case 'y':
+				if (v) o.lat = Number(v);
+				break;
+			case 'N':
+				// n12x5.1y46.2 (coordonnées ajoutées par add-locations-to-ways) ou n12 seul
+				o.nodes = v
+					? v.split(',').map((n) => {
+							const m = /^n(-?\d+)(?:x(-?[\d.]+)y(-?[\d.]+))?$/.exec(n);
+							return m
+								? { id: Number(m[1]), lon: m[2] && Number(m[2]), lat: m[3] && Number(m[3]) }
+								: { id: NaN };
+						})
+					: [];
+				break;
+			case 'M':
+				o.members = v
+					? v.split(',').map((m) => {
+							const at = m.indexOf('@');
+							return {
+								type: { n: 'node', w: 'way', r: 'relation' }[m[0]],
+								ref: Number(m.slice(1, at)),
+								role: oplText(m.slice(at + 1))
+							};
+						})
+					: [];
+				break;
+		}
+	}
+	return o;
+}
+
+const inBox = (b, lon, lat) => lon >= b[0] && lon <= b[2] && lat >= b[1] && lat <= b[3];
+
+/**
+ * Éléments OSM de chaque gare (même tableau que `rows`), lus dans l'extrait OPL. `rows` : lignes
+ * de l'index (emprise en colonne 9, celle que l'appli demande à l'API OSM).
+ */
+export async function collect(file, rows) {
+	const m = THRESHOLDS.stopSignMarginM;
+	const boxes = rows.map((r) => r[9]);
+	// Nœuds étiquetés (pancartes) : emprise élargie de la marge des pancartes, comme l'appli.
+	const wide = boxes.map((b) => expand(b, m));
+	// Grille de 0,01° : chaque gare est inscrite dans les cases que touche son emprise élargie.
+	const cells = new Map();
+	wide.forEach((b, i) => {
+		for (let x = Math.floor(b[0] * 100); x <= Math.floor(b[2] * 100); x++)
+			for (let y = Math.floor(b[1] * 100); y <= Math.floor(b[3] * 100); y++) {
+				const k = `${x}:${y}`;
+				if (!cells.has(k)) cells.set(k, []);
+				cells.get(k).push(i);
+			}
+	});
+	const candidates = (lon, lat) =>
+		cells.get(`${Math.floor(lon * 100)}:${Math.floor(lat * 100)}`) ?? [];
+	const out = rows.map(() => ({ nodes: new Map(), ways: new Map(), relations: [] }));
+	const wayStations = new Map(); // way retenu → gares
+	const rl = createInterface({ input: createReadStream(file), crlfDelay: Infinity });
+	for await (const line of rl) {
+		const o = parseOpl(line);
+		if (!o) continue;
+		if (o.type === 'node') {
+			if (!o.tags || o.lon === undefined || o.lat === undefined) continue;
+			for (const i of candidates(o.lon, o.lat))
+				if (inBox(wide[i], o.lon, o.lat))
+					out[i].nodes.set(o.id, { type: 'node', id: o.id, lat: o.lat, lon: o.lon, tags: o.tags });
+		} else if (o.type === 'way') {
+			const pts = (o.nodes ?? []).filter((n) => Number.isFinite(n.lon) && Number.isFinite(n.lat));
+			const hit = new Set();
+			for (const n of pts)
+				for (const i of candidates(n.lon, n.lat)) if (inBox(boxes[i], n.lon, n.lat)) hit.add(i);
+			if (hit.size) wayStations.set(o.id, [...hit]);
+			for (const i of hit) {
+				const st = out[i];
+				st.ways.set(o.id, { type: 'way', id: o.id, nodes: pts.map((n) => n.id), tags: o.tags });
+				for (const n of pts)
+					if (!st.nodes.has(n.id))
+						st.nodes.set(n.id, { type: 'node', id: n.id, lat: n.lat, lon: n.lon });
+			}
+		} else if (o.members) {
+			const hit = new Set(
+				o.members.flatMap((x) => (x.type === 'way' ? (wayStations.get(x.ref) ?? []) : []))
+			);
+			for (const i of hit)
+				out[i].relations.push({ type: 'relation', id: o.id, members: o.members, tags: o.tags });
+		}
+	}
+	return out.map((st) => [...st.nodes.values(), ...st.ways.values(), ...st.relations]);
+}
+
+/** Jauges d'une gare : [quais faits, total, voies faites, total, côtés faits, total]. */
+export function gauges(elements, bbox, code = DEFAULT_COUNTRY) {
+	const { platforms, tracks, stopSigns } = analyzeStation(
+		elements,
+		bbox,
+		new Date(),
+		code
+	).completeness;
+	return [
+		platforms.done,
+		platforms.total,
+		tracks.done,
+		tracks.total,
+		stopSigns.done,
+		stopSigns.total
+	];
+}
+
+/** Ajoute la 11e colonne (jauges) à chaque ligne de l'index. */
+export async function addGauges(rows, file, code = DEFAULT_COUNTRY) {
+	const all = await collect(file, rows);
+	rows.forEach((r, i) => r.push(gauges(all[i], r[9], code)));
+	return rows;
+}
+
 /** Gares hors de l'emprise approximative du pays (contrôle, statistiques seulement). */
 function outside(index, [w, s, e, n]) {
 	return index.filter(([, , , , , , lat, lon]) => lon < w || lon > e || lat < s || lat > n);
@@ -277,7 +428,7 @@ async function main() {
 		console.error(
 			'Usage : node scripts/build-stations.mjs rail-<cc>.geojsonseq [--country ' +
 				Object.keys(COUNTRIES).join('|') +
-				']'
+				'] [--osm jauges-<cc>.opl]'
 		);
 		process.exit(2);
 	}
@@ -295,6 +446,18 @@ async function main() {
 		offline
 	});
 	const { index, stats } = build(data, cache);
+	const osm = argValue('--osm');
+	if (osm) {
+		await addGauges(index, osm, code);
+		const todo = index.filter(
+			(r) => r[10][1] + r[10][3] + r[10][5] > r[10][0] + r[10][2] + r[10][4]
+		);
+		stats.gauges = {
+			stations: index.length,
+			withPlatforms: index.filter((r) => r[10][1] > 0).length,
+			incomplete: todo.length
+		};
+	}
 	const far = outside(index, country.bounds);
 	stats.outsideBounds = far.length;
 	stats.outsideBoundsSample = far.slice(0, 20).map((r) => r[1]);

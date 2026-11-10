@@ -12,7 +12,7 @@ import {
 	cross,
 	distToSegment,
 	type Pt
-} from './geo';
+} from './geo.ts';
 import {
 	OsmData,
 	inBBox,
@@ -25,8 +25,8 @@ import {
 	type OsmNode,
 	type OsmWay,
 	type Tags
-} from './osm';
-import { DEFAULT_COUNTRY, countryConfig, type CountryCode } from './countries';
+} from './osm.ts';
+import { DEFAULT_COUNTRY, countryConfig, type CountryCode } from './countries.ts';
 
 // Seuils (heuristiques à régler sur les gares de référence).
 export const THRESHOLDS = {
