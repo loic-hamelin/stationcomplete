@@ -56,7 +56,10 @@ export function groupQuests(a: StationAnalysis): QuestGroup[] {
 					...base,
 					kind: 'quai',
 					title: t('quest.q3.title', { count: n }),
-					subtitle: t('quest.q3.subtitle')
+					// Quai en plusieurs parties aux numéros différents (sans correction automatique).
+					subtitle: qs.every((q) => q.details?.motif === 'parties')
+						? t('quest.q3.partsSubtitle')
+						: t('quest.q3.subtitle')
 				});
 				break;
 			case 'Q4':

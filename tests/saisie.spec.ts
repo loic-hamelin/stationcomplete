@@ -66,11 +66,13 @@ test('saisir un numéro de voie et une pancarte, puis les retrouver', async ({ p
 
 	// Mode démonstration (pour saisir hors de la gare)
 	await page.goto('/reglages/');
-	await page.getByRole('switch', { name: 'Mode démonstration' }).click();
-	await expect(page.getByRole('switch', { name: 'Mode démonstration' })).toHaveAttribute(
-		'aria-checked',
-		'true'
-	);
+	// Un clic arrivé avant que la page soit interactive est perdu : on réessaie tant que
+	// l'interrupteur n'est pas activé (sans jamais le désactiver).
+	const demo = page.getByRole('switch', { name: 'Mode démonstration' });
+	await expect(async () => {
+		if ((await demo.getAttribute('aria-checked')) !== 'true') await demo.click();
+		await expect(demo).toHaveAttribute('aria-checked', 'true', { timeout: 1000 });
+	}).toPass();
 	await expectAccessible(page);
 
 	// E7 — voie : « Voie 13 » est nettoyé en « 13 »

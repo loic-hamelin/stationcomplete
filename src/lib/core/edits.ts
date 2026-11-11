@@ -41,7 +41,28 @@ export interface TagEdit extends EditBase {
 	 * (résumés en français : « Quai… » ou « Voie… »).
 	 */
 	family?: 'quai' | 'voie';
+	/**
+	 * Quai en plusieurs parties : autres parties qui reçoivent les mêmes tags, dans le même
+	 * envoi (un <modify> par partie). La saisie part entière ou pas du tout : si l'une des
+	 * parties a changé entre-temps, toute la saisie passe « à revoir » (numéros cohérents).
+	 */
+	parts?: TagPart[];
+	/** Nom du quai entier (« Quai voies 3 »), pour le commentaire du changeset. */
+	name?: string;
 }
+
+/** Autre partie d'un quai visée par une saisie de tags (version et valeurs d'origine). */
+export interface TagPart {
+	target: ElementKey;
+	version?: number;
+	base?: Record<string, string | null>;
+}
+
+/** Objets visés par une saisie de tags : l'objet, puis les autres parties du même quai. */
+export const tagTargets = (e: TagEdit): TagPart[] => [
+	{ target: e.target, version: e.version, base: e.base },
+	...(e.parts ?? [])
+];
 
 /** Nouvelle pancarte : nœud inséré dans le way de la voie, entre deux nœuds existants. */
 export interface NewNodeEdit extends EditBase {
@@ -279,10 +300,13 @@ export function mergeEdit(list: Edit[], edit: Edit): { edit?: Edit; drop: string
 		if (others.some((e) => e.kind === 'delete' && !e.conflict))
 			throw new Error(tr('edit.error.platformDeleted'));
 		const shape = others.find((e) => e.kind === 'shape' && !e.conflict);
-		if (shape?.kind === 'shape') return { edit: withTags(shape, edit), drop: [] };
+		// (Saisie sur toutes les parties d'un quai : gardée à part, elle vise plusieurs ways.)
+		if (shape?.kind === 'shape' && !edit.parts?.length)
+			return { edit: withTags(shape, edit), drop: [] };
 	}
 	if (edit.kind === 'shape') {
-		const others = onTarget(edit.target);
+		// Une saisie de numéros sur toutes les parties d'un quai reste à part (plusieurs ways).
+		const others = onTarget(edit.target).filter((o) => !(o.kind === 'tags' && o.parts?.length));
 		for (const o of others)
 			if (o.kind === 'tags') edit = withTags(edit, o);
 			else if (o.kind === 'shape' && o.tags)
@@ -308,11 +332,31 @@ export function mergeEdit(list: Edit[], edit: Edit): { edit?: Edit; drop: string
 				id: same.id,
 				tags: { ...same.tags, ...e.tags },
 				base: { ...e.base, ...same.base },
-				version: same.version ?? e.version
+				version: same.version ?? e.version,
+				...mergeParts(same.parts, e.parts),
+				...((e.name ?? same.name) ? { name: e.name ?? same.name } : {})
 			},
 			drop
 		};
 	return { edit: same ? { ...e, id: same.id } : e, drop };
+}
+
+/**
+ * Parties d'une saisie fusionnée : celles de la nouvelle saisie, avec la version et les valeurs
+ * d'origine de la saisie précédente quand elle visait déjà la même partie.
+ */
+function mergeParts(before?: TagPart[], now?: TagPart[]): { parts?: TagPart[] } {
+	if (!before?.length && !now?.length) return {};
+	const old = new Map((before ?? []).map((p) => [p.target, p]));
+	const out = new Map(old);
+	for (const p of now ?? []) {
+		const o = old.get(p.target);
+		out.set(
+			p.target,
+			o ? { ...p, version: o.version ?? p.version, base: { ...p.base, ...o.base } } : p
+		);
+	}
+	return { parts: [...out.values()] };
 }
 
 /** Range des tags saisis sur la fiche d'un quai dans sa saisie de forme. */
@@ -345,9 +389,11 @@ export function applyEdits(elements: OsmElement[], edits: Edit[]): OsmElement[] 
 
 	for (const ed of edits) {
 		if (ed.kind === 'tags') {
-			const e = out.get(ed.target);
-			if (!e) continue;
-			out.set(ed.target, { ...e, tags: changeTags(e.tags, ed.tags) } as OsmElement);
+			// L'objet, et les autres parties du même quai s'il y en a.
+			for (const { target } of tagTargets(ed)) {
+				const e = out.get(target);
+				if (e) out.set(target, { ...e, tags: changeTags(e.tags, ed.tags) } as OsmElement);
+			}
 		} else if (ed.kind === 'shape') {
 			const w = out.get(ed.target) as OsmWay | undefined;
 			if (!w || !ed.nodes.length) continue;

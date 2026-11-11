@@ -17,6 +17,7 @@
 	} from '#lib/core/edits.js';
 	import { platformTitle } from '#lib/core/features.js';
 	import { isPlatform, isRail, splitValues, type OsmWay } from '#lib/core/osm.js';
+	import { partKeys } from '#lib/core/quests.js';
 	import type { SignInput } from '#lib/core/stopsigns/fr.js';
 	import type { SignInputBase } from '#lib/core/stopsigns/types.js';
 	import { current, openStation } from '#lib/current.svelte.js';
@@ -76,9 +77,17 @@
 							: undefined
 	);
 	const survey = $derived(canSurvey(id));
+	// Quai logique : le quai entier (une partie d'un quai en plusieurs parties y mène aussi).
+	const platform = $derived(
+		kind === 'quai' && view
+			? view.analysis.platforms.find((p) => (partKeys(p) as string[]).includes(osm))
+			: undefined
+	);
+	// Quai en plusieurs parties : les numéros s'écrivent sur toutes, dans la même saisie.
+	const parts = $derived(platform?.parts);
 	const title = $derived(
 		kind === 'quai'
-			? platformTitle(el?.tags ?? {})
+			? platformTitle(platform?.tags ?? el?.tags ?? {})
 			: kind === 'voie'
 				? t('track.named', { ref: el?.tags?.['railway:track_ref'] ?? '' }).trim()
 				: kind === 'pancarte'
@@ -98,9 +107,9 @@
 		// Préremplissage, une seule fois par objet.
 		if (!el || !view || initFor === osm) return;
 		initFor = osm;
-		const tg = el.tags ?? {};
+		const tg = (kind === 'quai' ? platform?.tags : undefined) ?? el.tags ?? {};
 		if (kind === 'quai') {
-			const info = view.analysis.platforms.find((p) => `${p.ref.type}/${p.ref.id}` === osm);
+			const info = platform;
 			const fromTracks = (info?.tracks ?? []).flatMap((x) => [...splitValues(x.trackRef)]);
 			const letters = /^[A-Za-z]{1,3}(;[A-Za-z]{1,3})*$/.test(tg.ref ?? '');
 			refs = letters || !tg.ref ? [...new Set(fromTracks)] : [...splitValues(tg.ref)];
@@ -154,9 +163,19 @@
 	let error = $state('');
 	let saving = $state(false);
 
-	async function save(tags: Record<string, string | null>, summary: string) {
+	async function save(tags: Record<string, string | null>, summary: string, name?: string) {
 		if (!el || !ready) return;
-		const orig = ready?.elements.find((e) => `${e.type}/${e.id}` === osm);
+		// Quai en plusieurs parties : la saisie vise la partie principale et les autres parties.
+		const keys = parts && platform ? partKeys(platform) : [osm as ElementKey];
+		// Version et valeurs d'origine (avant toute saisie locale) : servent à détecter, à
+		// l'envoi, si quelqu'un a modifié le même tag entre-temps.
+		const origin = (key: string) => {
+			const orig = ready?.elements.find((e) => `${e.type}/${e.id}` === key);
+			return {
+				version: orig?.version,
+				base: Object.fromEntries(Object.keys(tags).map((k) => [k, orig?.tags?.[k] ?? null]))
+			};
+		};
 		saving = true;
 		try {
 			await saveEdit({
@@ -165,13 +184,19 @@
 				station: id,
 				country: ready.station.country,
 				createdAt: Date.now(),
-				target: osm as ElementKey,
-				// Version et valeurs d'origine (avant toute saisie locale) : servent à détecter, à
-				// l'envoi, si quelqu'un a modifié le même tag entre-temps.
-				version: orig?.version,
-				base: Object.fromEntries(Object.keys(tags).map((k) => [k, orig?.tags?.[k] ?? null])),
+				target: keys[0],
+				...origin(keys[0]),
+				...(keys.length > 1
+					? {
+							parts: keys.slice(1).map((k) => ({ target: k, ...origin(k) })),
+							...(name ? { name } : {})
+						}
+					: {}),
 				tags,
-				summary,
+				summary:
+					keys.length > 1
+						? t('input.platform.summaryParts', { summary, count: keys.length })
+						: summary,
 				// Famille de l'objet (le résumé est rédigé dans la langue de l'interface).
 				...(kind === 'quai' || kind === 'voie' ? { family: kind } : {})
 			});
@@ -188,20 +213,24 @@
 		const ref = joinRefs(refs);
 		if (!ref) return (error = t('input.platform.needRef'));
 		const lr = localRef.trim().toUpperCase().slice(0, 8);
-		const cur = el?.tags ?? {};
+		// Tags de chaque partie du quai (une seule, sauf quai en plusieurs parties).
+		const all = (parts ?? [{ tags: el?.tags ?? {} }]).map((p) => p.tags);
 		const tags: Record<string, string | null> = {
 			ref,
 			local_ref: lr || null,
 			check_date: today()
 		};
-		if (!cur.public_transport) tags.public_transport = 'platform';
-		if (!cur.railway) tags.railway = 'platform';
-		if (!cur.train) tags.train = 'yes';
+		if (all.some((c) => !c.public_transport)) tags.public_transport = 'platform';
+		if (all.some((c) => !c.railway)) tags.railway = 'platform';
+		if (all.some((c) => !c.train)) tags.train = 'yes';
 		save(
 			tags,
 			lr
 				? t('input.platform.summaryNamed', { name: lr, refs: ref.replaceAll(';', ', ') })
-				: t('input.platform.summary', { refs: ref.replaceAll(';', ', ') })
+				: t('input.platform.summary', { refs: ref.replaceAll(';', ', ') }),
+			lr
+				? t('platform.named', { ref: lr })
+				: t('platform.tracks', { refs: ref.replaceAll(';', '-') })
 		);
 	}
 
@@ -214,7 +243,7 @@
 	}
 
 	function verify() {
-		const tags = el?.tags ?? {};
+		const tags = (kind === 'quai' ? platform?.tags : undefined) ?? el?.tags ?? {};
 		const what =
 			kind === 'quai'
 				? platformTitle(tags)
@@ -334,6 +363,32 @@
 				</div>
 			{/if}
 
+			{#if kind === 'quai' && parts && platform}
+				<!-- Quai en plusieurs parties (parties couvertes) : mêmes numéros sur chacune. -->
+				<div class="banner" role="note">
+					<Icon name="info" size={18} />
+					<p>
+						{t('input.platform.parts', {
+							parts: t('feature.parts', {
+								count: parts.length,
+								covered: parts.filter((p) => p.covered).length
+							})
+						})}
+					</p>
+				</div>
+				{#if platform.mixed}
+					<div class="banner warn" role="note">
+						<Icon name="alert" size={18} />
+						<p>
+							{t('input.platform.mixed', {
+								values: [...(platform.mixed.ref ?? []), ...(platform.mixed.local_ref ?? [])]
+									.map((v) => v.replaceAll(';', '-'))
+									.join(' / ')
+							})}
+						</p>
+					</div>
+				{/if}
+			{/if}
 			{#if kind === 'quai'}
 				<fieldset disabled={!survey}>
 					<legend>{t('input.platform.refs')}</legend>

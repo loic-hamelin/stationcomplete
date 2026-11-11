@@ -68,7 +68,8 @@
 	};
 	let labels: Label[] = [];
 	let me: import('maplibre-gl').Marker | undefined;
-	let selectedId: number | undefined;
+	// Objets sélectionnés : plusieurs pour un quai en plusieurs parties (même `osm`).
+	let selectedIds: number[] = [];
 
 	type Expr = import('maplibre-gl').ExpressionSpecification;
 	const isEdited: Expr = ['==', ['get', 'edited'], true];
@@ -410,7 +411,10 @@
 				map.on('resize', relayout);
 				map.on('load', () => {
 					addLabels();
-					const f = focus ? data.features.find((x) => x.properties.osm === focus) : undefined;
+					// (Une partie d'un quai en plusieurs parties désigne le quai entier.)
+					const f = focus
+						? data.features.find((x) => x.properties.osm === focus || x.properties.part === focus)
+						: undefined;
 					// Vue reprise (retour de E12) : exactement celle de l'utilisateur.
 					if (view) map!.jumpTo({ center: view.center, zoom: view.zoom });
 					if (f) {
@@ -472,11 +476,12 @@
 			l.marker.getElement().style.zIndex = on ? '2' : '';
 		}
 		if (!map?.getSource('gare')) return;
-		if (selectedId !== undefined)
-			map.setFeatureState({ source: 'gare', id: selectedId }, { selected: false });
-		selectedId = data.features.find((x) => x.properties.osm === selected)?.id;
-		if (selectedId !== undefined)
-			map.setFeatureState({ source: 'gare', id: selectedId }, { selected: true });
+		for (const id of selectedIds) map.setFeatureState({ source: 'gare', id }, { selected: false });
+		// Quai en plusieurs parties : toutes ses parties prennent la couleur de sélection.
+		selectedIds = selected
+			? data.features.filter((x) => x.properties.osm === selected).map((x) => x.id)
+			: [];
+		for (const id of selectedIds) map.setFeatureState({ source: 'gare', id }, { selected: true });
 	}
 
 	// Saisie faite sans quitter la carte (suppression d'un quai, lot 7) : on met à jour la
@@ -489,7 +494,7 @@
 		(map.getSource('gare') as import('maplibre-gl').GeoJSONSource).setData(
 			d as unknown as import('maplibre-gl').GeoJSONSourceSpecification['data']
 		);
-		selectedId = undefined;
+		selectedIds = [];
 		addLabels();
 		highlight();
 	});

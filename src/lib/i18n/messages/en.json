@@ -75,7 +75,9 @@
 		"trackAway": "Not alongside any mapped platform",
 		"signLegacy": "Old tagging format, to be confirmed on site",
 		"signDirection": "Direction filled in",
-		"signNoDirection": "Train direction to be noted on site"
+		"signNoDirection": "Train direction to be noted on site",
+		"parts": "in {count} parts{covered, plural, =0 {} one {, # of them covered} other {, # of them covered}}",
+		"titleParts": "{title} — {parts}"
 	},
 	"quest": {
 		"q0": {
@@ -90,7 +92,8 @@
 		},
 		"q3": {
 			"title": "{count, plural, one {# platform whose numbers need checking} other {# platforms whose numbers need checking}}",
-			"subtitle": "The platform numbers and the track numbers do not match"
+			"subtitle": "The platform numbers and the track numbers do not match",
+			"partsSubtitle": "The parts of one platform do not have the same number: check on site"
 		},
 		"q4": {
 			"title": "{count, plural, one {# platform side without a stop marker} other {# platform sides without a stop marker}}"
@@ -361,7 +364,9 @@
 			"relationEmpty": "The relation {name} would no longer contain anything: delete it with an editor such as iD or JOSM.",
 			"signDeleted": "Stop marker already deleted on OpenStreetMap.",
 			"signTrack": "The track of the stop marker was deleted or redrawn in the meantime.",
-			"ringIncomplete": "Incomplete platform outline."
+			"ringIncomplete": "Incomplete platform outline.",
+			"partGone": "A part of the platform was deleted on OpenStreetMap in the meantime: nothing was sent for this platform.",
+			"partClash": "A part of the platform was changed by someone else in the meantime ({key}): nothing was sent for this platform (its parts are sent together)."
 		},
 		"comment": {
 			"numbers": "platform and track numbers, stop markers",
@@ -369,7 +374,8 @@
 			"shape": "platform shape corrected",
 			"deleted": "{name} deleted ({why})",
 			"signDeleted": "stop marker “{label}” deleted ({why}{mode, select, untag {, point kept in the track} other {}})",
-			"station": "{name} station: {parts}"
+			"station": "{name} station: {parts}",
+			"parts": "{name} ({count} parts): number set on each part"
 		}
 	},
 	"bearing": {
@@ -805,7 +811,9 @@
 			"Q4": "Stop markers to note along this platform",
 			"Q5": "Stop marker to complete",
 			"Q6": "To check (no recent check date)",
-			"Q7": "Duplicate or inconsistent track number"
+			"Q7": "Duplicate or inconsistent track number",
+			"mixed": "The parts of this platform do not have the same number: check on site",
+			"partial": "Number missing on {count, plural, one {# part} other {# parts}} of the platform: to be copied to each"
 		},
 		"editedHere": "Changed on this phone, waiting to be uploaded.",
 		"del": {
@@ -822,7 +830,8 @@
 			"relations": "It will also be {phrase}.",
 			"points": "{lost, plural, one {# point deleted} other {# points deleted}}{kept, plural, =0 {} one {; # linked to other objects, kept} other {; # linked to other objects, kept}}.",
 			"platformReplaced": "Your edits on this platform will be removed: {list}.",
-			"platformButton": "Delete the platform"
+			"platformButton": "Delete the platform",
+			"partOnly": "Only this part will be deleted ({part}): the other parts of the platform stay."
 		},
 		"seeContributions": "See my contributions",
 		"fill": "Fill in",
@@ -834,7 +843,13 @@
 		"drawnHere": "Platform drawn on this phone: to change its shape, remove it in your contributions and draw it again.",
 		"deletePlatform": "Delete this platform…",
 		"osmAttribution": "© OpenStreetMap contributors",
-		"toggleAttribution": "Show or hide credits"
+		"toggleAttribution": "Show or hide credits",
+		"part": {
+			"open": "Open-air part ({length})",
+			"covered": "Covered part ({length})",
+			"choose": "Which part of the platform?",
+			"named": "{name}, {covered, select, yes {covered part} other {open-air part}}"
+		}
 	},
 	"input": {
 		"title": "Details — stationcomplete",
@@ -866,7 +881,10 @@
 			"refsHint": "The numbers displayed above the tracks, not the platform letter.",
 			"letter": "Does this platform have a letter or a name?",
 			"letterLabel": "Letter or name of the platform",
-			"letterPlaceholder": "E.g. A"
+			"letterPlaceholder": "E.g. A",
+			"parts": "This platform is {parts} in OpenStreetMap: the numbers will be written on each of them, in the same upload.",
+			"mixed": "The parts of this platform do not have the same number ({values}): check on site. Your entry will put the same number everywhere.",
+			"summaryParts": "{summary} ({count} parts)"
 		},
 		"track": {
 			"split": "This section will have to be split by a mapper. Reporting it (OSM Note) will come with uploading, in batch 3.",

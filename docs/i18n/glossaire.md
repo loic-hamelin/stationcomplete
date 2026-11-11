@@ -33,6 +33,9 @@ Légende : ⚠ = terme incertain, à faire valider (raison en note). Ne se tradu
 | train long / court / tous trains  | long / short train / all trains | langer / kurzer Zug / alle Züge | treno lungo / corto / tutti i treni | tren largo / corto / todos los trenes | ⚠ (7)                                   |
 | unité simple / multiple (US / UM) | single / multiple unit          | Einfach- / Mehrfachtraktion     | ⚠ singola / multipla                | ⚠ simple / múltiple                   | `…:for=single_unit/multiple_unit`       |
 | souterrain                        | underground                     | unterirdisch                    | sotterraneo                         | subterráneo                           | `tunnel`, `layer<0`, `level<0`          |
+| partie (d'un quai)                | part                            | Teil                            | parte                               | parte                                 | — (quai en plusieurs objets)            |
+| partie couverte                   | covered part                    | ⚠ überdeckter Teil (8)          | parte coperta                       | parte cubierta                        | `layer<0`, `covered=yes`, `tunnel`…     |
+| partie à l'air libre              | open-air part                   | Teil unter freiem Himmel        | parte all'aperto                    | parte al aire libre                   | —                                       |
 
 (2) En italien, RFI dit « marciapiede » pour le quai ferroviaire ; le wiki OSM italien emploie aussi « banchina ». À trancher par la communauté OSM italienne.
 (3) « Stop marker » (britannique, « car stop marker ») plutôt que « stop sign », qui évoque le panneau routier. Alternative : « stop board ».
@@ -40,6 +43,7 @@ Légende : ⚠ = terme incertain, à faire valider (raison en note). Ne se tradu
 (5) Proposition de Loïc ; RFI emploie aussi « cartello di fermata ». À valider.
 (6) ADIF emploie aussi « cartelón de parada » ou « señal de parada ». À valider.
 (7) Libellés des boutons de la grille E7 : ils décrivent la pancarte française, dont le texte reste en français sur le terrain.
+(8) Partie d'un quai couverte par une dalle ou un bâtiment (Paris-Saint-Lazare, sous la place de l'Europe). « überdacht » désignerait plutôt un abri de quai ; « überdeckt » suit la dalle. À valider par Loïc.
 
 ## OpenStreetMap et appli
 

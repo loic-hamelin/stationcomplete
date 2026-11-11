@@ -1,0 +1,589 @@
+{
+ "station": {
+  "id": "n3533789791",
+  "name": "Paris-Saint-Lazare",
+  "commune": "Paris",
+  "dep": "75",
+  "lat": 48.87653,
+  "lon": 2.32524,
+  "type": "S",
+  "bbox": [
+   2.3222,
+   48.8742,
+   2.3311,
+   48.8802
+  ]
+ },
+ "fetched": "2026-11-11T09:00:00.000Z",
+ "attribution": "Données synthétiques « type Saint-Lazare » (quais coupés sous la dalle de la place de l’Europe), pas des données OpenStreetMap",
+ "parts": {
+  "P": [
+   8000001,
+   8000002,
+   8000003
+  ],
+  "Q": [
+   8000004,
+   8000005
+  ]
+ },
+ "elements": [
+  {
+   "type": "node",
+   "id": 9000001,
+   "lat": 48.8773782,
+   "lon": 2.326534,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000002,
+   "lat": 48.8764001,
+   "lon": 2.3272275,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000003,
+   "lat": 48.8763697,
+   "lon": 2.3271283,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000004,
+   "lat": 48.8773478,
+   "lon": 2.3264348,
+   "version": 1
+  },
+  {
+   "type": "way",
+   "id": 8000001,
+   "nodes": [
+    9000001,
+    9000002,
+    9000003,
+    9000004,
+    9000001
+   ],
+   "version": 3,
+   "tags": {
+    "railway": "platform",
+    "public_transport": "platform",
+    "train": "yes"
+   }
+  },
+  {
+   "type": "node",
+   "id": 9000005,
+   "lat": 48.8777817,
+   "lon": 2.3262479,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000006,
+   "lat": 48.8777513,
+   "lon": 2.3261488,
+   "version": 1
+  },
+  {
+   "type": "way",
+   "id": 8000002,
+   "nodes": [
+    9000005,
+    9000001,
+    9000004,
+    9000006,
+    9000005
+   ],
+   "version": 3,
+   "tags": {
+    "railway": "platform",
+    "public_transport": "platform",
+    "train": "yes",
+    "layer": "-1",
+    "covered": "yes"
+   }
+  },
+  {
+   "type": "node",
+   "id": 9000007,
+   "lat": 48.8781118,
+   "lon": 2.3260139,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000008,
+   "lat": 48.8777857,
+   "lon": 2.326245,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000009,
+   "lat": 48.8777553,
+   "lon": 2.3261459,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000010,
+   "lat": 48.8780814,
+   "lon": 2.3259147,
+   "version": 1
+  },
+  {
+   "type": "way",
+   "id": 8000003,
+   "nodes": [
+    9000007,
+    9000008,
+    9000009,
+    9000010,
+    9000007
+   ],
+   "version": 3,
+   "tags": {
+    "railway": "platform",
+    "public_transport": "platform",
+    "train": "yes",
+    "layer": "-1",
+    "covered": "yes",
+    "location": "underground"
+   }
+  },
+  {
+   "type": "node",
+   "id": 9000011,
+   "lat": 48.8773326,
+   "lon": 2.3263853,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000012,
+   "lat": 48.8763545,
+   "lon": 2.3270788,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000013,
+   "lat": 48.8763241,
+   "lon": 2.3269796,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000014,
+   "lat": 48.8773022,
+   "lon": 2.3262861,
+   "version": 1
+  },
+  {
+   "type": "way",
+   "id": 8000004,
+   "nodes": [
+    9000011,
+    9000012,
+    9000013,
+    9000014,
+    9000011
+   ],
+   "version": 3,
+   "tags": {
+    "railway": "platform",
+    "public_transport": "platform",
+    "train": "yes",
+    "ref": "25;26"
+   }
+  },
+  {
+   "type": "node",
+   "id": 9000015,
+   "lat": 48.8779031,
+   "lon": 2.3259807,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000016,
+   "lat": 48.8778727,
+   "lon": 2.3258816,
+   "version": 1
+  },
+  {
+   "type": "way",
+   "id": 8000005,
+   "nodes": [
+    9000015,
+    9000011,
+    9000014,
+    9000016,
+    9000015
+   ],
+   "version": 3,
+   "tags": {
+    "railway": "platform",
+    "public_transport": "platform",
+    "train": "yes",
+    "layer": "-1",
+    "covered": "yes",
+    "ref": "26"
+   }
+  },
+  {
+   "type": "node",
+   "id": 9000017,
+   "lat": 48.8788529,
+   "lon": 2.3255186,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000018,
+   "lat": 48.8784454,
+   "lon": 2.3258075,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000019,
+   "lat": 48.8780379,
+   "lon": 2.3260965,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000020,
+   "lat": 48.8776303,
+   "lon": 2.3263854,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000021,
+   "lat": 48.8773858,
+   "lon": 2.3265588,
+   "version": 1
+  },
+  {
+   "type": "way",
+   "id": 8000006,
+   "nodes": [
+    9000017,
+    9000018,
+    9000019,
+    9000020,
+    9000021
+   ],
+   "version": 3,
+   "tags": {
+    "railway": "rail",
+    "gauge": "1435",
+    "usage": "main",
+    "electrified": "contact_line",
+    "tunnel": "yes",
+    "layer": "-1"
+   }
+  },
+  {
+   "type": "node",
+   "id": 9000022,
+   "lat": 48.8769783,
+   "lon": 2.3268477,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000023,
+   "lat": 48.8765708,
+   "lon": 2.3271367,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000024,
+   "lat": 48.8761632,
+   "lon": 2.3274256,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000025,
+   "lat": 48.8757557,
+   "lon": 2.3277146,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000026,
+   "lat": 48.8753482,
+   "lon": 2.3280035,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000027,
+   "lat": 48.8751852,
+   "lon": 2.3281191,
+   "version": 1
+  },
+  {
+   "type": "way",
+   "id": 8000007,
+   "nodes": [
+    9000021,
+    9000022,
+    9000023,
+    9000024,
+    9000025,
+    9000026,
+    9000027
+   ],
+   "version": 3,
+   "tags": {
+    "railway": "rail",
+    "gauge": "1435",
+    "usage": "main",
+    "electrified": "contact_line"
+   }
+  },
+  {
+   "type": "node",
+   "id": 9000028,
+   "lat": 48.8788073,
+   "lon": 2.3253698,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000029,
+   "lat": 48.8783998,
+   "lon": 2.3256588,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000030,
+   "lat": 48.8779923,
+   "lon": 2.3259477,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000031,
+   "lat": 48.8775847,
+   "lon": 2.3262367,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000032,
+   "lat": 48.8773402,
+   "lon": 2.3264101,
+   "version": 1
+  },
+  {
+   "type": "way",
+   "id": 8000008,
+   "nodes": [
+    9000028,
+    9000029,
+    9000030,
+    9000031,
+    9000032
+   ],
+   "version": 3,
+   "tags": {
+    "railway": "rail",
+    "gauge": "1435",
+    "usage": "main",
+    "electrified": "contact_line",
+    "tunnel": "yes",
+    "layer": "-1"
+   }
+  },
+  {
+   "type": "node",
+   "id": 9000033,
+   "lat": 48.8769327,
+   "lon": 2.326699,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000034,
+   "lat": 48.8765251,
+   "lon": 2.326988,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000035,
+   "lat": 48.8761176,
+   "lon": 2.3272769,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000036,
+   "lat": 48.8757101,
+   "lon": 2.3275659,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000037,
+   "lat": 48.8753026,
+   "lon": 2.3278548,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000038,
+   "lat": 48.8751395,
+   "lon": 2.3279704,
+   "version": 1
+  },
+  {
+   "type": "way",
+   "id": 8000009,
+   "nodes": [
+    9000032,
+    9000033,
+    9000034,
+    9000035,
+    9000036,
+    9000037,
+    9000038
+   ],
+   "version": 3,
+   "tags": {
+    "railway": "rail",
+    "gauge": "1435",
+    "usage": "main",
+    "electrified": "contact_line"
+   }
+  },
+  {
+   "type": "node",
+   "id": 9000039,
+   "lat": 48.8787617,
+   "lon": 2.3252211,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000040,
+   "lat": 48.8783542,
+   "lon": 2.3255101,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000041,
+   "lat": 48.8779466,
+   "lon": 2.325799,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000042,
+   "lat": 48.8775391,
+   "lon": 2.326088,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000043,
+   "lat": 48.8772946,
+   "lon": 2.3262613,
+   "version": 1
+  },
+  {
+   "type": "way",
+   "id": 8000010,
+   "nodes": [
+    9000039,
+    9000040,
+    9000041,
+    9000042,
+    9000043
+   ],
+   "version": 3,
+   "tags": {
+    "railway": "rail",
+    "gauge": "1435",
+    "usage": "main",
+    "electrified": "contact_line",
+    "tunnel": "yes",
+    "layer": "-1"
+   }
+  },
+  {
+   "type": "node",
+   "id": 9000044,
+   "lat": 48.8768871,
+   "lon": 2.3265503,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000045,
+   "lat": 48.8764795,
+   "lon": 2.3268392,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000046,
+   "lat": 48.876072,
+   "lon": 2.3271282,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000047,
+   "lat": 48.8756645,
+   "lon": 2.3274171,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000048,
+   "lat": 48.8752569,
+   "lon": 2.3277061,
+   "version": 1
+  },
+  {
+   "type": "node",
+   "id": 9000049,
+   "lat": 48.8750939,
+   "lon": 2.3278217,
+   "version": 1
+  },
+  {
+   "type": "way",
+   "id": 8000011,
+   "nodes": [
+    9000043,
+    9000044,
+    9000045,
+    9000046,
+    9000047,
+    9000048,
+    9000049
+   ],
+   "version": 3,
+   "tags": {
+    "railway": "rail",
+    "gauge": "1435",
+    "usage": "main",
+    "electrified": "contact_line"
+   }
+  }
+ ]
+}

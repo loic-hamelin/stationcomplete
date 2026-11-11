@@ -34,6 +34,16 @@ export interface FeatureProps {
 	/** Objet souterrain (tunnel, couche ou niveau négatif) : pointillés estompés (lot 7d). */
 	under?: boolean;
 	/**
+	 * Quai en plusieurs parties : chaque partie est un objet de la carte, `osm` est le quai
+	 * entier (sa partie principale) et `part` la partie elle-même. Seule la partie principale
+	 * porte l'étiquette ; toucher une partie sélectionne le quai entier.
+	 */
+	part?: string;
+	/** Nombre de parties et de parties couvertes, et la phrase qui le dit (« En 3 parties… »). */
+	parts?: number;
+	coveredParts?: number;
+	partsText?: string;
+	/**
 	 * Voie qui ne longe aucun quai cartographié (lot 7d) : dessinée plus discrète, sans quête ;
 	 * étiquette seulement si elle porte un numéro (`label` vide sinon).
 	 */
@@ -132,55 +142,79 @@ export function buildFeatures(
 	const features: Feature[] = [];
 	let fid = 1;
 
-	// Quais
-	for (const p of a.platforms) {
-		const k = `${p.ref.type}/${p.ref.id}`;
-		let geometry: Geometry | undefined;
-		let under = isUnderground(p.tags);
-		if (p.ref.type === 'way') {
-			const w = data.ways.get(p.ref.id);
-			if (!w) continue;
+	/** Géométrie d'un quai (way, ou contour extérieur d'un multipolygone) et souterrain ou non. */
+	const platformGeometry = (ref: { type: string; id: number }, tags: Record<string, string>) => {
+		if (ref.type === 'way') {
+			const w = data.ways.get(ref.id);
+			if (!w) return undefined;
 			const c = coords(w);
-			geometry =
+			const geometry: Geometry =
 				w.nodes[0] === w.nodes.at(-1) && c.length > 3
 					? { type: 'Polygon', coordinates: [c] }
 					: { type: 'LineString', coordinates: c };
-		} else {
-			const r = data.relations.get(p.ref.id);
-			const outer = r?.members
-				.filter((m) => m.type === 'way' && m.role !== 'inner')
-				.map((m) => data.ways.get(m.ref))
-				.filter((w): w is OsmWay => !!w && isPlatform(r?.tags));
-			const first = outer?.[0];
-			if (!first) continue;
-			geometry = { type: 'Polygon', coordinates: [coords(first)] };
-			under ||= isUnderground(first.tags);
+			return { geometry, under: isUnderground(tags) };
 		}
+		const r = data.relations.get(ref.id);
+		const outer = r?.members
+			.filter((m) => m.type === 'way' && m.role !== 'inner')
+			.map((m) => data.ways.get(m.ref))
+			.filter((w): w is OsmWay => !!w && isPlatform(r?.tags));
+		const first = outer?.[0];
+		if (!first) return undefined;
+		const geometry: Geometry = { type: 'Polygon', coordinates: [coords(first)] };
+		return { geometry, under: isUnderground(tags) || isUnderground(first.tags) };
+	};
+
+	// Quais (un quai en plusieurs parties : un objet par partie, une seule étiquette)
+	for (const p of a.platforms) {
+		const k = `${p.ref.type}/${p.ref.id}`;
 		const t = p.tags;
 		const label = t.local_ref ?? (t.ref ? t.ref.replaceAll(';', '-') : '?');
 		const lettered = !t.local_ref && LETTERS.test(t.ref ?? '');
-		features.push({
-			type: 'Feature',
-			id: fid++,
-			geometry,
-			properties: {
-				kind: 'quai',
-				osm: k,
-				status: statusOf(k, !!t.ref),
-				label,
-				title: platformTitle(t),
-				detail: lettered
-					? msg('feature.platformLettered', { length: fmtDistance(p.lengthM) })
-					: t.ref
-						? msg('feature.platformTracks', {
-								refs: andRefs(t.ref),
-								length: fmtDistance(p.lengthM)
-							})
-						: msg('feature.platformNoRef', { length: fmtDistance(p.lengthM) }),
-				quests: (questsOf.get(k) ?? []).join(','),
-				...(under ? { under } : {})
-			}
-		});
+		const parts = p.parts ?? [{ ref: p.ref, tags: p.tags }];
+		const covered = p.parts?.filter((x) => x.covered).length ?? 0;
+		const partsText = p.parts
+			? msg('feature.parts', { count: p.parts.length, covered })
+			: undefined;
+		const detail = lettered
+			? msg('feature.platformLettered', { length: fmtDistance(p.lengthM) })
+			: t.ref
+				? msg('feature.platformTracks', {
+						refs: andRefs(t.ref),
+						length: fmtDistance(p.lengthM)
+					})
+				: msg('feature.platformNoRef', { length: fmtDistance(p.lengthM) });
+		for (const [i, part] of parts.entries()) {
+			const g = platformGeometry(part.ref, part.tags);
+			if (!g) continue;
+			features.push({
+				type: 'Feature',
+				id: fid++,
+				geometry: g.geometry,
+				properties: {
+					kind: 'quai',
+					osm: k,
+					status: statusOf(k, !!t.ref && !p.missingRef),
+					// Étiquette sur la partie principale seulement (la première).
+					label: i === 0 ? label : '',
+					// « Quai 3 — en 3 parties, dont 2 couvertes »
+					title: partsText
+						? msg('feature.titleParts', { title: platformTitle(t), parts: partsText })
+						: platformTitle(t),
+					detail,
+					quests: (questsOf.get(k) ?? []).join(','),
+					...(g.under ? { under: true } : {}),
+					...(p.parts
+						? {
+								part: `${part.ref.type}/${part.ref.id}`,
+								parts: p.parts.length,
+								coveredParts: covered,
+								partsText
+							}
+						: {})
+				}
+			});
+		}
 	}
 
 	// Voies le long des quais

@@ -96,7 +96,14 @@
 		if (e.kind === 'shape' || isRemoval(e)) return;
 		await updateEdits([
 			e.kind === 'tags'
-				? { ...e, conflict: undefined, version: undefined, base: undefined }
+				? {
+						...e,
+						conflict: undefined,
+						version: undefined,
+						base: undefined,
+						// Quai en plusieurs parties : chaque partie aussi, à sa version à jour.
+						...(e.parts ? { parts: e.parts.map((p) => ({ target: p.target })) } : {})
+					}
 				: e.kind === 'node'
 					? { ...e, conflict: undefined, wayVersion: undefined }
 					: { ...e, conflict: undefined }

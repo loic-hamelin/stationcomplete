@@ -75,7 +75,9 @@
 		"trackAway": "Verläuft an keinem kartierten Bahnsteig",
 		"signLegacy": "Altes Tagging-Format, vor Ort zu bestätigen",
 		"signDirection": "Richtung erfasst",
-		"signNoDirection": "Fahrtrichtung der Züge vor Ort erfassen"
+		"signNoDirection": "Fahrtrichtung der Züge vor Ort erfassen",
+		"parts": "in {count} Teilen{covered, plural, =0 {} one {, davon # überdeckt} other {, davon # überdeckt}}",
+		"titleParts": "{title} — {parts}"
 	},
 	"quest": {
 		"q0": {
@@ -90,7 +92,8 @@
 		},
 		"q3": {
 			"title": "{count, plural, one {# Bahnsteig mit zu prüfenden Nummern} other {# Bahnsteige mit zu prüfenden Nummern}}",
-			"subtitle": "Die Nummern des Bahnsteigs und die der Gleise stimmen nicht überein"
+			"subtitle": "Die Nummern des Bahnsteigs und die der Gleise stimmen nicht überein",
+			"partsSubtitle": "Die Teile eines Bahnsteigs haben nicht dieselbe Nummer: vor Ort prüfen"
 		},
 		"q4": {
 			"title": "{count, plural, one {# Bahnsteigseite ohne Haltetafel} other {# Bahnsteigseiten ohne Haltetafel}}"
@@ -361,7 +364,9 @@
 			"relationEmpty": "Die Relation {name} wäre danach leer: Lösche sie mit einem Editor wie iD oder JOSM.",
 			"signDeleted": "Haltetafel wurde auf OpenStreetMap bereits gelöscht.",
 			"signTrack": "Das Gleis der Haltetafel wurde inzwischen gelöscht oder neu gezeichnet.",
-			"ringIncomplete": "Unvollständiger Umriss des Bahnsteigs."
+			"ringIncomplete": "Unvollständiger Umriss des Bahnsteigs.",
+			"partGone": "Ein Teil des Bahnsteigs wurde inzwischen auf OpenStreetMap gelöscht: Für diesen Bahnsteig wurde nichts gesendet.",
+			"partClash": "Ein Teil des Bahnsteigs wurde inzwischen von jemand anderem geändert ({key}): Für diesen Bahnsteig wurde nichts gesendet (seine Teile werden zusammen gesendet)."
 		},
 		"comment": {
 			"numbers": "Bahnsteig- und Gleisnummern, Haltetafeln",
@@ -369,7 +374,8 @@
 			"shape": "Bahnsteigform korrigiert",
 			"deleted": "{name} gelöscht ({why})",
 			"signDeleted": "Haltetafel „{label}“ gelöscht ({why}{mode, select, untag {, Punkt bleibt im Gleis} other {}})",
-			"station": "Bahnhof {name}: {parts}"
+			"station": "Bahnhof {name}: {parts}",
+			"parts": "{name} ({count} Teile): Nummer in jedem Teil eingetragen"
 		}
 	},
 	"bearing": {
@@ -805,7 +811,9 @@
 			"Q4": "Haltetafeln entlang dieses Bahnsteigs erfassen",
 			"Q5": "Haltetafel ergänzen",
 			"Q6": "Zu prüfen (kein aktuelles Prüfdatum)",
-			"Q7": "Doppelte oder widersprüchliche Gleisnummer"
+			"Q7": "Doppelte oder widersprüchliche Gleisnummer",
+			"mixed": "Die Teile dieses Bahnsteigs haben nicht dieselbe Nummer: prüfe vor Ort",
+			"partial": "Nummer fehlt auf {count, plural, one {# Teil} other {# Teilen}} des Bahnsteigs: auf jeden Teil übertragen"
 		},
 		"editedHere": "Auf diesem Telefon geändert, wartet auf das Hochladen.",
 		"del": {
@@ -822,7 +830,8 @@
 			"relations": "Er wird außerdem {phrase}.",
 			"points": "{lost, plural, one {# Punkt gelöscht} other {# Punkte gelöscht}}{kept, plural, =0 {} one {; # mit anderen Objekten verbunden, bleibt erhalten} other {; # mit anderen Objekten verbunden, bleiben erhalten}}.",
 			"platformReplaced": "Deine Änderungen an diesem Bahnsteig werden entfernt: {list}.",
-			"platformButton": "Bahnsteig löschen"
+			"platformButton": "Bahnsteig löschen",
+			"partOnly": "Nur dieser Teil wird gelöscht ({part}): Die anderen Teile des Bahnsteigs bleiben."
 		},
 		"seeContributions": "Meine Beiträge ansehen",
 		"fill": "Erfassen",
@@ -834,7 +843,13 @@
 		"drawnHere": "Auf diesem Telefon gezeichneter Bahnsteig: Um seine Form zu ändern, entferne ihn in deinen Beiträgen und zeichne ihn neu.",
 		"deletePlatform": "Diesen Bahnsteig löschen …",
 		"osmAttribution": "© OpenStreetMap-Mitwirkende",
-		"toggleAttribution": "Quellenangaben ein- oder ausblenden"
+		"toggleAttribution": "Quellenangaben ein- oder ausblenden",
+		"part": {
+			"open": "Teil unter freiem Himmel ({length})",
+			"covered": "Überdeckter Teil ({length})",
+			"choose": "Welcher Teil des Bahnsteigs?",
+			"named": "{name}, {covered, select, yes {überdeckter Teil} other {Teil unter freiem Himmel}}"
+		}
 	},
 	"input": {
 		"title": "Details — stationcomplete",
@@ -866,7 +881,10 @@
 			"refsHint": "Die über den Gleisen angezeigten Nummern, nicht der Buchstabe des Bahnsteigs.",
 			"letter": "Hat dieser Bahnsteig einen Buchstaben oder einen Namen?",
 			"letterLabel": "Buchstabe oder Name des Bahnsteigs",
-			"letterPlaceholder": "z. B. A"
+			"letterPlaceholder": "z. B. A",
+			"parts": "Dieser Bahnsteig ist in OpenStreetMap {parts} erfasst: Die Nummern werden in jeden Teil geschrieben, im selben Upload.",
+			"mixed": "Die Teile dieses Bahnsteigs haben nicht dieselbe Nummer ({values}): Prüfe vor Ort. Deine Eingabe setzt überall dieselbe Nummer.",
+			"summaryParts": "{summary} ({count} Teile)"
 		},
 		"track": {
 			"split": "Dieser Abschnitt muss von einer Kartiererin oder einem Kartierer geteilt werden. Die Meldung (OSM-Hinweis) kommt mit dem Hochladen, in Paket 3.",

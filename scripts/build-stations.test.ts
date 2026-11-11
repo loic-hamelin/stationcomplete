@@ -176,6 +176,30 @@ describe('index des gares : jauges (quais, voies, pancartes)', () => {
 			c.stopSigns.total
 		]);
 	});
+
+	// Quai en plusieurs parties (gare synthétique « type Saint-Lazare ») : l'index compte chaque
+	// quai une fois, comme l'appli.
+	it('quai coupé en parties couvertes : compté une fois dans l’index', async () => {
+		const fx = JSON.parse(readFileSync('tests/fixtures/saint-lazare-type.json', 'utf8')) as {
+			station: { bbox: BBox };
+			elements: OsmElement[];
+		};
+		const dir = mkdtempSync(join(tmpdir(), 'rc-opl-'));
+		writeFileSync(join(dir, 'sl.opl'), toOpl(fx.elements));
+		const row = ['n3533789791', 'Paris-Saint-Lazare', '', '', '', '', 0, 0, 'S', fx.station.bbox];
+		const rows = (await addGauges([row], join(dir, 'sl.opl'), 'fr')) as unknown[][];
+		// 2 quais (en 3 et 2 parties), dont 1 numéroté ; 6 tronçons de voie ; 4 côtés de quai.
+		expect(rows[0][10]).toEqual([1, 2, 0, 6, 0, 4]);
+		const c = analyzeStation(fx.elements, fx.station.bbox, new Date(), 'fr').completeness;
+		expect(rows[0][10]).toEqual([
+			c.platforms.done,
+			c.platforms.total,
+			c.tracks.done,
+			c.tracks.total,
+			c.stopSigns.done,
+			c.stopSigns.total
+		]);
+	});
 });
 
 /** Extrait OPL tel que le produit la CI : filtre osmium puis add-locations-to-ways. */

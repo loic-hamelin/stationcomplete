@@ -19,6 +19,7 @@ Site : <https://stationcomplete.org>
 - Lot 7d : suppression d'une pancarte d'arrêt existante (nœud retiré de la voie seulement si c'est sans risque, sinon tags retirés ; la géométrie des voies ne change jamais), pointillés estompés réservés aux objets souterrains et légende de la carte, accrochage limité à 12 px de la croix et sommets glissés au doigt.
 - Lot P1 : organisation par pays, sans changement visible. Tout ce qui est propre à un pays (index des gares, photo aérienne, schéma des pancartes, subdivision, règles de quêtes, langues) est décrit dans `src/lib/core/countries.ts` ; la politique de sécurité, le service worker et la construction hebdomadaire de l'index en découlent. Seule la France est activée ; la Suisse est déclarée mais désactivée.
 - Choisir une gare (E3, 7 novembre 2026) : carte « Reprendre » (gare en cours, jauges, prochaine tâche), recherche par pertinence puis distance (accents, tirets, « St » = « Saint »), gares autour de moi, « À compléter près de vous », favorites et récentes en fiches (distance, département, halte, hors-ligne, mini-jauge quais · voies · pancartes). L'index hebdomadaire porte les jauges de chaque gare, calculées par le moteur de quêtes de l'appli. Langue (et pays, quand il y en aura plusieurs) choisis à la première ouverture, modifiables dans Réglages.
+- Quai en plusieurs parties (11 novembre 2026) : un quai découpé dans OSM en parties à l'air libre et couvertes (Paris-Saint-Lazare) est regroupé en un seul quai — une étiquette, compté une fois dans les quêtes et les jauges, numéro écrit sur toutes ses parties dans le même envoi. Rien n'est fusionné dans OSM.
 - Lot traduction : interface en français, anglais, allemand, italien et espagnol. Langue détectée au premier lancement d'après le téléphone, modifiable dans Réglages ; seule la langue active est téléchargée. Le commentaire proposé du changeset est rédigé dans la langue de l'interface ; les tags ne se traduisent jamais.
 
 ## Développer sur son ordinateur
@@ -51,7 +52,11 @@ Textes de l'interface : `src/lib/i18n/messages/<langue>.json` (fr, langue source
 
 ## Publication
 
-Chaque envoi sur la branche `main` déclenche le workflow `.github/workflows/deploy.yml`, qui vérifie (types, mise en forme, lint), construit, contrôle le budget de poids, lance les tests de bout en bout, puis publie le site sur GitHub Pages. Si une étape échoue, rien n'est publié. Le fichier `static/CNAME` relie le site au domaine `stationcomplete.org`.
+Chaque envoi sur la branche `main` déclenche le workflow `.github/workflows/deploy.yml`, qui vérifie (types, mise en forme, lint), lance les tests unitaires, audite les dépendances, construit, contrôle le budget de poids, lance les tests de bout en bout, puis publie le site sur GitHub Pages. Si une étape échoue, rien n'est publié. Une pull request passe les mêmes vérifications, sans rien publier. Le fichier `static/CNAME` relie le site au domaine `stationcomplete.org`.
+
+## Sécurité
+
+Dependabot propose chaque mardi les mises à jour des bibliothèques et des actions, avec un délai de 7 jours après leur publication. Il propose aussi les correctifs de sécurité dès qu'une faille est connue. Les mises à jour sans risque (correctifs de sécurité non majeurs, outils de développement) sont fusionnées automatiquement si toute la CI passe ; les autres attendent une relecture. CodeQL analyse le code et les workflows. Mode d'emploi : `docs/securite/robot-dependances.md`. Signaler une faille : `.github/SECURITY.md` (en privé, jamais dans un ticket public).
 
 Chaque lundi, le workflow `.github/workflows/stations.yml` reconstruit l'index des gares de chaque pays activé (une tâche par pays : un pays en échec ne bloque pas les autres), l'enregistre dans le dépôt et relance la publication. Lancé à la main, il peut construire l'index d'un pays précis, même désactivé (champ « pays »).
 
@@ -62,6 +67,7 @@ Chaque lundi, le workflow `.github/workflows/stations.yml` reconstruit l'index d
 - `docs/architecture.md` : architecture technique et plan en lots ; § 9.2 : traduction ; § 13 : organisation par pays et check-list « ajouter un pays »
 - `docs/i18n/` : glossaire fr/en/de/it/es et guide des relecteurs
 - `docs/pays/` : études par pays (Suisse)
+- `docs/securite/` : robot de mise à jour des dépendances, alertes de sécurité
 
 ## Licences
 

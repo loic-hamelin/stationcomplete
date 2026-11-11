@@ -75,7 +75,9 @@
 		"trackAway": "No discurre junto a ningún andén cartografiado",
 		"signLegacy": "Formato de etiquetas antiguo, por confirmar in situ",
 		"signDirection": "Sentido indicado",
-		"signNoDirection": "Sentido de los trenes por anotar in situ"
+		"signNoDirection": "Sentido de los trenes por anotar in situ",
+		"parts": "en {count} partes{covered, plural, =0 {} one {, # de ellas cubierta} other {, # de ellas cubiertas}}",
+		"titleParts": "{title} — {parts}"
 	},
 	"quest": {
 		"q0": {
@@ -90,7 +92,8 @@
 		},
 		"q3": {
 			"title": "{count, plural, one {# andén con números por verificar} other {# andenes con números por verificar}}",
-			"subtitle": "Los números del andén y los de las vías no coinciden"
+			"subtitle": "Los números del andén y los de las vías no coinciden",
+			"partsSubtitle": "Las partes de un mismo andén no tienen el mismo número: comprobar in situ"
 		},
 		"q4": {
 			"title": "{count, plural, one {# lado de andén sin cartel de parada} other {# lados de andén sin cartel de parada}}"
@@ -361,7 +364,9 @@
 			"relationEmpty": "La relación {name} quedaría vacía: elimínala con un editor como iD o JOSM.",
 			"signDeleted": "Cartel de parada ya eliminado en OpenStreetMap.",
 			"signTrack": "La vía del cartel de parada se ha eliminado o redibujado entretanto.",
-			"ringIncomplete": "Contorno del andén incompleto."
+			"ringIncomplete": "Contorno del andén incompleto.",
+			"partGone": "Una parte del andén se eliminó entretanto en OpenStreetMap: no se envió nada para este andén.",
+			"partClash": "Otra persona modificó entretanto una parte del andén ({key}): no se envió nada para este andén (sus partes se envían juntas)."
 		},
 		"comment": {
 			"numbers": "números de andenes y vías, carteles de parada",
@@ -369,7 +374,8 @@
 			"shape": "forma del andén corregida",
 			"deleted": "{name} eliminado ({why})",
 			"signDeleted": "cartel de parada «{label}» eliminado ({why}{mode, select, untag {, punto conservado en la vía} other {}})",
-			"station": "Estación de {name}: {parts}"
+			"station": "Estación de {name}: {parts}",
+			"parts": "{name} ({count} partes): número indicado en cada parte"
 		}
 	},
 	"bearing": {
@@ -805,7 +811,9 @@
 			"Q4": "Carteles de parada por anotar a lo largo de este andén",
 			"Q5": "Cartel de parada por completar",
 			"Q6": "Por verificar (ninguna fecha de verificación reciente)",
-			"Q7": "Número de vía duplicado o incoherente"
+			"Q7": "Número de vía duplicado o incoherente",
+			"mixed": "Las partes de este andén no tienen el mismo número: compruébalo in situ",
+			"partial": "Falta el número en {count, plural, one {# parte} other {# partes}} del andén: hay que copiarlo en cada una"
 		},
 		"editedHere": "Modificado en este teléfono, pendiente de envío.",
 		"del": {
@@ -822,7 +830,8 @@
 			"relations": "También será {phrase}.",
 			"points": "{lost, plural, one {# punto eliminado} other {# puntos eliminados}}{kept, plural, =0 {} one {; # unido a otros objetos, conservado} other {; # unidos a otros objetos, conservados}}.",
 			"platformReplaced": "Se quitarán tus ediciones sobre este andén: {list}.",
-			"platformButton": "Eliminar el andén"
+			"platformButton": "Eliminar el andén",
+			"partOnly": "Solo se eliminará esta parte ({part}): las demás partes del andén se mantienen."
 		},
 		"seeContributions": "Ver mis contribuciones",
 		"fill": "Completar",
@@ -834,7 +843,13 @@
 		"drawnHere": "Andén dibujado en este teléfono: para cambiar su forma, quítalo en tus contribuciones y vuelve a dibujarlo.",
 		"deletePlatform": "Eliminar este andén…",
 		"osmAttribution": "© colaboradores de OpenStreetMap",
-		"toggleAttribution": "Mostrar u ocultar los créditos"
+		"toggleAttribution": "Mostrar u ocultar los créditos",
+		"part": {
+			"open": "Parte al aire libre ({length})",
+			"covered": "Parte cubierta ({length})",
+			"choose": "¿Qué parte del andén?",
+			"named": "{name}, {covered, select, yes {parte cubierta} other {parte al aire libre}}"
+		}
 	},
 	"input": {
 		"title": "Ficha — stationcomplete",
@@ -866,7 +881,10 @@
 			"refsHint": "Los números que aparecen encima de las vías, no la letra del andén.",
 			"letter": "¿Tiene este andén una letra o un nombre?",
 			"letterLabel": "Letra o nombre del andén",
-			"letterPlaceholder": "P. ej. A"
+			"letterPlaceholder": "P. ej. A",
+			"parts": "Este andén está {parts} en OpenStreetMap: los números se escribirán en cada una, en el mismo envío.",
+			"mixed": "Las partes de este andén no tienen el mismo número ({values}): compruébalo in situ. Tu entrada pondrá el mismo número en todas.",
+			"summaryParts": "{summary} ({count} partes)"
 		},
 		"track": {
 			"split": "Un cartógrafo tendrá que dividir este tramo. La notificación (nota de OSM) llegará con el envío, en el lote 3.",

@@ -34,7 +34,7 @@
 	import { stationView } from '#lib/view.js';
 	import StationMap from '#lib/map/StationMap.svelte';
 	import { onMount, untrack } from 'svelte';
-	import { t, tk } from '#lib/i18n/t.js';
+	import { fmtDistance, t, tk } from '#lib/i18n/t.js';
 
 	let mounted = $state(false);
 	onMount(() => {
@@ -73,7 +73,11 @@
 	const data = $derived.by(() => {
 		if (!view) return undefined;
 		const fc = view.features();
-		for (const f of fc.features) f.properties.edited = view.edited.has(f.properties.osm);
+		for (const f of fc.features) {
+			const p = f.properties;
+			// Quai en plusieurs parties : modifié si l'une de ses parties l'est.
+			p.edited = view.edited.has(p.osm) || (!!p.part && view.edited.has(p.part));
+		}
 		return fc;
 	});
 	const survey = $derived(canSurvey(id));
@@ -101,9 +105,14 @@
 	let legend = $state(false);
 	let notice = $state('');
 	let deleteError = $state('');
+	// Quai en plusieurs parties : forme et suppression se font partie par partie.
+	let picking = $state<'shape' | 'delete' | undefined>();
+	let chosenPart = $state<string | undefined>();
 	const select = (p: FeatureProps | undefined) => {
 		selected = p;
 		more = false;
+		picking = undefined;
+		chosenPart = undefined;
 		deleting = false;
 		reason = undefined;
 		deleteError = '';
@@ -112,13 +121,36 @@
 	$effect(() => {
 		// La feuille grandit (menu, confirmation) : les étiquettes s'écartent d'elle.
 		void more;
+		void picking;
 		void deleting;
 		void legend;
 		untrack(() => mapRef?.refreshLabels());
 	});
+	// Quai en plusieurs parties : ses parties (partie principale d'abord), avec leur libellé.
+	const group = $derived(
+		selected?.kind === 'quai' && selected.parts && view
+			? view.analysis.platforms.find((p) => `${p.ref.type}/${p.ref.id}` === selected?.osm)
+			: undefined
+	);
+	const groupParts = $derived(
+		(group?.parts ?? []).map((x) => {
+			const key = `${x.ref.type}/${x.ref.id}`;
+			const label = t(x.covered ? 'map.part.covered' : 'map.part.open', {
+				length: fmtDistance(x.lengthM)
+			});
+			const shape =
+				ready && x.ref.type === 'way' && x.ref.id > 0
+					? platformShape(new OsmData(ready.elements), x.ref.id)
+					: undefined;
+			return { key, label, covered: x.covered, shape };
+		})
+	);
+	// Objet visé par la forme et la suppression : la partie choisie, sinon le quai (ou sa partie
+	// principale).
+	const target = $derived(chosenPart ?? selected?.osm);
 	const quaiWay = $derived(
-		selected?.kind === 'quai' && /^way\/\d+$/.test(selected.osm)
-			? Number(selected.osm.slice(4))
+		selected?.kind === 'quai' && target && /^way\/\d+$/.test(target)
+			? Number(target.slice(4))
 			: undefined
 	);
 	// Quai tel qu'il est sur OpenStreetMap (données lues) : contour, verrous, relations.
@@ -150,7 +182,9 @@
 		return { node: n, removal: signRemoval(n, ways, rels, (i) => d.nodes.get(i)) };
 	});
 	const replaced = $derived(
-		deleting && selected ? editsReplacedByDelete(id, selected.osm).filter((e) => !e.conflict) : []
+		deleting && selected && target
+			? editsReplacedByDelete(id, target).filter((e) => !e.conflict)
+			: []
 	);
 
 	async function confirmDelete() {
@@ -159,7 +193,15 @@
 		// (« Mal placée » n'existe que pour une pancarte.)
 		if (!reason || reason === 'misplaced') return (deleteError = t('map.del.chooseReason'));
 		if (reason === 'gone' && !survey) return (deleteError = t('map.del.goneOnSite'));
-		const name = platformName(shapeOf.way.tags);
+		const part = groupParts.find((x) => x.key === chosenPart);
+		// Partie d'un quai en plusieurs parties : nommée comme le quai, avec la partie.
+		const name =
+			group && part
+				? t('map.part.named', {
+						name: platformName(group.tags),
+						covered: part.covered ? 'yes' : 'no'
+					})
+				: platformName(shapeOf.way.tags);
 		try {
 			await saveEdit({
 				kind: 'delete',
@@ -213,7 +255,15 @@
 	}
 
 	/** Constat d'une quête sur la fiche d'un objet (Q1 à Q7), dans la langue de l'interface. */
-	const questText = (q: string) => (/^Q[1-7]$/.test(q) ? tk(`map.quest.${q}`) : q);
+	const questText = (q: string) =>
+		// Quai en plusieurs parties : parties aux numéros différents, ou sans numéro.
+		q === 'Q3' && group?.mixed
+			? t('map.quest.mixed')
+			: q === 'Q1' && group?.missingRef
+				? t('map.quest.partial', { count: group.missingRef })
+				: /^Q[1-7]$/.test(q)
+					? tk(`map.quest.${q}`)
+					: q;
 	// Constats de la feuille basse : une icône par nature (alerte, à relever, à vérifier).
 	const QUEST_ICON: Record<string, 'alert' | 'question' | 'clock'> = {
 		Q3: 'alert',
@@ -555,6 +605,13 @@
 							</p>
 						</fieldset>
 						<ul class="facts">
+							{#if chosenPart}
+								<li class="info">
+									<Icon name="info" size={18} />{t('map.del.partOnly', {
+										part: groupParts.find((x) => x.key === chosenPart)?.label ?? ''
+									})}
+								</li>
+							{/if}
 							{#if shapeOf.relations.length}
 								<li class="info">
 									<Icon name="info" size={18} />{t('map.del.relations', {
@@ -609,7 +666,18 @@
 							<a class="btn-quiet" href={placeHref}>{t('map.signHere')}</a>
 						{/if}
 						{#if selected.kind === 'quai'}
-							{#if shapeOf && !shapeOf.refused}
+							{#if groupParts.length}
+								<button
+									class="btn-quiet"
+									type="button"
+									aria-expanded={picking === 'shape'}
+									aria-controls="part-menu"
+									onclick={() => {
+										more = false;
+										picking = picking === 'shape' ? undefined : 'shape';
+									}}><Icon name="shape" size={18} />{t('map.reshape')}</button
+								>
+							{:else if shapeOf && !shapeOf.refused}
 								<a
 									class="btn-quiet"
 									href={resolve(
@@ -626,7 +694,10 @@
 								aria-label={t('map.more')}
 								aria-expanded={more}
 								aria-controls="more-menu"
-								onclick={() => (more = !more)}><Icon name="more" size={20} /></button
+								onclick={() => {
+									picking = undefined;
+									more = !more;
+								}}><Icon name="more" size={20} /></button
 							>
 						{:else if selected.kind === 'pancarte'}
 							<button
@@ -660,7 +731,60 @@
 						</li>
 					</ul>
 				{/if}
-				{#if more && selected.kind === 'quai'}
+				{#if picking && groupParts.length}
+					<!-- Quai en plusieurs parties : la forme et la suppression visent une partie. -->
+					<div class="menu parts" id="part-menu">
+						<p class="pick" id="part-menu-title">{t('map.part.choose')}</p>
+						<ul aria-labelledby="part-menu-title">
+							{#each groupParts as x (x.key)}
+								<li>
+									{#if picking === 'shape' && x.shape && !x.shape.refused}
+										<a
+											class="btn-quiet"
+											href={resolve(
+												`/gare/forme?id=${encodeURIComponent(id)}&osm=${x.key}${viewQuery}`
+											)}><Icon name="shape" size={18} />{x.label}</a
+										>
+									{:else if picking === 'delete' && x.shape && !x.shape.refused}
+										<button
+											class="btn-quiet danger"
+											type="button"
+											onclick={() => {
+												chosenPart = x.key;
+												picking = undefined;
+												deleting = true;
+											}}><Icon name="trash" size={18} />{x.label}</button
+										>
+									{:else}
+										<p class="note">
+											<Icon name="info" size={18} />{x.label} : {x.shape?.refused ??
+												t('shape.complex')}
+										</p>
+									{/if}
+								</li>
+							{/each}
+						</ul>
+					</div>
+				{/if}
+				{#if more && selected.kind === 'quai' && groupParts.length}
+					<ul class="menu" id="more-menu">
+						<li>
+							<button
+								class="btn-quiet danger"
+								type="button"
+								onclick={() => {
+									more = false;
+									picking = 'delete';
+								}}><Icon name="trash" size={18} />{t('map.deletePlatform')}</button
+							>
+						</li>
+						<li>
+							<a class="btn-quiet osm" href={`${srv().web}/${selected.osm}`} rel="external">
+								{t('common.seeOnOsm')}<Icon name="ext" size={16} />
+							</a>
+						</li>
+					</ul>
+				{:else if more && selected.kind === 'quai'}
 					<ul class="menu" id="more-menu">
 						{#if shapeOf?.refused || !shapeOf}
 							<li class="note">
@@ -1046,6 +1170,18 @@
 	}
 	.menu .note :global(svg) {
 		flex-shrink: 0;
+		color: var(--text-2);
+	}
+	/* Quai en plusieurs parties : « Quelle partie ? » puis une ligne par partie. */
+	.parts ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.pick {
+		margin: 0;
+		padding: 6px 6px 0;
+		font-size: 0.875rem;
 		color: var(--text-2);
 	}
 	.btn-quiet.danger {

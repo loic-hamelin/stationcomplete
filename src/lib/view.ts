@@ -14,7 +14,13 @@ export function stationView(station: Station, elements: OsmElement[], edits: Edi
 	// Schéma des pancartes et règles de quêtes du pays de la gare.
 	const analysis = analyzeStation(merged, station.bbox, undefined, station.country);
 	// Objets modifiés localement, pour les distinguer sur la carte et dans les listes.
-	const edited = new Set<string>(shown.map(editKey));
+	// (Saisie sur un quai en plusieurs parties : toutes ses parties.)
+	const edited = new Set<string>(
+		shown.flatMap((e) => [
+			editKey(e),
+			...(e.kind === 'tags' ? (e.parts ?? []).map((p) => p.target) : [])
+		])
+	);
 	return {
 		elements: merged,
 		analysis,

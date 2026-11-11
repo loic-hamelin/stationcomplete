@@ -75,7 +75,9 @@
 		"trackAway": "Non costeggia nessun marciapiede mappato",
 		"signLegacy": "Vecchio formato dei tag, da confermare sul posto",
 		"signDirection": "Direzione indicata",
-		"signNoDirection": "Direzione dei treni da rilevare sul posto"
+		"signNoDirection": "Direzione dei treni da rilevare sul posto",
+		"parts": "in {count} parti{covered, plural, =0 {} one {, di cui # coperta} other {, di cui # coperte}}",
+		"titleParts": "{title} — {parts}"
 	},
 	"quest": {
 		"q0": {
@@ -90,7 +92,8 @@
 		},
 		"q3": {
 			"title": "{count, plural, one {# marciapiede con numeri da verificare} other {# marciapiedi con numeri da verificare}}",
-			"subtitle": "I numeri del marciapiede e quelli dei binari non corrispondono"
+			"subtitle": "I numeri del marciapiede e quelli dei binari non corrispondono",
+			"partsSubtitle": "Le parti di uno stesso marciapiede non hanno lo stesso numero: da verificare sul posto"
 		},
 		"q4": {
 			"title": "{count, plural, one {# lato di marciapiede senza tabella di fermata} other {# lati di marciapiede senza tabella di fermata}}"
@@ -361,7 +364,9 @@
 			"relationEmpty": "La relazione {name} resterebbe vuota: eliminala con un editor come iD o JOSM.",
 			"signDeleted": "Tabella di fermata già eliminata su OpenStreetMap.",
 			"signTrack": "Il binario della tabella di fermata è stato eliminato o ridisegnato nel frattempo.",
-			"ringIncomplete": "Contorno del marciapiede incompleto."
+			"ringIncomplete": "Contorno del marciapiede incompleto.",
+			"partGone": "Una parte del marciapiede è stata eliminata nel frattempo su OpenStreetMap: non è stato inviato nulla per questo marciapiede.",
+			"partClash": "Una parte del marciapiede è stata modificata da qualcun altro nel frattempo ({key}): non è stato inviato nulla per questo marciapiede (le sue parti partono insieme)."
 		},
 		"comment": {
 			"numbers": "numeri di marciapiedi e binari, tabelle di fermata",
@@ -369,7 +374,8 @@
 			"shape": "forma del marciapiede corretta",
 			"deleted": "{name} eliminato ({why})",
 			"signDeleted": "tabella di fermata «{label}» eliminata ({why}{mode, select, untag {, punto mantenuto nel binario} other {}})",
-			"station": "Stazione di {name}: {parts}"
+			"station": "Stazione di {name}: {parts}",
+			"parts": "{name} ({count} parti): numero inserito su ogni parte"
 		}
 	},
 	"bearing": {
@@ -805,7 +811,9 @@
 			"Q4": "Tabelle di fermata da rilevare lungo questo marciapiede",
 			"Q5": "Tabella di fermata da completare",
 			"Q6": "Da verificare (nessuna data di verifica recente)",
-			"Q7": "Numero di binario doppio o incoerente"
+			"Q7": "Numero di binario doppio o incoerente",
+			"mixed": "Le parti di questo marciapiede non hanno lo stesso numero: verifica sul posto",
+			"partial": "Numero assente su {count, plural, one {# parte} other {# parti}} del marciapiede: da riportare su ciascuna"
 		},
 		"editedHere": "Modificato su questo telefono, in attesa di invio.",
 		"del": {
@@ -822,7 +830,8 @@
 			"relations": "Sarà anche {phrase}.",
 			"points": "{lost, plural, one {# punto eliminato} other {# punti eliminati}}{kept, plural, =0 {} one {; # collegato ad altri oggetti, mantenuto} other {; # collegati ad altri oggetti, mantenuti}}.",
 			"platformReplaced": "Le tue modifiche su questo marciapiede saranno rimosse: {list}.",
-			"platformButton": "Elimina il marciapiede"
+			"platformButton": "Elimina il marciapiede",
+			"partOnly": "Verrà eliminata solo questa parte ({part}): le altre parti del marciapiede restano."
 		},
 		"seeContributions": "Vedi i miei contributi",
 		"fill": "Compila",
@@ -834,7 +843,13 @@
 		"drawnHere": "Marciapiede disegnato su questo telefono: per cambiarne la forma, rimuovilo nei tuoi contributi e ridisegnalo.",
 		"deletePlatform": "Elimina questo marciapiede…",
 		"osmAttribution": "© collaboratori di OpenStreetMap",
-		"toggleAttribution": "Mostra o nascondi i crediti"
+		"toggleAttribution": "Mostra o nascondi i crediti",
+		"part": {
+			"open": "Parte all’aperto ({length})",
+			"covered": "Parte coperta ({length})",
+			"choose": "Quale parte del marciapiede?",
+			"named": "{name}, {covered, select, yes {parte coperta} other {parte all’aperto}}"
+		}
 	},
 	"input": {
 		"title": "Scheda — stationcomplete",
@@ -866,7 +881,10 @@
 			"refsHint": "I numeri esposti sopra i binari, non la lettera del marciapiede.",
 			"letter": "Questo marciapiede ha una lettera o un nome?",
 			"letterLabel": "Lettera o nome del marciapiede",
-			"letterPlaceholder": "Es. A"
+			"letterPlaceholder": "Es. A",
+			"parts": "Questo marciapiede è {parts} in OpenStreetMap: i numeri saranno scritti su ciascuna, nello stesso invio.",
+			"mixed": "Le parti di questo marciapiede non hanno lo stesso numero ({values}): verifica sul posto. Il tuo inserimento metterà lo stesso numero ovunque.",
+			"summaryParts": "{summary} ({count} parti)"
 		},
 		"track": {
 			"split": "Questo tratto dovrà essere diviso da un mappatore. La segnalazione (nota OSM) arriverà con l’invio, nel lotto 3.",

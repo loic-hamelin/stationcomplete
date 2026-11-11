@@ -27,6 +27,7 @@ import {
 	type Tags
 } from './osm.ts';
 import { DEFAULT_COUNTRY, countryConfig, type CountryCode } from './countries.ts';
+import { groupPlatforms, isCoveredPart } from './platformGroups.ts';
 
 // Seuils (heuristiques à régler sur les gares de référence).
 export const THRESHOLDS = {
@@ -37,7 +38,17 @@ export const THRESHOLDS = {
 	minOverlapRatio: 0.5,
 	stopSignMarginM: 50,
 	checkDateMaxYears: 2,
-	noteOverhangM: 300
+	noteOverhangM: 300,
+	// Quai en plusieurs parties (platformGroups.ts) : parties qui se touchent (nœud partagé ou
+	// bords à moins de 1 m), dans le prolongement (axes à moins de 20°, décalés d'au plus 4 m,
+	// recouvrement d'au plus 12 m et de la moitié de la plus courte), le long des mêmes voies.
+	groupTouchM: 1,
+	groupMaxAngleDeg: 20,
+	groupMaxLateralM: 4,
+	groupMaxOverlapM: 12,
+	groupMaxOverlapRatio: 0.5,
+	// Tronçons d'une même voie mis bout à bout (voie coupée à l'entrée d'un tunnel).
+	railJoinAngleDeg: 20
 };
 
 export type QuestId = 'Q0' | 'Q1' | 'Q2' | 'Q3' | 'Q4' | 'Q5' | 'Q6' | 'Q7';
@@ -63,6 +74,20 @@ export interface TrackSide {
 	trackRef?: string;
 }
 
+/** Partie d'un quai découpé en plusieurs objets OSM (parties couvertes). */
+export interface PlatformPart {
+	ref: ElementRef;
+	tags: Tags;
+	lengthM: number;
+	/** Partie couverte : souterraine (pointillés estompés) ou covered=yes. */
+	covered: boolean;
+}
+
+/**
+ * Un quai logique : un objet OSM, ou plusieurs parties d'un même quai physique (regroupées par
+ * platformGroups.ts). `ref` est alors la partie principale, `tags` ses tags avec les numéros
+ * communs, et l'axe, les voies et les pancartes sont ceux du quai entier.
+ */
 export interface PlatformInfo {
 	ref: ElementRef;
 	tags: Tags;
@@ -70,7 +95,17 @@ export interface PlatformInfo {
 	axis: { center: Pt; u: Pt; min: number; max: number };
 	tracks: TrackSide[];
 	stopSigns: number[];
+	/** Parties (partie principale d'abord), seulement si le quai en a plusieurs. */
+	parts?: PlatformPart[];
+	/** Numéros différents d'une partie à l'autre : quai « incohérent » (Q3, motif « parties »). */
+	mixed?: { ref?: string[]; local_ref?: string[] };
+	/** Parties sans numéro alors qu'une autre partie en porte un (Q1). */
+	missingRef?: number;
 }
+
+/** Clés OSM (« way/12 ») de toutes les parties d'un quai. */
+export const partKeys = (p: PlatformInfo) =>
+	(p.parts ?? [p]).map((x) => `${x.ref.type}/${x.ref.id}` as const);
 
 /**
  * Voies qui longent un quai (même règle partout : quêtes, carte, avertissement de E11/E12) :
@@ -189,7 +224,13 @@ export function analyzeStation(
 	const wayInBBox = (w: OsmWay) => nodePts(w).some((n) => inBBox(bbox, n.lon, n.lat));
 
 	// ---- Quais : ways et multipolygones ----
-	type RawPlatform = { ref: ElementRef; tags: Tags; contour: Pt[][]; polygon: boolean };
+	type RawPlatform = {
+		ref: ElementRef;
+		tags: Tags;
+		contour: Pt[][];
+		polygon: boolean;
+		nodes: number[];
+	};
 	const raw: RawPlatform[] = [];
 	for (const w of data.ways.values()) {
 		if (!isPlatform(w.tags) || !wayInBBox(w)) continue;
@@ -197,22 +238,24 @@ export function analyzeStation(
 			ref: { type: 'way', id: w.id },
 			tags: w.tags ?? {},
 			contour: [nodePts(w).map(P)],
-			polygon: isClosed(w)
+			polygon: isClosed(w),
+			nodes: w.nodes
 		});
 	}
 	for (const r of data.relations.values()) {
 		if (!isPlatform(r.tags) || r.tags?.type !== 'multipolygon') continue;
-		const rings = r.members
+		const outer = r.members
 			.filter((m) => m.type === 'way' && m.role !== 'inner')
 			.map((m) => data.ways.get(m.ref))
-			.filter((w): w is OsmWay => !!w)
-			.map((w) => nodePts(w).map(P));
+			.filter((w): w is OsmWay => !!w);
+		const rings = outer.map((w) => nodePts(w).map(P));
 		if (!rings.length || !rings.flat().length) continue;
 		raw.push({
 			ref: { type: 'relation', id: r.id },
 			tags: r.tags ?? {},
 			contour: rings,
-			polygon: true
+			polygon: true,
+			nodes: outer.flatMap((w) => w.nodes)
 		});
 	}
 
@@ -237,8 +280,35 @@ export function analyzeStation(
 		pts: railPts.get(w.id)!,
 		trackRef: w.tags?.['railway:track_ref']
 	}));
-	const platforms: PlatformInfo[] = raw.map((p) => {
-		const { axis, tracks } = platformTracks(p.contour, p.polygon, railList);
+	// Adjacence de chaque partie, puis regroupement des parties d'un même quai (quai logique) :
+	// les règles d'adjacence s'appliquent ensuite au quai entier (union des contours).
+	const single = raw.map((p) => platformTracks(p.contour, p.polygon, railList));
+	const groups = groupPlatforms(
+		raw.map((p, i) => ({
+			nodes: p.nodes,
+			contour: p.contour,
+			tags: p.tags,
+			axis: single[i].axis,
+			tracks: single[i].tracks
+		})),
+		rails.map((w) => ({
+			id: w.id,
+			nodes: w.nodes,
+			pts: railPts.get(w.id)!,
+			trackRef: w.tags?.['railway:track_ref']
+		})),
+		THRESHOLDS
+	);
+	const platforms: PlatformInfo[] = groups.map((g) => {
+		const main = raw[g.principal];
+		const many = g.members.length > 1;
+		const { axis, tracks } = many
+			? platformTracks(
+					g.members.flatMap((i) => raw[i].contour),
+					g.members.every((i) => raw[i].polygon),
+					railList
+				)
+			: single[g.principal];
 		// Pancartes sur une voie adjacente, dans l'intervalle du quai élargi de 50 m.
 		const adjacent = new Set(tracks.map((t) => t.way));
 		const signs = stopSigns
@@ -250,13 +320,30 @@ export function analyzeStation(
 				);
 			})
 			.map((n) => n.id);
-		return {
-			ref: p.ref,
-			tags: p.tags,
+		const info: PlatformInfo = {
+			ref: main.ref,
+			tags: main.tags,
 			lengthM: Math.round(axis.length),
 			axis: { center: axis.center, u: axis.u, min: axis.min, max: axis.max },
 			tracks,
 			stopSigns: signs
+		};
+		if (!many) return info;
+		// Numéros communs du quai : ceux de la partie principale, sinon ceux d'une autre partie.
+		const tags = { ...main.tags };
+		if (g.ref) tags.ref = g.ref;
+		if (g.localRef) tags.local_ref = g.localRef;
+		return {
+			...info,
+			tags,
+			parts: g.members.map((i) => ({
+				ref: raw[i].ref,
+				tags: raw[i].tags,
+				lengthM: Math.round(single[i].axis.length),
+				covered: isCoveredPart(raw[i].tags)
+			})),
+			...(g.mixed.ref || g.mixed.local_ref ? { mixed: g.mixed } : {}),
+			...(g.missingRef ? { missingRef: g.missingRef } : {})
 		};
 	});
 
@@ -272,6 +359,18 @@ export function analyzeStation(
 	for (const p of platforms) {
 		if (!p.tags.ref)
 			push({ id: 'Q1', target: p.ref, details: { local_ref: p.tags.local_ref ?? '' } });
+		else if (p.mixed)
+			// Parties d'un même quai aux numéros différents : à vérifier sur place, sans correction
+			// automatique.
+			push({
+				id: 'Q3',
+				target: p.ref,
+				details: {
+					motif: 'parties',
+					ref: p.mixed.ref ?? [],
+					local_ref: p.mixed.local_ref ?? []
+				}
+			});
 		else {
 			const known = p.tracks.filter((t) => t.trackRef).map((t) => t.trackRef!);
 			const refs = splitValues(p.tags.ref);
@@ -283,6 +382,13 @@ export function analyzeStation(
 					details: { ref: p.tags.ref, voies: [...trackRefs].sort() }
 				});
 		}
+		// Quai en plusieurs parties dont certaines sans numéro : numéro à reporter sur chacune.
+		if (p.tags.ref && p.missingRef)
+			push({
+				id: 'Q1',
+				target: p.ref,
+				details: { local_ref: p.tags.local_ref ?? '', parties: p.missingRef }
+			});
 		// Q4 : un côté de quai bordé d'une voie, sans aucune pancarte sur ce côté.
 		if (signs)
 			for (const side of ['left', 'right'] as const) {
@@ -329,7 +435,9 @@ export function analyzeStation(
 	const limit = new Date(now);
 	limit.setFullYear(limit.getFullYear() - THRESHOLDS.checkDateMaxYears);
 	const stale = (t: Tags = {}) => !t.check_date || new Date(t.check_date) < limit;
-	for (const p of platforms) if (p.tags.ref && stale(p.tags)) push({ id: 'Q6', target: p.ref });
+	for (const p of platforms)
+		if (p.tags.ref && (p.parts ?? [p]).some((x) => stale(x.tags)))
+			push({ id: 'Q6', target: p.ref });
 	for (const [wayId, ref] of adjacentWays)
 		if (ref && stale(data.ways.get(wayId)!.tags))
 			push({ id: 'Q6', target: { type: 'way', id: wayId } });
@@ -389,7 +497,11 @@ export function analyzeStation(
 		stopSigns,
 		quests,
 		completeness: {
-			platforms: { done: platforms.filter((p) => p.tags.ref).length, total: platforms.length },
+			// Un quai en plusieurs parties compte une fois, fait quand toutes ont un numéro.
+			platforms: {
+				done: platforms.filter((p) => p.tags.ref && !p.missingRef).length,
+				total: platforms.length
+			},
 			tracks: { done: [...adjacentWays.values()].filter(Boolean).length, total: adjacentWays.size },
 			stopSigns: { done: sidesDone, total: sides.length }
 		}

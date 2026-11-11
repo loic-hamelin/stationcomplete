@@ -75,7 +75,9 @@
 		"trackAway": "Ne longe aucun quai cartographié",
 		"signLegacy": "Ancien format de tags, à confirmer sur place",
 		"signDirection": "Sens renseigné",
-		"signNoDirection": "Sens des trains à relever sur place"
+		"signNoDirection": "Sens des trains à relever sur place",
+		"parts": "en {count} parties{covered, plural, =0 {} one {, dont # couverte} other {, dont # couvertes}}",
+		"titleParts": "{title} — {parts}"
 	},
 	"quest": {
 		"q0": {
@@ -90,7 +92,8 @@
 		},
 		"q3": {
 			"title": "{count, plural, one {# quai dont les numéros sont à vérifier} other {# quais dont les numéros sont à vérifier}}",
-			"subtitle": "Les numéros du quai et ceux des voies ne correspondent pas"
+			"subtitle": "Les numéros du quai et ceux des voies ne correspondent pas",
+			"partsSubtitle": "Les parties d’un même quai n’ont pas le même numéro : à vérifier sur place"
 		},
 		"q4": {
 			"title": "{count, plural, one {# côté de quai sans pancarte d’arrêt} other {# côtés de quai sans pancarte d’arrêt}}"
@@ -361,7 +364,9 @@
 			"relationEmpty": "La relation {name} ne contiendrait plus rien : suppression à faire avec un éditeur comme iD ou JOSM.",
 			"signDeleted": "Pancarte déjà supprimée sur OpenStreetMap.",
 			"signTrack": "La voie de la pancarte a été supprimée ou redessinée entre-temps.",
-			"ringIncomplete": "Contour du quai incomplet."
+			"ringIncomplete": "Contour du quai incomplet.",
+			"partGone": "Une partie du quai a été supprimée entre-temps sur OpenStreetMap : rien n’a été envoyé pour ce quai.",
+			"partClash": "Une partie du quai a été modifiée par quelqu’un d’autre entre-temps ({key}) : rien n’a été envoyé pour ce quai (ses parties partent ensemble)."
 		},
 		"comment": {
 			"numbers": "numéros de quais et de voies, pancartes d’arrêt",
@@ -369,7 +374,8 @@
 			"shape": "forme de quai corrigée",
 			"deleted": "{name} supprimé ({why})",
 			"signDeleted": "pancarte d’arrêt « {label} » supprimée ({why}{mode, select, untag {, point gardé dans la voie} other {}})",
-			"station": "Gare de {name} : {parts}"
+			"station": "Gare de {name} : {parts}",
+			"parts": "{name} ({count} parties) : numéro renseigné sur chaque partie"
 		}
 	},
 	"bearing": {
@@ -805,7 +811,9 @@
 			"Q4": "Pancartes d’arrêt à relever le long de ce quai",
 			"Q5": "Pancarte à compléter",
 			"Q6": "À vérifier (aucune date de vérification récente)",
-			"Q7": "Numéro de voie en double ou incohérent"
+			"Q7": "Numéro de voie en double ou incohérent",
+			"mixed": "Les parties de ce quai n’ont pas le même numéro : vérifiez sur place",
+			"partial": "Numéro absent sur {count, plural, one {# partie} other {# parties}} du quai : à reporter sur chacune"
 		},
 		"editedHere": "Modifié sur ce téléphone, en attente d’envoi.",
 		"del": {
@@ -822,7 +830,8 @@
 			"relations": "Il sera aussi {phrase}.",
 			"points": "{lost, plural, one {# point supprimé} other {# points supprimés}}{kept, plural, =0 {} one { ; # relié à d’autres objets, conservé} other { ; # reliés à d’autres objets, conservés}}.",
 			"platformReplaced": "Vos saisies sur ce quai seront retirées : {list}.",
-			"platformButton": "Supprimer le quai"
+			"platformButton": "Supprimer le quai",
+			"partOnly": "Seule cette partie sera supprimée ({part}) : les autres parties du quai restent."
 		},
 		"seeContributions": "Voir mes contributions",
 		"fill": "Renseigner",
@@ -834,7 +843,13 @@
 		"drawnHere": "Quai dessiné sur ce téléphone : pour changer sa forme, retirez-le dans vos contributions et redessinez-le.",
 		"deletePlatform": "Supprimer ce quai…",
 		"osmAttribution": "© contributeurs OpenStreetMap",
-		"toggleAttribution": "Afficher ou masquer les crédits"
+		"toggleAttribution": "Afficher ou masquer les crédits",
+		"part": {
+			"open": "Partie à l’air libre ({length})",
+			"covered": "Partie couverte ({length})",
+			"choose": "Quelle partie du quai ?",
+			"named": "{name}, {covered, select, yes {partie couverte} other {partie à l’air libre}}"
+		}
 	},
 	"input": {
 		"title": "Fiche — stationcomplete",
@@ -866,7 +881,10 @@
 			"refsHint": "Les numéros affichés au-dessus des voies, pas la lettre du quai.",
 			"letter": "Ce quai a-t-il une lettre ou un nom ?",
 			"letterLabel": "Lettre ou nom du quai",
-			"letterPlaceholder": "Ex. A"
+			"letterPlaceholder": "Ex. A",
+			"parts": "Ce quai est {parts} dans OpenStreetMap : les numéros seront écrits sur chacune, dans le même envoi.",
+			"mixed": "Les parties de ce quai n’ont pas le même numéro ({values}) : vérifiez sur place. Votre saisie mettra le même numéro partout.",
+			"summaryParts": "{summary} ({count} parties)"
 		},
 		"track": {
 			"split": "Ce tronçon devra être découpé par un cartographe. Le signalement (Note OSM) arrive avec l’envoi, au lot 3.",

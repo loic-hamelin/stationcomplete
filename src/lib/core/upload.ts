@@ -12,7 +12,8 @@ import {
 	type OrigNode,
 	type ShapeEdit,
 	type SignDeleteEdit,
-	type TagEdit
+	type TagEdit,
+	tagTargets
 } from './edits';
 import { DEFAULT_COUNTRY, imageryOf, type CountryCode } from './countries';
 import type { BBox, OsmElement, OsmNode, OsmRelation, OsmWay, Tags } from './osm';
@@ -46,10 +47,11 @@ export function elementsToFetch(edits: Edit[]) {
 		if (e.kind === 'node') ways.add(e.way);
 		else if (e.kind === 'way')
 			continue; // quai dessiné : rien à relire, tout est nouveau
-		else {
-			const [type, id] = e.target.split('/');
-			(type === 'node' ? nodes : type === 'way' ? ways : relations).add(Number(id));
-		}
+		else
+			for (const target of e.kind === 'tags' ? tagTargets(e).map((p) => p.target) : [e.target]) {
+				const [type, id] = target.split('/');
+				(type === 'node' ? nodes : type === 'way' ? ways : relations).add(Number(id));
+			}
 	}
 	return { nodes: [...nodes], ways: [...ways], relations: [...relations] };
 }
@@ -150,27 +152,47 @@ export function planUpload(edits: Edit[], fresh: OsmElement[]): Plan {
 		plan.touched[id] = touched;
 	};
 
+	// Tags : l'objet, et pour un quai en plusieurs parties chacune d'elles. Tout ou rien : si une
+	// partie a disparu ou changé entre-temps, toute la saisie est « à revoir » (les parties d'un
+	// quai ne doivent pas se retrouver avec des numéros différents).
 	for (const ed of edits.filter((e): e is TagEdit => e.kind === 'tags')) {
-		const el = byKey.get(ed.target);
-		if (!el) {
-			conflict(ed.id, tr('upload.conflict.gone'));
-			continue;
-		}
-		const tags: Tags = { ...(el.tags ?? {}) };
-		let clash = '';
-		if (ed.version !== undefined && el.version !== ed.version)
-			for (const [k, v] of Object.entries(ed.tags)) {
-				const now = tags[k] ?? null;
-				const before = ed.base ? (ed.base[k] ?? null) : now;
-				if (now !== before && now !== (v || null)) clash = k;
+		const all = tagTargets(ed);
+		const many = all.length > 1;
+		let reason = '';
+		for (const p of all) {
+			const el = byKey.get(p.target);
+			if (!el) {
+				reason = many ? tr('upload.conflict.partGone') : tr('upload.conflict.gone');
+				break;
 			}
-		if (clash) {
-			conflict(ed.id, tr('upload.conflict.clash', { key: clash }));
+			const tags: Tags = el.tags ?? {};
+			let clash = '';
+			if (p.version !== undefined && el.version !== p.version)
+				for (const [k, v] of Object.entries(ed.tags)) {
+					const now = tags[k] ?? null;
+					const before = p.base ? (p.base[k] ?? null) : now;
+					if (now !== before && now !== (v || null)) clash = k;
+				}
+			if (clash) {
+				reason = many
+					? tr('upload.conflict.partClash', { key: clash })
+					: tr('upload.conflict.clash', { key: clash });
+				break;
+			}
+		}
+		if (reason) {
+			conflict(ed.id, reason);
 			continue;
 		}
-		el.tags = changeTags(tags, ed.tags);
-		modified.add(ed.target);
-		sent(ed.id, [ed.target]);
+		for (const p of all) {
+			const el = byKey.get(p.target)!;
+			el.tags = changeTags(el.tags, ed.tags);
+			modified.add(p.target);
+		}
+		sent(
+			ed.id,
+			all.map((p) => p.target)
+		);
 	}
 
 	for (const ed of edits.filter((e): e is NewNodeEdit => e.kind === 'node')) {
@@ -411,8 +433,17 @@ export function planUpload(edits: Edit[], fresh: OsmElement[]): Plan {
  */
 export function proposedComment(stationName: string, edits: Edit[]) {
 	const parts: string[] = [];
-	if (edits.some((e) => e.kind === 'tags' || e.kind === 'node'))
+	if (edits.some((e) => (e.kind === 'tags' && !e.parts?.length) || e.kind === 'node'))
 		parts.push(tr('upload.comment.numbers'));
+	// Quai en plusieurs parties : le commentaire dit que chaque partie reçoit le même numéro.
+	for (const e of edits)
+		if (e.kind === 'tags' && e.parts?.length)
+			parts.push(
+				tr('upload.comment.parts', {
+					name: e.name ?? e.summary,
+					count: e.parts.length + 1
+				})
+			);
 	if (edits.some((e) => e.kind === 'way')) parts.push(tr('upload.comment.drawn'));
 	const shapes = edits.filter((e): e is ShapeEdit => e.kind === 'shape');
 	if (shapes.length) {
