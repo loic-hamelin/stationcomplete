@@ -99,6 +99,27 @@ Chaque langue donne le nom, les formes avec article (`a` : « le toit » / « un
 | barrière                         | barrier                   | Absperrung            | barriera                       | barrera                       |
 | élément ferroviaire              | railway feature           | ⚠ Bahnelement         | elemento ferroviario           | elemento ferroviario          |
 
+## Équipements (lot « Équipements », 11 novembre 2026)
+
+| fr                                            | en                                 | de                                     | it                                              | es                                               | Tag OSM                         |
+| --------------------------------------------- | ---------------------------------- | -------------------------------------- | ----------------------------------------------- | ------------------------------------------------ | ------------------------------- |
+| équipements                                   | facilities                         | Ausstattung                            | ⚠ dotazioni (9)                                 | equipamiento                                     | —                               |
+| hauteur du quai (au-dessus du rail)           | platform height                    | Bahnsteighöhe (über Schienenoberkante) | ⚠ altezza del marciapiede (sul piano del ferro) | altura del andén (sobre el carril)               | `height`                        |
+| écrans d'affichage des trains                 | ⚠ train information screens        | ⚠ Zuganzeiger (10)                     | monitor informativi                             | pantallas de información                         | `passenger_information_display` |
+| abri                                          | shelter                            | Unterstand                             | ⚠ pensilina                                     | ⚠ marquesina                                     | `shelter`                       |
+| bandes podotactiles                           | tactile paving                     | ⚠ taktile Leitstreifen (11)            | percorso tattile                                | ⚠ pavimento podotáctil                           | `tactile_paving`                |
+| bancs                                         | benches                            | Sitzbänke                              | panchine                                        | bancos                                           | `bench`                         |
+| escalier / escalier mécanique / tapis roulant | steps / escalator / moving walkway | Treppe / Rolltreppe / Fahrsteig        | scala / scala mobile / ⚠ tappeto mobile         | escalera / escalera mecánica / ⚠ pasillo rodante | `highway=steps`, `conveying`    |
+| il monte / il descend (sens de la flèche)     | up / down                          | hinauf / hinunter                      | sale / scende                                   | sube / baja                                      | `incline=up/down`               |
+| main courante                                 | handrail                           | Handlauf                               | corrimano                                       | pasamanos                                        | `handrail`                      |
+| je ne sais pas                                | don't know                         | weiß nicht                             | non so                                          | no lo sé                                         | —                               |
+
+(9) « dotazioni » (équipements d'une station) ; « servizi » serait compris comme des services. À valider.
+(10) Deutsche Bahn dit « Zugzielanzeiger » (affichage de la destination) ; « Zuganzeiger » est plus général. À valider par Loïc.
+(12) Trenitalia : « emettitrice self-service » ; « biglietteria automatica » est plus courant. À valider.
+(13) Renfe : « máquina autoventa ». À valider.
+(11) « Blindenleitsystem » / « Bodenindikatoren » sont aussi employés ; en bord de quai, DB parle de « Aufmerksamkeitsfeld ». À valider.
+
 ## Termes à faire valider, par langue
 
 - **en** : « stop marker » (pancarte d'arrêt) ; « platform sector marker » (repère de quai) ; anglais britannique choisi (lift, metres, dates jour/mois).

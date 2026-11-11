@@ -35,7 +35,9 @@
 		center,
 		tracks,
 		elements,
-		onsnap
+		onsnap,
+		free = false,
+		onmove
 	}: {
 		/** Photo aérienne du pays de la gare. */
 		imagery: Imagery;
@@ -43,6 +45,9 @@
 		tracks: OsmWay[];
 		elements: OsmElement[];
 		onsnap: (s: Snap | undefined) => void;
+		/** Placement libre (équipement) : pas d'accrochage, le point est le centre de la croix. */
+		free?: boolean;
+		onmove?: (lon: number, lat: number) => void;
 	} = $props();
 
 	let container: HTMLDivElement;
@@ -94,6 +99,10 @@
 	function update() {
 		if (!map) return;
 		const c = map.getCenter();
+		if (free) {
+			onmove?.(c.lng, c.lat);
+			return;
+		}
 		const s = snapToTracks(c.lng, c.lat, tracks, (id) => nodes.get(id), 3);
 		if (s) snapMarker?.setLngLat([s.lon, s.lat]).addTo(map);
 		else snapMarker?.remove();

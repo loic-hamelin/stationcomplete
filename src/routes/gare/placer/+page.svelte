@@ -49,6 +49,21 @@
 		return [ready.station.lon, ready.station.lat];
 	});
 
+	// Équipement (lot Équipements) : placement libre, sans accrochage à la voie.
+	const equipKind = $derived(
+		q.get('kind') === 'elevator' || q.get('kind') === 'ticket'
+			? (q.get('kind') as 'elevator' | 'ticket')
+			: undefined
+	);
+	let free = $state<[number, number] | undefined>();
+	function goEquip() {
+		if (!free || !equipKind) return;
+		goto(
+			resolve(
+				`/gare/equipement?id=${encodeURIComponent(id)}&kind=${equipKind}&lon=${free[0].toFixed(7)}&lat=${free[1].toFixed(7)}`
+			)
+		);
+	}
 	let snap = $state<Snap | undefined>();
 	let near = $state<OsmNode | undefined>();
 	let mapRef = $state<{ nudge: (dx: number, dy: number) => void; zoom: (d: number) => void }>();
@@ -96,6 +111,8 @@
 				center={start}
 				{tracks}
 				elements={view.elements}
+				free={!!equipKind}
+				onmove={(lon, lat) => (free = [lon, lat])}
 				onsnap={(s) => ((snap = s), (near = undefined))}
 			/>
 		{:else}
@@ -111,9 +128,15 @@
 					href={resolve(`/gare/carte?id=${encodeURIComponent(id)}`)}
 					aria-label={t('common.cancel')}><Icon name="close" size={22} /></a
 				>
-				<h1>{t('place.heading')}</h1>
+				<h1>
+					{equipKind
+						? t('place.equipHeading', {
+								label: t(equipKind === 'elevator' ? 'equip.kind.elevator' : 'equip.kind.ticket')
+							})
+						: t('place.heading')}
+				</h1>
 			</div>
-			<p><Rich text={t('place.help')} /></p>
+			<p><Rich text={equipKind ? t('place.equipHelp') : t('place.help')} /></p>
 		</header>
 
 		{#if view && start}
@@ -132,31 +155,40 @@
 	</div>
 
 	<section class="panel float" aria-label={t('place.panel')}>
-		<div class="snap" class:ok={!!snap} role="status" aria-live="polite">
-			<Icon name={snap ? 'check' : 'alert'} size={20} />
-			{#if snap}
-				<span><Rich text={t('place.snapped', { gap: fmtDecimal(snap.distM) })} /></span>
-			{:else}
-				<span>{t('place.closer')}</span>
-			{/if}
-		</div>
-
-		{#if near}
-			<div class="near" role="alert">
-				<p>{t('place.near')}</p>
-				<div class="two">
-					<a
-						class="btn btn-secondary"
-						href={resolve(`/gare/saisie?id=${encodeURIComponent(id)}&osm=node/${near.id}`)}
-						>{t('place.editThis')}</a
-					>
-					<button class="btn" type="button" onclick={go}>{t('place.another')}</button>
-				</div>
+		{#if equipKind}
+			<div class="snap ok" role="status">
+				<Icon name="check" size={20} /><span>{t('place.equipHere')}</span>
 			</div>
-		{:else}
-			<button class="btn" type="button" disabled={!snap} onclick={validate}
+			<button class="btn" type="button" disabled={!free} onclick={goEquip}
 				>{t('place.validate')}</button
 			>
+		{:else}
+			<div class="snap" class:ok={!!snap} role="status" aria-live="polite">
+				<Icon name={snap ? 'check' : 'alert'} size={20} />
+				{#if snap}
+					<span><Rich text={t('place.snapped', { gap: fmtDecimal(snap.distM) })} /></span>
+				{:else}
+					<span>{t('place.closer')}</span>
+				{/if}
+			</div>
+
+			{#if near}
+				<div class="near" role="alert">
+					<p>{t('place.near')}</p>
+					<div class="two">
+						<a
+							class="btn btn-secondary"
+							href={resolve(`/gare/saisie?id=${encodeURIComponent(id)}&osm=node/${near.id}`)}
+							>{t('place.editThis')}</a
+						>
+						<button class="btn" type="button" onclick={go}>{t('place.another')}</button>
+					</div>
+				</div>
+			{:else}
+				<button class="btn" type="button" disabled={!snap} onclick={validate}
+					>{t('place.validate')}</button
+				>
+			{/if}
 		{/if}
 	</section>
 </div>

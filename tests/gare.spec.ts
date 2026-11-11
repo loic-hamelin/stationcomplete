@@ -64,7 +64,9 @@ test('chercher une gare, voir ce qui manque, ouvrir la carte', async ({ page }) 
 	await expect(page.locator('.maplibregl-canvas')).toBeVisible();
 	// 12 objets des quêtes, plus 11 voies numérotées qui ne longent aucun quai (lot 7d :
 	// toutes les voies sont dessinées, étiquette seulement si elles portent un numéro)
-	await expect(page.locator('.rc-badge')).toHaveCount(23);
+	await expect(page.locator('.rc-badge')).toHaveCount(23 + 12);
+	// (dont 12 équipements : 6 ascenseurs, 3 distributeurs de billets, 3 escaliers, lot Équipements)
+	await expect(page.locator('.rc-badge.equip')).toHaveCount(12);
 	const sheet = page.getByRole('region', { name: 'Objet sélectionné' });
 	await expect(sheet).toContainText('Voie 2');
 	await expect(sheet).toContainText('Numéro de voie en double');

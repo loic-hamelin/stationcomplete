@@ -77,7 +77,11 @@
 		"signDirection": "Sentido indicado",
 		"signNoDirection": "Sentido de los trenes por anotar in situ",
 		"parts": "en {count} partes{covered, plural, =0 {} one {, # de ellas cubierta} other {, # de ellas cubiertas}}",
-		"titleParts": "{title} — {parts}"
+		"titleParts": "{title} — {parts}",
+		"level": "Nivel {level}",
+		"wheelchair": "{value, select, yes {Accesible en silla de ruedas} other {No accesible en silla de ruedas}}",
+		"equipNoDetail": "Sin detalles",
+		"stepCount": "{count, plural, one {# escalón} other {# escalones}}"
 	},
 	"quest": {
 		"q0": {
@@ -109,6 +113,18 @@
 			"title": "{count, plural, one {# número de vía mal colocado} other {# números de vía mal colocados}}",
 			"duplicate": "Dos vías tienen el número {ref}",
 			"subtitle": "Verificar con prioridad"
+		},
+		"q8": {
+			"title": "{count, plural, one {# andén: equipamiento por anotar} other {# andenes: equipamiento por anotar}}"
+		},
+		"q9": {
+			"title": "{count, plural, one {# ascensor: acceso en silla de ruedas por anotar} other {# ascensores: acceso en silla de ruedas por anotar}}"
+		},
+		"q10": {
+			"title": "{count, plural, one {# escalera por completar} other {# escaleras por completar}}"
+		},
+		"q11": {
+			"title": "{count, plural, one {# escalera mecánica o pasillo: sentido por anotar} other {# escaleras mecánicas o pasillos: sentido por anotar}}"
 		}
 	},
 	"signRemoval": {
@@ -366,7 +382,10 @@
 			"signTrack": "La vía del cartel de parada se ha eliminado o redibujado entretanto.",
 			"ringIncomplete": "Contorno del andén incompleto.",
 			"partGone": "Una parte del andén se eliminó entretanto en OpenStreetMap: no se envió nada para este andén.",
-			"partClash": "Otra persona modificó entretanto una parte del andén ({key}): no se envió nada para este andén (sus partes se envían juntas)."
+			"partClash": "Otra persona modificó entretanto una parte del andén ({key}): no se envió nada para este andén (sus partes se envían juntas).",
+			"pointDeleted": "Equipamiento ya eliminado en OpenStreetMap.",
+			"pointChanged": "El equipamiento se modificó entretanto en OpenStreetMap: no se envió nada para él. Vuelve a eliminarlo en el mapa actualizado.",
+			"pointLinked": "El equipamiento se unió entretanto a otro objeto en OpenStreetMap: no se envió nada para él. Elimínalo con un editor como iD o JOSM."
 		},
 		"comment": {
 			"numbers": "números de andenes y vías, carteles de parada",
@@ -375,7 +394,12 @@
 			"deleted": "{name} eliminado ({why})",
 			"signDeleted": "cartel de parada «{label}» eliminado ({why}{mode, select, untag {, punto conservado en la vía} other {}})",
 			"station": "Estación de {name}: {parts}",
-			"parts": "{name} ({count} partes): número indicado en cada parte"
+			"parts": "{name} ({count} partes): número indicado en cada parte",
+			"equipment": "equipamiento de los andenes",
+			"pointTags": "ascensores y máquinas de billetes completados",
+			"pointsAdded": "añadido: {list}",
+			"pointDeleted": "{label} eliminado ({why})",
+			"steps": "escaleras completadas"
 		}
 	},
 	"bearing": {
@@ -396,12 +420,15 @@
 			"shape": "Forma del andén",
 			"delete": "Eliminación · motivo: {why}",
 			"signDelete": "Eliminación de cartel de parada · motivo: {why}",
-			"tags": "Cambio"
+			"tags": "Cambio",
+			"newPoint": "Nuevo equipamiento",
+			"pointDelete": "Eliminación de equipamiento · motivo: {why}"
 		},
 		"drawnSummary": "{summary} (dibujado)",
 		"error": {
 			"signDeleted": "Este cartel de parada está marcado para eliminar: quita primero esa edición.",
-			"platformDeleted": "Este andén está marcado para eliminar: quita primero esa edición."
+			"platformDeleted": "Este andén está marcado para eliminar: quita primero esa edición.",
+			"pointDeleted": "Este equipamiento está marcado para eliminar: quita primero esa edición."
 		}
 	},
 	"remote": {
@@ -762,7 +789,9 @@
 			"tracksUnit": "numeradas",
 			"signs": "Carteles de parada",
 			"signsUnit": "lados anotados",
-			"none": "nada que anotar"
+			"none": "nada que anotar",
+			"equipment": "Equipamiento",
+			"equipmentUnit": "andenes anotados"
 		},
 		"offline": {
 			"label": "Sin conexión",
@@ -799,7 +828,9 @@
 			"edited": "Modificado por ti, pendiente de envío",
 			"under": "Subterráneo (túnel, nivel inferior)",
 			"todo": "Por completar",
-			"alert": "Verificar con prioridad"
+			"alert": "Verificar con prioridad",
+			"equip": "Equipamiento (ascensor, máquina)",
+			"steps": "Escalera (flecha hacia arriba)"
 		},
 		"loading": "Cargando la estación…",
 		"locate": "Mostrar mi ubicación",
@@ -813,7 +844,11 @@
 			"Q6": "Por verificar (ninguna fecha de verificación reciente)",
 			"Q7": "Número de vía duplicado o incoherente",
 			"mixed": "Las partes de este andén no tienen el mismo número: compruébalo in situ",
-			"partial": "Falta el número en {count, plural, one {# parte} other {# partes}} del andén: hay que copiarlo en cada una"
+			"partial": "Falta el número en {count, plural, one {# parte} other {# partes}} del andén: hay que copiarlo en cada una",
+			"Q8": "Equipamiento por anotar: {items}",
+			"Q9": "Acceso en silla de ruedas por anotar",
+			"Q10": "Por completar: {items}",
+			"Q11": "Sentido de marcha por anotar"
 		},
 		"editedHere": "Modificado en este teléfono, pendiente de envío.",
 		"del": {
@@ -831,7 +866,12 @@
 			"points": "{lost, plural, one {# punto eliminado} other {# puntos eliminados}}{kept, plural, =0 {} one {; # unido a otros objetos, conservado} other {; # unidos a otros objetos, conservados}}.",
 			"platformReplaced": "Se quitarán tus ediciones sobre este andén: {list}.",
 			"platformButton": "Eliminar el andén",
-			"partOnly": "Solo se eliminará esta parte ({part}): las demás partes del andén se mantienen."
+			"partOnly": "Solo se eliminará esta parte ({part}): las demás partes del andén se mantienen.",
+			"pointTitle": "¿Eliminar este equipamiento?",
+			"pointButton": "Eliminar el equipamiento",
+			"pointPhrase": "El punto se eliminará: no está unido a ningún otro objeto.",
+			"pointLinked": "Equipamiento unido a otros objetos (camino, edificio, relación) o dibujado como área: elimínalo con un editor como iD o JOSM.",
+			"pointReplaced": "Tus ediciones en este equipamiento se quitarán: {list}."
 		},
 		"seeContributions": "Ver mis contribuciones",
 		"fill": "Completar",
@@ -849,7 +889,11 @@
 			"covered": "Parte cubierta ({length})",
 			"choose": "¿Qué parte del andén?",
 			"named": "{name}, {covered, select, yes {parte cubierta} other {parte al aire libre}}"
-		}
+		},
+		"filterEquip": "Equipamiento",
+		"add": "Añadir",
+		"addMenu": "¿Qué quieres añadir?",
+		"deletePoint": "Eliminar este equipamiento…"
 	},
 	"input": {
 		"title": "Ficha — stationcomplete",
@@ -915,7 +959,27 @@
 			"letterHint": "Una placa con una sola letra (A, B…) no es un cartel de parada: es una referencia de sector del andén."
 		},
 		"correct": "Es correcto",
-		"fix": "Corregir"
+		"fix": "Corregir",
+		"equip": {
+			"title": "Equipamiento del andén",
+			"hint": "Lo que hay en este andén, visto in situ. «No lo sé» no cambia nada.",
+			"height": "Altura del andén sobre el carril",
+			"meters": "{value} m",
+			"other": "Otra",
+			"otherLabel": "Otra altura, en metros",
+			"otherPlaceholder": "Ej. 0,38",
+			"heightFormat": "Altura no válida: indica metros, por ejemplo 0,55.",
+			"heightRange": "Altura poco probable para un andén: entre 0,10 y 1,50 m.",
+			"display": "Pantallas de información de trenes (horarios, vía)",
+			"shelter": "Marquesina para esperar",
+			"shelterParts": "Solo partes al aire libre: las partes cubiertas no se ven afectadas.",
+			"tactile": "Pavimento podotáctil a lo largo del borde del andén",
+			"bench": "Bancos",
+			"unknown": "No lo sé",
+			"summary": "{summary}; equipamiento: {items}",
+			"summaryAlone": "{name}: equipamiento ({items})",
+			"needSomething": "Indica un número de vía o al menos un equipamiento."
+		}
 	},
 	"place": {
 		"title": "Colocar un cartel de parada — stationcomplete",
@@ -927,7 +991,10 @@
 		"near": "Ya existe un cartel de parada a menos de 10 m en esta vía.",
 		"editThis": "Modificar ese",
 		"another": "Es otro distinto",
-		"validate": "Confirmar la posición"
+		"validate": "Confirmar la posición",
+		"equipHeading": "Colocar: {label}",
+		"equipHelp": "Lleva la cruz <b>sobre el equipamiento</b>, tal como se ve en la foto aérea.",
+		"equipHere": "El punto se colocará bajo la cruz."
 	},
 	"drawPage": {
 		"title": "Dibujar un andén — stationcomplete",
@@ -1019,5 +1086,108 @@
 		"left": "Mover la cruz hacia la izquierda",
 		"right": "Mover la cruz hacia la derecha",
 		"down": "Mover la cruz hacia abajo"
+	},
+	"equip": {
+		"item": {
+			"height": "altura",
+			"display": "pantallas",
+			"shelter": "marquesina",
+			"tactile": "pavimento podotáctil",
+			"bench": "bancos"
+		},
+		"reasonInline": {
+			"gone": "ya no existe",
+			"duplicate": "duplicado",
+			"misplaced": "mal colocado"
+		},
+		"reason": {
+			"gone": "Ya no existe",
+			"duplicate": "Duplicado",
+			"misplaced": "Mal colocado"
+		},
+		"kind": {
+			"elevator": "Ascensor",
+			"ticket": "Máquina de billetes"
+		},
+		"title": "Equipamiento",
+		"onSite": "El equipamiento se anota <b>in situ</b>, sin pasar la línea de seguridad.",
+		"place": {
+			"where": "¿Dónde está?",
+			"outside": "Al aire libre",
+			"inside": "En interior o bajo tierra",
+			"outsideHint": "Visible en la foto aérea: colócalo con precisión bajo la cruz.",
+			"onPhoto": "Colocar en la foto aérea",
+			"insideHint": "Aquí la foto y el GPS no sirven: sitúalo respecto a un andén y la app calcula el punto.",
+			"platform": "¿En qué andén?",
+			"noPlatform": "Ningún andén en OpenStreetMap para esta estación.",
+			"platformTracks": "vías {refs} · {length}",
+			"along": "¿Dónde, a lo largo del andén?",
+			"end": "Extremo hacia el {dir}",
+			"endInline": "extremo hacia el {dir}",
+			"middle": "Centro",
+			"distance": "A una distancia…",
+			"distanceLabel": "Metros desde el {end}",
+			"distanceHint": "El andén mide {length}.",
+			"distanceBad": "Indica una distancia entre 0 y la longitud del andén.",
+			"side": "¿De qué lado?",
+			"sideTrack": "Lado vía {refs}",
+			"sideDir": "Lado hacia el {dir}",
+			"center": "En el centro",
+			"result": "{platform}: punto a {along} del {end}, {inside, select, yes {dentro del contorno del andén.} other {sobre la línea del andén.}}",
+			"level": " Nivel del andén: {level}.",
+			"needPlace": "Sitúa primero el equipamiento."
+		},
+		"levels": "Niveles servidos",
+		"level": "Nivel",
+		"levelsHint": "Separados por «;», por ejemplo -1;0 (0 = planta baja).",
+		"levelHint": "0 = planta baja, -1 = sótano.",
+		"levelBad": "Niveles no válidos: números separados por «;», por ejemplo -1;0.",
+		"wheelchair": "Accesible en silla de ruedas",
+		"operator": "Operador",
+		"operatorPlaceholder": "Ej. SNCF Voyageurs",
+		"isolated": "El punto se añade solo, sin unirlo a los caminos peatonales: se podrá unir más tarde con iD o JOSM.",
+		"duplicate": "{label} ya cartografiado a {dist}: ¿es el mismo?",
+		"editThis": "Editar ese",
+		"createAnyway": "Crear otro",
+		"summaryEdit": "{label}: {facts}",
+		"summaryVerified": "{label} verificado"
+	},
+	"steps": {
+		"kind": {
+			"stairs": "Escalera",
+			"escalator": "Escalera mecánica",
+			"walkway": "Pasillo rodante"
+		},
+		"detail": {
+			"up": "Flecha hacia arriba",
+			"moving": "Flecha: sentido de marcha"
+		},
+		"item": {
+			"incline": "sentido de subida",
+			"handrail": "pasamanos",
+			"tactile": "pavimento podotáctil",
+			"conveying": "sentido de marcha"
+		}
+	},
+	"stepsPage": {
+		"sketch": "Esquema: {kind} en trazo grueso, flecha en el sentido del camino en OpenStreetMap, andenes cercanos en verde claro, norte arriba.",
+		"never": "La flecha sigue el sentido del camino en OpenStreetMap. Tus respuestas la siguen; la app nunca invierte el camino. (En el mapa, una vez conocido, la flecha indica la subida o el sentido de marcha.)",
+		"incline": "En el sentido de la flecha, ¿la escalera sube o baja?",
+		"up": "Sube",
+		"down": "Baja",
+		"conveying": "¿En qué sentido avanza?",
+		"forward": "En el sentido de la flecha",
+		"backward": "Contra la flecha",
+		"reversible": "Cambia (según la hora)",
+		"handrail": "Pasamanos (siguiendo la flecha)",
+		"both": "A ambos lados",
+		"left": "Solo a la izquierda",
+		"right": "Solo a la derecha",
+		"none": "Ninguno",
+		"tactile": "Pavimento podotáctil arriba y abajo",
+		"stepCount": "Número de escalones",
+		"stepCountBad": "Número de escalones no válido: un entero de 1 a 500.",
+		"nothing": "Responde al menos una pregunta, o toca «Es correcto».",
+		"summary": "{kind}: {items}"
 	}
 }

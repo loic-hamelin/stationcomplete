@@ -81,6 +81,8 @@
 	--voie-soft: #eeedf6;
 	--pancarte: #85561a;
 	--pancarte-soft: #f7f0e4;
+	--equip: #2c5d84;
+	--equip-soft: #e8f0f7;
 	/* sémantique atténuée */
 	--ok: #0b723c;
 	--ok-soft: #e6f4ec;
@@ -126,6 +128,8 @@
 		--voie-soft: #25233a;
 		--pancarte: #d8a660;
 		--pancarte-soft: #2e2518;
+		--equip: #8cbfe6;
+		--equip-soft: #1a2633;
 		--ok: #5fcb8e;
 		--ok-soft: #18291f;
 		--missing: #e2b256;
@@ -160,6 +164,8 @@
 	--voie-soft: #25233a;
 	--pancarte: #d8a660;
 	--pancarte-soft: #2e2518;
+	--equip: #8cbfe6;
+	--equip-soft: #1a2633;
 	--ok: #5fcb8e;
 	--ok-soft: #18291f;
 	--missing: #e2b256;

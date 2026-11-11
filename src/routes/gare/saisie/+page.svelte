@@ -15,7 +15,19 @@
 		today,
 		type ElementKey
 	} from '#lib/core/edits.js';
+	import {
+		ITEM_KEY,
+		PLATFORM_ITEMS,
+		heightProblem,
+		parseHeight,
+		platformEquipmentTags,
+		COVERED_OMIT,
+		type PlatformEquipmentInput,
+		type PlatformItem,
+		type YesNo
+	} from '#lib/core/equipment.js';
 	import { platformTitle } from '#lib/core/features.js';
+	import { isCoveredPart } from '#lib/core/platformGroups.js';
 	import { isPlatform, isRail, splitValues, type OsmWay } from '#lib/core/osm.js';
 	import { partKeys } from '#lib/core/quests.js';
 	import type { SignInput } from '#lib/core/stopsigns/fr.js';
@@ -26,7 +38,7 @@
 	import { stationView } from '#lib/view.js';
 	import { onMount, untrack } from 'svelte';
 	import Rich from '#lib/i18n/Rich.svelte';
-	import { t } from '#lib/i18n/t.js';
+	import { fmtDecimal, fmtList, t, tk } from '#lib/i18n/t.js';
 
 	let mounted = $state(false);
 	onMount(() => {
@@ -114,8 +126,44 @@
 			const letters = /^[A-Za-z]{1,3}(;[A-Za-z]{1,3})*$/.test(tg.ref ?? '');
 			refs = letters || !tg.ref ? [...new Set(fromTracks)] : [...splitValues(tg.ref)];
 			localRef = tg.local_ref ?? (letters ? (tg.ref ?? '').replaceAll(';', '-') : '');
+			// Équipements : valeurs connues du quai (sinon « Je ne sais pas »).
+			const known = info?.equipment.known ?? {};
+			for (const item of YES_NO) equip[item] = known[item] as YesNo | undefined;
+			const h = parseHeight(known.height);
+			if (h === undefined) heightChoice = undefined;
+			else if (heights.includes(h)) heightChoice = String(h);
+			else {
+				heightChoice = 'other';
+				heightOther = fmtDecimal(h, 2);
+			}
 		} else if (kind === 'voie') trackRef = tg['railway:track_ref'] ?? '';
 	});
+	// ---------------- Équipements du quai (lot Équipements) ----------------
+	const YES_NO = ['display', 'shelter', 'tactile', 'bench'] as const;
+	const equip = $state<Omit<PlatformEquipmentInput, 'height'>>({});
+	// Hauteur : une valeur usuelle du pays (« 0.55 »), « other » (champ libre) ou rien.
+	let heightChoice = $state<string | undefined>();
+	let heightOther = $state('');
+	const heights = $derived(
+		ready ? countryConfig(ready.station.country).equipment.platformHeights : []
+	);
+	const heightInput = $derived(heightChoice === 'other' ? heightOther : heightChoice);
+	const EQUIP_LABEL: Record<
+		(typeof YES_NO)[number],
+		'input.equip.display' | 'input.equip.shelter' | 'input.equip.tactile' | 'input.equip.bench'
+	> = {
+		display: 'input.equip.display',
+		shelter: 'input.equip.shelter',
+		tactile: 'input.equip.tactile',
+		bench: 'input.equip.bench'
+	};
+	const shelterApplies = $derived(platform?.equipment.shelterApplies ?? true);
+	/** Parties visées par les équipements (une seule, sauf quai en plusieurs parties). */
+	const equipParts = $derived(
+		parts?.map((p) => ({ tags: p.tags, covered: p.covered })) ??
+			(el ? [{ tags: el.tags ?? {}, covered: isCoveredPart(el.tags) }] : [])
+	);
+
 	function addRef() {
 		const v = cleanTrackRef(newRef);
 		if (v && !refs.includes(v)) refs = [...refs, v];
@@ -163,7 +211,12 @@
 	let error = $state('');
 	let saving = $state(false);
 
-	async function save(tags: Record<string, string | null>, summary: string, name?: string) {
+	async function save(
+		tags: Record<string, string | null>,
+		summary: string,
+		name?: string,
+		omitCovered = false
+	) {
 		if (!el || !ready) return;
 		// Quai en plusieurs parties : la saisie vise la partie principale et les autres parties.
 		const keys = parts && platform ? partKeys(platform) : [osm as ElementKey];
@@ -188,7 +241,14 @@
 				...origin(keys[0]),
 				...(keys.length > 1
 					? {
-							parts: keys.slice(1).map((k) => ({ target: k, ...origin(k) })),
+							parts: keys.slice(1).map((k) => ({
+								target: k,
+								...origin(k),
+								// L'abri ne s'écrit pas sur une partie couverte.
+								...(omitCovered && parts?.find((x) => `${x.ref.type}/${x.ref.id}` === k)?.covered
+									? { omit: COVERED_OMIT }
+									: {})
+							})),
 							...(name ? { name } : {})
 						}
 					: {}),
@@ -211,26 +271,48 @@
 	function saveQuai() {
 		error = '';
 		const ref = joinRefs(refs);
-		if (!ref) return (error = t('input.platform.needRef'));
+		const hp = heightProblem(heightInput);
+		if (hp)
+			return (error =
+				hp === 'format' ? t('input.equip.heightFormat') : t('input.equip.heightRange'));
+		const eqTags = platformEquipmentTags(
+			{ ...$state.snapshot(equip), height: heightInput },
+			equipParts
+		);
+		const changed = PLATFORM_ITEMS.filter((i: PlatformItem) => ITEM_KEY[i] in eqTags);
+		if (!ref && !changed.length) return (error = t('input.platform.needRef'));
 		const lr = localRef.trim().toUpperCase().slice(0, 8);
 		// Tags de chaque partie du quai (une seule, sauf quai en plusieurs parties).
 		const all = (parts ?? [{ tags: el?.tags ?? {} }]).map((p) => p.tags);
-		const tags: Record<string, string | null> = {
-			ref,
-			local_ref: lr || null,
-			check_date: today()
-		};
-		if (all.some((c) => !c.public_transport)) tags.public_transport = 'platform';
-		if (all.some((c) => !c.railway)) tags.railway = 'platform';
-		if (all.some((c) => !c.train)) tags.train = 'yes';
+		// Numéros et équipements partent dans la même saisie (un seul envoi).
+		const tags: Record<string, string | null> = { ...eqTags, check_date: today() };
+		if (ref) {
+			tags.ref = ref;
+			tags.local_ref = lr || null;
+			if (all.some((c) => !c.public_transport)) tags.public_transport = 'platform';
+			if (all.some((c) => !c.railway)) tags.railway = 'platform';
+			if (all.some((c) => !c.train)) tags.train = 'yes';
+		}
+		const items = fmtList(changed.map((i) => tk(`equip.item.${i}`)));
+		const current = platformTitle(platform?.tags ?? el?.tags ?? {});
+		const refSummary = !ref
+			? ''
+			: lr
+				? t('input.platform.summaryNamed', { name: lr, refs: ref.replaceAll(';', ', ') })
+				: t('input.platform.summary', { refs: ref.replaceAll(';', ', ') });
 		save(
 			tags,
-			lr
-				? t('input.platform.summaryNamed', { name: lr, refs: ref.replaceAll(';', ', ') })
-				: t('input.platform.summary', { refs: ref.replaceAll(';', ', ') }),
-			lr
-				? t('platform.named', { ref: lr })
-				: t('platform.tracks', { refs: ref.replaceAll(';', '-') })
+			!ref
+				? t('input.equip.summaryAlone', { name: current, items })
+				: changed.length
+					? t('input.equip.summary', { summary: refSummary, items })
+					: refSummary,
+			!ref
+				? current
+				: lr
+					? t('platform.named', { ref: lr })
+					: t('platform.tracks', { refs: ref.replaceAll(';', '-') }),
+			'shelter' in eqTags
 		);
 	}
 
@@ -434,6 +516,73 @@
 						/>
 					</label>
 				</fieldset>
+				<!-- Équipements du quai (lot Équipements) : réponses Oui / Non / Je ne sais pas. -->
+				<section class="equip" aria-labelledby="equip-title">
+					<h2 id="equip-title"><Icon name="equip" size={18} />{t('input.equip.title')}</h2>
+					<p class="hint">{t('input.equip.hint')}</p>
+					<fieldset disabled={!survey}>
+						<legend>{t('input.equip.height')}</legend>
+						<div class="chips">
+							{#each heights as h (h)}
+								<button
+									type="button"
+									aria-pressed={heightChoice === String(h)}
+									onclick={() => (heightChoice = String(h))}
+									>{t('input.equip.meters', { value: fmtDecimal(h, 2) })}</button
+								>
+							{/each}
+							<button
+								type="button"
+								aria-pressed={heightChoice === 'other'}
+								onclick={() => (heightChoice = 'other')}>{t('input.equip.other')}</button
+							>
+							<button
+								type="button"
+								aria-pressed={heightChoice === undefined}
+								onclick={() => (heightChoice = undefined)}>{t('input.equip.unknown')}</button
+							>
+						</div>
+						{#if heightChoice === 'other'}
+							<label class="field mid">
+								<span class="visually-hidden">{t('input.equip.otherLabel')}</span>
+								<input
+									class="input"
+									bind:value={heightOther}
+									inputmode="decimal"
+									placeholder={t('input.equip.otherPlaceholder')}
+									maxlength="8"
+								/>
+							</label>
+						{/if}
+					</fieldset>
+					{#each YES_NO as item (item)}
+						{#if item !== 'shelter' || shelterApplies}
+							<fieldset disabled={!survey}>
+								<legend>{t(EQUIP_LABEL[item])}</legend>
+								{#if item === 'shelter' && parts?.some((p) => p.covered)}
+									<p class="hint">{t('input.equip.shelterParts')}</p>
+								{/if}
+								<div class="seg three">
+									<button
+										type="button"
+										aria-pressed={equip[item] === 'yes'}
+										onclick={() => (equip[item] = 'yes')}>{t('common.yes')}</button
+									>
+									<button
+										type="button"
+										aria-pressed={equip[item] === 'no'}
+										onclick={() => (equip[item] = 'no')}>{t('common.no')}</button
+									>
+									<button
+										type="button"
+										aria-pressed={equip[item] === undefined}
+										onclick={() => (equip[item] = undefined)}>{t('input.equip.unknown')}</button
+									>
+								</div>
+							</fieldset>
+						{/if}
+					{/each}
+				</section>
 			{:else if kind === 'voie'}
 				<fieldset disabled={!survey}>
 					<legend>{t('input.track.ref')}</legend>
@@ -855,6 +1004,37 @@
 	}
 	.mini .input {
 		min-height: 44px;
+	}
+	/* Équipements du quai : section compacte, filet en tête. */
+	.equip {
+		display: flex;
+		flex-direction: column;
+		gap: 14px;
+		padding-top: 16px;
+		border-top: 1px solid var(--border);
+	}
+	.equip h2 {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin: 0;
+		font-size: 1.0625rem;
+	}
+	.equip h2 :global(svg) {
+		color: var(--equip);
+	}
+	.equip .hint {
+		margin-top: -8px;
+	}
+	.equip legend {
+		margin-bottom: 4px;
+		font-size: 0.9375rem;
+	}
+	.field.mid {
+		max-width: 160px;
+	}
+	.seg.three > button {
+		font-size: 0.875rem;
 	}
 	.seg.four {
 		grid-auto-flow: row;

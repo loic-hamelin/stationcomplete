@@ -77,15 +77,18 @@ describe('analyzeStation', () => {
 		expect(r.platforms[0].lengthM).toBe(200);
 	});
 
-	it('quai et voies sans numéro, sans pancarte : Q1, Q2 ×2, Q4 ×2', () => {
+	it('quai et voies sans numéro, sans pancarte : Q1, Q2 ×2, Q4 ×2 (et Q8 équipements)', () => {
 		const s = station({});
 		const r = analyzeStation(s.els, s.bbox, NOW);
-		expect(ids(r.quests)).toEqual(['Q1', 'Q2', 'Q2', 'Q4', 'Q4']);
+		expect(ids(r.quests)).toEqual(['Q1', 'Q2', 'Q2', 'Q4', 'Q4', 'Q8']);
 		expect(r.completeness).toEqual({
 			platforms: { done: 0, total: 1 },
 			tracks: { done: 0, total: 2 },
-			stopSigns: { done: 0, total: 2 }
+			stopSigns: { done: 0, total: 2 },
+			equipment: { done: 0, total: 1 }
 		});
+		// Équipements : après les numéros et les pancartes, avant les vérifications.
+		expect(r.quests.at(-1)?.id).toBe('Q8');
 		expect(r.quests.every((q) => q.onSite)).toBe(true);
 	});
 
@@ -101,8 +104,15 @@ describe('analyzeStation', () => {
 				...ok
 			}
 		});
+		const equipped = {
+			height: '0.55',
+			passenger_information_display: 'yes',
+			shelter: 'no',
+			tactile_paving: 'yes',
+			bench: 'yes'
+		};
 		const s = station({
-			platformTags: { ref: '1;2', ...ok },
+			platformTags: { ref: '1;2', ...equipped, ...ok },
 			trackA: { 'railway:track_ref': '1', ...ok },
 			trackB: { 'railway:track_ref': '2', ...ok },
 			signs: [sign('A'), sign('B')]
@@ -110,6 +120,7 @@ describe('analyzeStation', () => {
 		const r = analyzeStation(s.els, s.bbox, NOW);
 		expect(r.quests).toEqual([]);
 		expect(r.completeness.stopSigns).toEqual({ done: 2, total: 2 });
+		expect(r.completeness.equipment).toEqual({ done: 1, total: 1 });
 	});
 
 	it('Q3 : le ref du quai ne correspond pas aux numéros des voies', () => {

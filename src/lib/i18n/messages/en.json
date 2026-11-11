@@ -77,7 +77,11 @@
 		"signDirection": "Direction filled in",
 		"signNoDirection": "Train direction to be noted on site",
 		"parts": "in {count} parts{covered, plural, =0 {} one {, # of them covered} other {, # of them covered}}",
-		"titleParts": "{title} — {parts}"
+		"titleParts": "{title} — {parts}",
+		"level": "Level {level}",
+		"wheelchair": "{value, select, yes {Wheelchair accessible} other {Not wheelchair accessible}}",
+		"equipNoDetail": "No details",
+		"stepCount": "{count, plural, one {# step} other {# steps}}"
 	},
 	"quest": {
 		"q0": {
@@ -109,6 +113,18 @@
 			"title": "{count, plural, one {# misplaced track number} other {# misplaced track numbers}}",
 			"duplicate": "Two tracks have the number {ref}",
 			"subtitle": "Check first"
+		},
+		"q8": {
+			"title": "{count, plural, one {# platform: facilities to note} other {# platforms: facilities to note}}"
+		},
+		"q9": {
+			"title": "{count, plural, one {# lift: wheelchair access to note} other {# lifts: wheelchair access to note}}"
+		},
+		"q10": {
+			"title": "{count, plural, one {# flight of steps to complete} other {# flights of steps to complete}}"
+		},
+		"q11": {
+			"title": "{count, plural, one {# escalator or walkway: direction to note} other {# escalators or walkways: direction to note}}"
 		}
 	},
 	"signRemoval": {
@@ -366,7 +382,10 @@
 			"signTrack": "The track of the stop marker was deleted or redrawn in the meantime.",
 			"ringIncomplete": "Incomplete platform outline.",
 			"partGone": "A part of the platform was deleted on OpenStreetMap in the meantime: nothing was sent for this platform.",
-			"partClash": "A part of the platform was changed by someone else in the meantime ({key}): nothing was sent for this platform (its parts are sent together)."
+			"partClash": "A part of the platform was changed by someone else in the meantime ({key}): nothing was sent for this platform (its parts are sent together).",
+			"pointDeleted": "Facility already deleted on OpenStreetMap.",
+			"pointChanged": "The facility was changed meanwhile on OpenStreetMap: nothing was uploaded for it. Redo the deletion on the up-to-date map.",
+			"pointLinked": "The facility was linked to another object meanwhile on OpenStreetMap: nothing was uploaded for it. Delete it with an editor such as iD or JOSM."
 		},
 		"comment": {
 			"numbers": "platform and track numbers, stop markers",
@@ -375,7 +394,12 @@
 			"deleted": "{name} deleted ({why})",
 			"signDeleted": "stop marker “{label}” deleted ({why}{mode, select, untag {, point kept in the track} other {}})",
 			"station": "{name} station: {parts}",
-			"parts": "{name} ({count} parts): number set on each part"
+			"parts": "{name} ({count} parts): number set on each part",
+			"equipment": "platform facilities",
+			"pointTags": "lifts and ticket machines completed",
+			"pointsAdded": "added: {list}",
+			"pointDeleted": "{label} deleted ({why})",
+			"steps": "steps completed"
 		}
 	},
 	"bearing": {
@@ -396,12 +420,15 @@
 			"shape": "Platform shape",
 			"delete": "Deletion · reason: {why}",
 			"signDelete": "Stop marker deletion · reason: {why}",
-			"tags": "Change"
+			"tags": "Change",
+			"newPoint": "New facility",
+			"pointDelete": "Facility deletion · reason: {why}"
 		},
 		"drawnSummary": "{summary} (drawn)",
 		"error": {
 			"signDeleted": "This stop marker is marked for deletion: remove that edit first.",
-			"platformDeleted": "This platform is marked for deletion: remove that edit first."
+			"platformDeleted": "This platform is marked for deletion: remove that edit first.",
+			"pointDeleted": "This facility is marked for deletion: remove that edit first."
 		}
 	},
 	"remote": {
@@ -762,7 +789,9 @@
 			"tracksUnit": "numbered",
 			"signs": "Stop markers",
 			"signsUnit": "sides noted",
-			"none": "nothing to note"
+			"none": "nothing to note",
+			"equipment": "Facilities",
+			"equipmentUnit": "platforms noted"
 		},
 		"offline": {
 			"label": "Offline",
@@ -799,7 +828,9 @@
 			"edited": "Changed by you, waiting to be uploaded",
 			"under": "Underground (tunnel, lower level)",
 			"todo": "To complete",
-			"alert": "Check first"
+			"alert": "Check first",
+			"equip": "Facility (lift, ticket machine)",
+			"steps": "Steps (arrow points up)"
 		},
 		"loading": "Loading the station…",
 		"locate": "Show my location",
@@ -813,7 +844,11 @@
 			"Q6": "To check (no recent check date)",
 			"Q7": "Duplicate or inconsistent track number",
 			"mixed": "The parts of this platform do not have the same number: check on site",
-			"partial": "Number missing on {count, plural, one {# part} other {# parts}} of the platform: to be copied to each"
+			"partial": "Number missing on {count, plural, one {# part} other {# parts}} of the platform: to be copied to each",
+			"Q8": "Facilities to note: {items}",
+			"Q9": "Wheelchair access to note",
+			"Q10": "To complete: {items}",
+			"Q11": "Direction of travel to note"
 		},
 		"editedHere": "Changed on this phone, waiting to be uploaded.",
 		"del": {
@@ -831,7 +866,12 @@
 			"points": "{lost, plural, one {# point deleted} other {# points deleted}}{kept, plural, =0 {} one {; # linked to other objects, kept} other {; # linked to other objects, kept}}.",
 			"platformReplaced": "Your edits on this platform will be removed: {list}.",
 			"platformButton": "Delete the platform",
-			"partOnly": "Only this part will be deleted ({part}): the other parts of the platform stay."
+			"partOnly": "Only this part will be deleted ({part}): the other parts of the platform stay.",
+			"pointTitle": "Delete this facility?",
+			"pointButton": "Delete the facility",
+			"pointPhrase": "The point will be deleted: it is not linked to any other object.",
+			"pointLinked": "Facility linked to other objects (path, building, relation) or drawn as an area: delete it with an editor such as iD or JOSM.",
+			"pointReplaced": "Your edits on this facility will be removed: {list}."
 		},
 		"seeContributions": "See my contributions",
 		"fill": "Fill in",
@@ -849,7 +889,11 @@
 			"covered": "Covered part ({length})",
 			"choose": "Which part of the platform?",
 			"named": "{name}, {covered, select, yes {covered part} other {open-air part}}"
-		}
+		},
+		"filterEquip": "Facilities",
+		"add": "Add",
+		"addMenu": "What do you want to add?",
+		"deletePoint": "Delete this facility…"
 	},
 	"input": {
 		"title": "Details — stationcomplete",
@@ -915,7 +959,27 @@
 			"letterHint": "A plate with a single letter (A, B…) is not a stop marker: it is a platform sector marker."
 		},
 		"correct": "It is correct",
-		"fix": "Correct"
+		"fix": "Correct",
+		"equip": {
+			"title": "Platform facilities",
+			"hint": "What this platform has, seen on site. “Don’t know” changes nothing.",
+			"height": "Platform height above the rail",
+			"meters": "{value} m",
+			"other": "Other",
+			"otherLabel": "Other height, in metres",
+			"otherPlaceholder": "E.g. 0.38",
+			"heightFormat": "Height not understood: give metres, for example 0.55.",
+			"heightRange": "Unlikely platform height: between 0.10 and 1.50 m.",
+			"display": "Train information screens (times, track)",
+			"shelter": "Shelter to wait in",
+			"shelterParts": "Open-air parts only: covered parts are not concerned.",
+			"tactile": "Tactile paving along the platform edge",
+			"bench": "Benches",
+			"unknown": "Don’t know",
+			"summary": "{summary}; facilities: {items}",
+			"summaryAlone": "{name}: facilities ({items})",
+			"needSomething": "Enter a track number or at least one facility."
+		}
 	},
 	"place": {
 		"title": "Place a stop marker — stationcomplete",
@@ -927,7 +991,10 @@
 		"near": "A stop marker already exists less than 10 m away on this track.",
 		"editThis": "Edit that one",
 		"another": "It is a different one",
-		"validate": "Confirm the position"
+		"validate": "Confirm the position",
+		"equipHeading": "Place: {label}",
+		"equipHelp": "Bring the cross <b>onto the facility</b>, as seen on the aerial photo.",
+		"equipHere": "The point will be placed under the cross."
 	},
 	"drawPage": {
 		"title": "Draw a platform — stationcomplete",
@@ -1019,5 +1086,108 @@
 		"left": "Move the crosshair left",
 		"right": "Move the crosshair right",
 		"down": "Move the crosshair down"
+	},
+	"equip": {
+		"item": {
+			"height": "height",
+			"display": "displays",
+			"shelter": "shelter",
+			"tactile": "tactile paving",
+			"bench": "benches"
+		},
+		"reasonInline": {
+			"gone": "no longer exists",
+			"duplicate": "duplicate",
+			"misplaced": "misplaced"
+		},
+		"reason": {
+			"gone": "No longer exists",
+			"duplicate": "Duplicate",
+			"misplaced": "Misplaced"
+		},
+		"kind": {
+			"elevator": "Lift",
+			"ticket": "Ticket machine"
+		},
+		"title": "Facility",
+		"onSite": "Facilities are noted <b>on site</b>, staying behind the safety line.",
+		"place": {
+			"where": "Where is it?",
+			"outside": "Outdoors",
+			"inside": "Indoors or underground",
+			"outsideHint": "Visible on the aerial photo: place it precisely under the cross.",
+			"onPhoto": "Place on the aerial photo",
+			"insideHint": "The photo and GPS don’t help here: locate it relative to a platform and the app computes the point.",
+			"platform": "On which platform?",
+			"noPlatform": "No platform in OpenStreetMap for this station.",
+			"platformTracks": "tracks {refs} · {length}",
+			"along": "Where along the platform?",
+			"end": "{dir} end",
+			"endInline": "{dir} end",
+			"middle": "Middle",
+			"distance": "At a distance…",
+			"distanceLabel": "Metres from the {end}",
+			"distanceHint": "The platform is {length} long.",
+			"distanceBad": "Enter a distance between 0 and the platform length.",
+			"side": "Which side?",
+			"sideTrack": "Track {refs} side",
+			"sideDir": "{dir} side",
+			"center": "In the middle",
+			"result": "{platform}: point {along} from the {end}, {inside, select, yes {inside the platform outline.} other {on the platform line.}}",
+			"level": " Platform level: {level}.",
+			"needPlace": "Locate the facility first."
+		},
+		"levels": "Levels served",
+		"level": "Level",
+		"levelsHint": "Separated by “;”, for example -1;0 (0 = ground floor).",
+		"levelHint": "0 = ground floor, -1 = basement.",
+		"levelBad": "Levels not understood: numbers separated by “;”, for example -1;0.",
+		"wheelchair": "Wheelchair accessible",
+		"operator": "Operator",
+		"operatorPlaceholder": "E.g. SNCF Voyageurs",
+		"isolated": "The point is added on its own, not linked to footpaths: it can be linked later with iD or JOSM.",
+		"duplicate": "{label} already mapped {dist} away: is it the same one?",
+		"editThis": "Edit that one",
+		"createAnyway": "Create another one",
+		"summaryEdit": "{label}: {facts}",
+		"summaryVerified": "{label} checked"
+	},
+	"steps": {
+		"kind": {
+			"stairs": "Steps",
+			"escalator": "Escalator",
+			"walkway": "Moving walkway"
+		},
+		"detail": {
+			"up": "Arrow points up",
+			"moving": "Arrow: direction of travel"
+		},
+		"item": {
+			"incline": "uphill direction",
+			"handrail": "handrails",
+			"tactile": "tactile paving",
+			"conveying": "direction of travel"
+		}
+	},
+	"stepsPage": {
+		"sketch": "Sketch: {kind} as a thick line, arrow along the path direction in OpenStreetMap, nearby platforms in pale green, north up.",
+		"never": "The arrow follows the path direction in OpenStreetMap. Your answers follow it; the app never reverses the path. (On the map, once known, the arrow shows the way up or the direction of travel.)",
+		"incline": "Following the arrow, do the steps go up or down?",
+		"up": "Up",
+		"down": "Down",
+		"conveying": "Which way does it move?",
+		"forward": "With the arrow",
+		"backward": "Against the arrow",
+		"reversible": "It changes (by time of day)",
+		"handrail": "Handrails (following the arrow)",
+		"both": "Both sides",
+		"left": "Left only",
+		"right": "Right only",
+		"none": "None",
+		"tactile": "Tactile paving at the top and bottom",
+		"stepCount": "Number of steps",
+		"stepCountBad": "Number of steps not understood: a whole number from 1 to 500.",
+		"nothing": "Answer at least one question, or tap “It is correct”.",
+		"summary": "{kind}: {items}"
 	}
 }

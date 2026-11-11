@@ -77,7 +77,11 @@
 		"signDirection": "Direzione indicata",
 		"signNoDirection": "Direzione dei treni da rilevare sul posto",
 		"parts": "in {count} parti{covered, plural, =0 {} one {, di cui # coperta} other {, di cui # coperte}}",
-		"titleParts": "{title} — {parts}"
+		"titleParts": "{title} — {parts}",
+		"level": "Livello {level}",
+		"wheelchair": "{value, select, yes {Accessibile in sedia a rotelle} other {Non accessibile in sedia a rotelle}}",
+		"equipNoDetail": "Nessun dettaglio",
+		"stepCount": "{count, plural, one {# gradino} other {# gradini}}"
 	},
 	"quest": {
 		"q0": {
@@ -109,6 +113,18 @@
 			"title": "{count, plural, one {# numero di binario posizionato male} other {# numeri di binario posizionati male}}",
 			"duplicate": "Due binari hanno il numero {ref}",
 			"subtitle": "Da verificare con priorità"
+		},
+		"q8": {
+			"title": "{count, plural, one {# marciapiede: dotazioni da rilevare} other {# marciapiedi: dotazioni da rilevare}}"
+		},
+		"q9": {
+			"title": "{count, plural, one {# ascensore: accesso in sedia a rotelle da rilevare} other {# ascensori: accesso in sedia a rotelle da rilevare}}"
+		},
+		"q10": {
+			"title": "{count, plural, one {# scala da completare} other {# scale da completare}}"
+		},
+		"q11": {
+			"title": "{count, plural, one {# scala o tappeto mobile: senso di marcia da rilevare} other {# scale o tappeti mobili: senso di marcia da rilevare}}"
 		}
 	},
 	"signRemoval": {
@@ -366,7 +382,10 @@
 			"signTrack": "Il binario della tabella di fermata è stato eliminato o ridisegnato nel frattempo.",
 			"ringIncomplete": "Contorno del marciapiede incompleto.",
 			"partGone": "Una parte del marciapiede è stata eliminata nel frattempo su OpenStreetMap: non è stato inviato nulla per questo marciapiede.",
-			"partClash": "Una parte del marciapiede è stata modificata da qualcun altro nel frattempo ({key}): non è stato inviato nulla per questo marciapiede (le sue parti partono insieme)."
+			"partClash": "Una parte del marciapiede è stata modificata da qualcun altro nel frattempo ({key}): non è stato inviato nulla per questo marciapiede (le sue parti partono insieme).",
+			"pointDeleted": "Dotazione già eliminata su OpenStreetMap.",
+			"pointChanged": "La dotazione è stata modificata nel frattempo su OpenStreetMap: non è stato inviato nulla. Rifai l’eliminazione sulla mappa aggiornata.",
+			"pointLinked": "La dotazione è stata collegata nel frattempo a un altro oggetto su OpenStreetMap: non è stato inviato nulla. Eliminala con un editor come iD o JOSM."
 		},
 		"comment": {
 			"numbers": "numeri di marciapiedi e binari, tabelle di fermata",
@@ -375,7 +394,12 @@
 			"deleted": "{name} eliminato ({why})",
 			"signDeleted": "tabella di fermata «{label}» eliminata ({why}{mode, select, untag {, punto mantenuto nel binario} other {}})",
 			"station": "Stazione di {name}: {parts}",
-			"parts": "{name} ({count} parti): numero inserito su ogni parte"
+			"parts": "{name} ({count} parti): numero inserito su ogni parte",
+			"equipment": "dotazioni dei marciapiedi",
+			"pointTags": "ascensori e biglietterie completati",
+			"pointsAdded": "aggiunto: {list}",
+			"pointDeleted": "{label} eliminato ({why})",
+			"steps": "scale completate"
 		}
 	},
 	"bearing": {
@@ -396,12 +420,15 @@
 			"shape": "Forma del marciapiede",
 			"delete": "Eliminazione · motivo: {why}",
 			"signDelete": "Eliminazione di tabella di fermata · motivo: {why}",
-			"tags": "Modifica"
+			"tags": "Modifica",
+			"newPoint": "Nuova dotazione",
+			"pointDelete": "Eliminazione di dotazione · motivo: {why}"
 		},
 		"drawnSummary": "{summary} (disegnato)",
 		"error": {
 			"signDeleted": "Questa tabella di fermata è segnata da eliminare: rimuovi prima quella modifica.",
-			"platformDeleted": "Questo marciapiede è segnato da eliminare: rimuovi prima quella modifica."
+			"platformDeleted": "Questo marciapiede è segnato da eliminare: rimuovi prima quella modifica.",
+			"pointDeleted": "Questa dotazione è segnata da eliminare: rimuovi prima quella modifica."
 		}
 	},
 	"remote": {
@@ -762,7 +789,9 @@
 			"tracksUnit": "numerati",
 			"signs": "Tabelle di fermata",
 			"signsUnit": "lati rilevati",
-			"none": "niente da rilevare"
+			"none": "niente da rilevare",
+			"equipment": "Dotazioni",
+			"equipmentUnit": "marciapiedi rilevati"
 		},
 		"offline": {
 			"label": "Offline",
@@ -799,7 +828,9 @@
 			"edited": "Modificato da te, in attesa di invio",
 			"under": "Sotterraneo (galleria, livello inferiore)",
 			"todo": "Da completare",
-			"alert": "Da verificare con priorità"
+			"alert": "Da verificare con priorità",
+			"equip": "Dotazione (ascensore, biglietteria)",
+			"steps": "Scala (freccia verso l’alto)"
 		},
 		"loading": "Caricamento della stazione…",
 		"locate": "Mostra la mia posizione",
@@ -813,7 +844,11 @@
 			"Q6": "Da verificare (nessuna data di verifica recente)",
 			"Q7": "Numero di binario doppio o incoerente",
 			"mixed": "Le parti di questo marciapiede non hanno lo stesso numero: verifica sul posto",
-			"partial": "Numero assente su {count, plural, one {# parte} other {# parti}} del marciapiede: da riportare su ciascuna"
+			"partial": "Numero assente su {count, plural, one {# parte} other {# parti}} del marciapiede: da riportare su ciascuna",
+			"Q8": "Dotazioni da rilevare: {items}",
+			"Q9": "Accesso in sedia a rotelle da rilevare",
+			"Q10": "Da completare: {items}",
+			"Q11": "Senso di marcia da rilevare"
 		},
 		"editedHere": "Modificato su questo telefono, in attesa di invio.",
 		"del": {
@@ -831,7 +866,12 @@
 			"points": "{lost, plural, one {# punto eliminato} other {# punti eliminati}}{kept, plural, =0 {} one {; # collegato ad altri oggetti, mantenuto} other {; # collegati ad altri oggetti, mantenuti}}.",
 			"platformReplaced": "Le tue modifiche su questo marciapiede saranno rimosse: {list}.",
 			"platformButton": "Elimina il marciapiede",
-			"partOnly": "Verrà eliminata solo questa parte ({part}): le altre parti del marciapiede restano."
+			"partOnly": "Verrà eliminata solo questa parte ({part}): le altre parti del marciapiede restano.",
+			"pointTitle": "Eliminare questa dotazione?",
+			"pointButton": "Elimina la dotazione",
+			"pointPhrase": "Il punto sarà eliminato: non è collegato ad altri oggetti.",
+			"pointLinked": "Dotazione collegata ad altri oggetti (percorso, edificio, relazione) o disegnata come area: eliminala con un editor come iD o JOSM.",
+			"pointReplaced": "Le tue modifiche su questa dotazione saranno rimosse: {list}."
 		},
 		"seeContributions": "Vedi i miei contributi",
 		"fill": "Compila",
@@ -849,7 +889,11 @@
 			"covered": "Parte coperta ({length})",
 			"choose": "Quale parte del marciapiede?",
 			"named": "{name}, {covered, select, yes {parte coperta} other {parte all’aperto}}"
-		}
+		},
+		"filterEquip": "Dotazioni",
+		"add": "Aggiungi",
+		"addMenu": "Cosa vuoi aggiungere?",
+		"deletePoint": "Elimina questa dotazione…"
 	},
 	"input": {
 		"title": "Scheda — stationcomplete",
@@ -915,7 +959,27 @@
 			"letterHint": "Una targa con una sola lettera (A, B…) non è una tabella di fermata: è un riferimento di settore del marciapiede."
 		},
 		"correct": "È corretto",
-		"fix": "Correggi"
+		"fix": "Correggi",
+		"equip": {
+			"title": "Dotazioni del marciapiede",
+			"hint": "Cosa c’è su questo marciapiede, visto sul posto. «Non so» non cambia nulla.",
+			"height": "Altezza del marciapiede sul piano del ferro",
+			"meters": "{value} m",
+			"other": "Altra",
+			"otherLabel": "Altra altezza, in metri",
+			"otherPlaceholder": "Es. 0,38",
+			"heightFormat": "Altezza non valida: indica i metri, per esempio 0,55.",
+			"heightRange": "Altezza improbabile per un marciapiede: tra 0,10 e 1,50 m.",
+			"display": "Monitor informativi dei treni (orari, binario)",
+			"shelter": "Pensilina per l’attesa",
+			"shelterParts": "Solo parti all’aperto: le parti coperte non sono interessate.",
+			"tactile": "Percorso tattile lungo il bordo del marciapiede",
+			"bench": "Panchine",
+			"unknown": "Non so",
+			"summary": "{summary}; dotazioni: {items}",
+			"summaryAlone": "{name}: dotazioni ({items})",
+			"needSomething": "Indica un numero di binario o almeno una dotazione."
+		}
 	},
 	"place": {
 		"title": "Posiziona una tabella di fermata — stationcomplete",
@@ -927,7 +991,10 @@
 		"near": "Esiste già una tabella di fermata a meno di 10 m su questo binario.",
 		"editThis": "Modifica quella",
 		"another": "È un’altra",
-		"validate": "Conferma la posizione"
+		"validate": "Conferma la posizione",
+		"equipHeading": "Posiziona: {label}",
+		"equipHelp": "Porta la croce <b>sulla dotazione</b>, come si vede sulla foto aerea.",
+		"equipHere": "Il punto sarà posato sotto la croce."
 	},
 	"drawPage": {
 		"title": "Disegna un marciapiede — stationcomplete",
@@ -1019,5 +1086,108 @@
 		"left": "Sposta il mirino a sinistra",
 		"right": "Sposta il mirino a destra",
 		"down": "Sposta il mirino in basso"
+	},
+	"equip": {
+		"item": {
+			"height": "altezza",
+			"display": "monitor",
+			"shelter": "pensilina",
+			"tactile": "percorso tattile",
+			"bench": "panchine"
+		},
+		"reasonInline": {
+			"gone": "non esiste più",
+			"duplicate": "doppione",
+			"misplaced": "posizione errata"
+		},
+		"reason": {
+			"gone": "Non esiste più",
+			"duplicate": "Doppione",
+			"misplaced": "Posizione errata"
+		},
+		"kind": {
+			"elevator": "Ascensore",
+			"ticket": "Biglietteria automatica"
+		},
+		"title": "Dotazione",
+		"onSite": "Le dotazioni si rilevano <b>sul posto</b>, restando dietro la linea di sicurezza.",
+		"place": {
+			"where": "Dove si trova?",
+			"outside": "All’aperto",
+			"inside": "Al chiuso o sotterraneo",
+			"outsideHint": "Visibile sulla foto aerea: posizionalo con precisione sotto la croce.",
+			"onPhoto": "Posiziona sulla foto aerea",
+			"insideHint": "Qui foto e GPS non servono: indicalo rispetto a un marciapiede, l’app calcola il punto.",
+			"platform": "Su quale marciapiede?",
+			"noPlatform": "Nessun marciapiede in OpenStreetMap per questa stazione.",
+			"platformTracks": "binari {refs} · {length}",
+			"along": "Dove, lungo il marciapiede?",
+			"end": "Estremità verso {dir}",
+			"endInline": "estremità verso {dir}",
+			"middle": "Centro",
+			"distance": "A una distanza…",
+			"distanceLabel": "Metri dall’{end}",
+			"distanceHint": "Il marciapiede è lungo {length}.",
+			"distanceBad": "Indica una distanza tra 0 e la lunghezza del marciapiede.",
+			"side": "Da quale lato?",
+			"sideTrack": "Lato binario {refs}",
+			"sideDir": "Lato verso {dir}",
+			"center": "Al centro",
+			"result": "{platform}: punto a {along} dall’{end}, {inside, select, yes {dentro il contorno del marciapiede.} other {sulla linea del marciapiede.}}",
+			"level": " Livello del marciapiede: {level}.",
+			"needPlace": "Indica prima la posizione."
+		},
+		"levels": "Livelli serviti",
+		"level": "Livello",
+		"levelsHint": "Separati da «;», per esempio -1;0 (0 = piano terra).",
+		"levelHint": "0 = piano terra, -1 = seminterrato.",
+		"levelBad": "Livelli non validi: numeri separati da «;», per esempio -1;0.",
+		"wheelchair": "Accessibile in sedia a rotelle",
+		"operator": "Gestore",
+		"operatorPlaceholder": "Es. SNCF Voyageurs",
+		"isolated": "Il punto è aggiunto da solo, non collegato ai percorsi pedonali: si potrà collegare più tardi con iD o JOSM.",
+		"duplicate": "{label} già mappato a {dist}: è lo stesso?",
+		"editThis": "Modifica quello",
+		"createAnyway": "Creane un altro",
+		"summaryEdit": "{label}: {facts}",
+		"summaryVerified": "{label} verificato"
+	},
+	"steps": {
+		"kind": {
+			"stairs": "Scala",
+			"escalator": "Scala mobile",
+			"walkway": "Tappeto mobile"
+		},
+		"detail": {
+			"up": "Freccia verso l’alto",
+			"moving": "Freccia: senso di marcia"
+		},
+		"item": {
+			"incline": "senso di salita",
+			"handrail": "corrimano",
+			"tactile": "percorso tattile",
+			"conveying": "senso di marcia"
+		}
+	},
+	"stepsPage": {
+		"sketch": "Schema: {kind} in tratto spesso, freccia nel senso del percorso in OpenStreetMap, marciapiedi vicini in verde chiaro, nord in alto.",
+		"never": "La freccia segue il senso del percorso in OpenStreetMap. Le tue risposte la seguono; l’app non inverte mai il percorso. (Sulla mappa, una volta noto, la freccia indica la salita o il senso di marcia.)",
+		"incline": "Nel senso della freccia, la scala sale o scende?",
+		"up": "Sale",
+		"down": "Scende",
+		"conveying": "In che senso si muove?",
+		"forward": "Nel senso della freccia",
+		"backward": "Contro la freccia",
+		"reversible": "Cambia (secondo l’ora)",
+		"handrail": "Corrimano (seguendo la freccia)",
+		"both": "Su entrambi i lati",
+		"left": "Solo a sinistra",
+		"right": "Solo a destra",
+		"none": "Nessuno",
+		"tactile": "Percorso tattile in cima e in fondo",
+		"stepCount": "Numero di gradini",
+		"stepCountBad": "Numero di gradini non valido: un intero da 1 a 500.",
+		"nothing": "Rispondi ad almeno una domanda, o tocca «È corretto».",
+		"summary": "{kind}: {items}"
 	}
 }

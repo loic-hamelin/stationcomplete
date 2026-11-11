@@ -70,8 +70,11 @@
 		voie: 'voie',
 		pancarte: 'pancarte',
 		alerte: 'alert',
-		verif: 'check'
+		verif: 'check',
+		equip: 'equip'
 	};
+	// 4e jauge (lot Équipements) : quais dont les équipements sont relevés, sur E4 seulement.
+	const equipGauge = $derived(analysis?.completeness.equipment);
 	/** Jauge segmentée : un segment par objet jusqu'à 12, une barre continue au-delà. */
 	const segments = (done: number, total: number) =>
 		total <= 12
@@ -201,6 +204,21 @@
 						{/if}
 					</div>
 				{/each}
+				{#if equipGauge?.total}
+					<div class="gauge equip wide">
+						<span class="g-title"
+							><Icon name="equip" size={18} />{t('station.gauge.equipment')}</span
+						>
+						<span class="g-line">
+							<span class="g-num">{equipGauge.done}/{equipGauge.total}</span>
+							<span class="g-unit">{t('station.gauge.equipmentUnit')}</span>
+						</span>
+						<span class="bar" aria-hidden="true">
+							{#each segments(equipGauge.done, equipGauge.total) as on, i (i)}<span class:on
+								></span>{/each}
+						</span>
+					</div>
+				{/if}
 			</section>
 
 			<div class="offline" role="group" aria-label={t('station.offline.label')}>
@@ -410,6 +428,30 @@
 	.gauge.pancarte {
 		--c: var(--pancarte);
 	}
+	/* Équipements : ligne compacte sous les trois jauges (titre, compte et barre sur une ligne). */
+	.gauge.equip {
+		--c: var(--equip);
+	}
+	.gauge.wide {
+		grid-column: 1 / -1;
+		display: grid;
+		grid-template-columns: auto 1fr;
+		align-items: center;
+		column-gap: 12px;
+		padding: 8px 10px;
+	}
+	.gauge.wide .g-line {
+		display: flex;
+		align-items: baseline;
+		justify-content: flex-end;
+		gap: 6px;
+	}
+	.gauge.wide .g-num {
+		font-size: 1.0625rem;
+	}
+	.gauge.wide .bar {
+		grid-column: 1 / -1;
+	}
 	.g-title {
 		display: flex;
 		align-items: center;
@@ -499,6 +541,10 @@
 	.quest.pancarte {
 		--c: var(--pancarte);
 		--s: var(--pancarte-soft);
+	}
+	.quest.equip {
+		--c: var(--equip);
+		--s: var(--equip-soft);
 	}
 	.quest.verif {
 		--c: var(--ok);

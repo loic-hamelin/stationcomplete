@@ -43,6 +43,8 @@ const PAIRS = [
 	['voie', 'voie-soft', 'jetons E7'],
 	['pancarte', 'bg'],
 	['pancarte', 'pancarte-soft'],
+	['equip', 'bg', 'équipements'],
+	['equip', 'equip-soft'],
 	['ok', 'bg'],
 	['missing', 'bg'],
 	['missing', 'missing-soft'],

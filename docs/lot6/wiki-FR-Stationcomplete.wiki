@@ -12,13 +12,15 @@ L'utilisateur choisit une gare. L'appli lit les données de la gare par l'API OS
 
 * Les numéros ne peuvent être saisis '''que sur place''' (position vérifiée sur le téléphone, jamais envoyée). À distance, on peut seulement placer ou vérifier des objets, dessiner un quai absent ou corriger la forme d'un quai sur la photo aérienne.
 * Fond de carte : BD ORTHO de l'IGN (Licence Ouverte 2.0), précision visée de l'ordre du mètre.
-* L'appli ne modifie que les clés listées ci-dessous. Elle peut aussi corriger la '''forme''' d'un quai, '''supprimer''' un quai (en double, ou disparu constaté sur place) et '''supprimer''' une pancarte d'arrêt (en double, mal placée, ou disparue constatée sur place), selon les règles décrites plus bas ; elle ne supprime aucun autre type d'objet, et '''jamais une voie'''.
+* L'appli ne modifie que les clés listées ci-dessous. Elle peut aussi corriger la '''forme''' d'un quai, '''supprimer''' un quai (en double, ou disparu constaté sur place) '''supprimer''' une pancarte d'arrêt (en double, mal placée, ou disparue constatée sur place) et '''supprimer''' un ascenseur ou un distributeur de billets isolé (mêmes motifs), selon les règles décrites plus bas ; elle ne supprime aucun autre type d'objet, et '''jamais une voie'''.
 
 == Ce que l'appli modifie ==
 {| class="wikitable"
 ! Objet !! Clés écrites !! Remarque
 |-
 | Quai (<code>railway=platform</code>, way ou multipolygone) || <code>ref</code>, <code>local_ref</code>, <code>check_date</code> || <code>ref</code> = numéros des voies le long du quai (« 1;3 ») ; <code>local_ref</code> = numéro ou lettre affiché sur le quai, s'il diffère
+|-
+| Équipements d'un quai (même objet) || <code>height</code> (mètres au-dessus du rail, point décimal), [[Key:passenger_information_display|<code>passenger_information_display</code>]]=yes/no, <code>shelter</code>=yes/no, <code>tactile_paving</code>=yes/no, <code>bench</code>=yes/no, <code>check_date</code> || relevés sur place uniquement ; « Je ne sais pas » n'écrit rien. <code>departures_board</code> n'est jamais écrit ; il est retiré seulement s'il vaut <code>realtime</code> ou <code>delay</code> et que l'utilisateur constate sur place qu'il n'y a pas d'écran. Quai en plusieurs parties : mêmes valeurs sur chaque partie, sauf <code>shelter</code>, écrit sur les parties à l'air libre seulement. Aucun état de panne n'est écrit
 |-
 | Voie (<code>railway=rail</code>) || [[FR:Key:railway:track_ref|<code>railway:track_ref</code>]], <code>check_date</code> || numéro local de la voie en gare
 |-
@@ -33,6 +35,16 @@ L'utilisateur choisit une gare. L'appli lit les données de la gare par l'API OS
 | Suppression d'un quai (way) || suppression du way et de ses nœuds devenus orphelins ; retrait du quai des relations qui le contenaient (zone d'arrêt <code>public_transport=stop_area</code>, lignes) || motif obligatoire, écrit dans le commentaire du changeset : « en double avec un autre quai » (possible à distance) ou « n'existe plus » (sur place seulement, la photo pouvant être ancienne)
 |-
 | Suppression d'une pancarte d'arrêt (nœud de la voie) || si c'est sans risque : retrait du nœud de la voie (même liste de nœuds sans lui) puis suppression du nœud ; sinon : nœud gardé, seuls les tags de la pancarte sont retirés || motif obligatoire, écrit dans le commentaire du changeset : « en double » ou « mal placée » (possible à distance), « n'existe plus » (sur place seulement). La géométrie de la voie ne change jamais
+|-
+| Ascenseur (nouveau nœud isolé, ou existant) || <code>highway=elevator</code>, <code>level</code> (niveaux desservis), <code>wheelchair</code>=yes/no, <code>check_date</code> || sur place uniquement ; placé sur la photo aérienne (dehors) ou situé par rapport à un quai (intérieur, souterrain : point calculé dans le contour du quai, <code>level</code> du quai proposé). Nœud non relié aux chemins (accepté par le wiki) ; un ascenseur à moins de 5 m est signalé avant d'en créer un autre
+|-
+| Distributeur de billets (nouveau nœud isolé, ou existant) || <code>amenity=vending_machine</code>, <code>vending=public_transport_tickets</code>, <code>operator</code> (facultatif), <code>level</code>, <code>check_date</code> || mêmes règles que l'ascenseur
+|-
+| Suppression d'un ascenseur ou d'un distributeur || suppression du nœud || seulement un nœud isolé (dans aucun way ni aucune relation, vérifié avant l'envoi) ; motif obligatoire dans le commentaire : « en double », « mal placé » (à distance), « n'existe plus » (sur place)
+|-
+| Escalier existant (<code>highway=steps</code>, way) || <code>incline</code>=up/down, <code>handrail</code>=yes/no, <code>handrail:left</code>/<code>handrail:right</code>, <code>tactile_paving</code>=yes/no, <code>step_count</code>, <code>check_date</code> || sur place uniquement ; <code>incline</code> est relatif au sens du way, montré par une flèche (« dans le sens de la flèche, l'escalier monte-t-il ou descend-il ? ») : '''le way n'est jamais retourné''' ni redessiné, aucun escalier n'est créé ni supprimé
+|-
+| Escalier mécanique (<code>highway=steps</code> + <code>conveying</code>) ou tapis roulant (<code>highway=footway</code> + <code>conveying</code>) existant || <code>conveying</code>=forward/backward/reversible, <code>incline</code>, <code>check_date</code> || mêmes règles ; <code>conveying=yes</code> (sens inconnu) est proposé à compléter
 |-
 | Vérification || <code>check_date</code> || quand l'utilisateur confirme sur place qu'une donnée est juste
 |}

@@ -32,9 +32,10 @@
 	import { canSurvey, checkOnSite, where } from '#lib/onsite.svelte.js';
 	import { srv } from '#lib/osmserver.svelte.js';
 	import { stationView } from '#lib/view.js';
+	import { equipmentItems } from '#lib/questText.js';
 	import StationMap from '#lib/map/StationMap.svelte';
 	import { onMount, untrack } from 'svelte';
-	import { fmtDistance, t, tk } from '#lib/i18n/t.js';
+	import { fmtDistance, fmtList, t, tk } from '#lib/i18n/t.js';
 
 	let mounted = $state(false);
 	onMount(() => {
@@ -94,7 +95,14 @@
 		);
 	});
 	const isLocal = (osm: string) => osm.startsWith('node/-');
-	const visible = $state({ quai: true, voie: true, pancarte: true });
+	/** Escalier, escalier mécanique, tapis roulant : on les complète, sans les supprimer. */
+	const isLine = (p: FeatureProps) =>
+		p.sub === 'stairs' || p.sub === 'escalator' || p.sub === 'walkway';
+	const visible = $state({ quai: true, voie: true, pancarte: true, equip: true });
+	// « + Ajouter » : pancarte d'arrêt, ascenseur ou distributeur de billets.
+	let adding = $state(false);
+	const equipHref = (kind: 'elevator' | 'ticket') =>
+		resolve(`/gare/equipement?id=${encodeURIComponent(id)}&kind=${kind}`);
 	let selected = $state<FeatureProps | undefined>();
 	let mapRef = $state<{ locate: () => void; refreshLabels: () => void }>();
 
@@ -102,6 +110,7 @@
 	let more = $state(false);
 	let deleting = $state(false);
 	let reason = $state<'duplicate' | 'gone' | 'misplaced' | undefined>();
+	// (Équipement : même parcours de suppression qu'une pancarte.)
 	let legend = $state(false);
 	let notice = $state('');
 	let deleteError = $state('');
@@ -116,6 +125,7 @@
 		deleting = false;
 		reason = undefined;
 		deleteError = '';
+		adding = false;
 		if (p) notice = '';
 	};
 	$effect(() => {
@@ -180,6 +190,22 @@
 			r.members.some((m) => m.type === 'node' && m.ref === signId)
 		);
 		return { node: n, removal: signRemoval(n, ways, rels, (i) => d.nodes.get(i)) };
+	});
+	// Équipement existant (lot Équipements) : supprimable seulement s'il est un nœud isolé.
+	const pointOf = $derived.by(() => {
+		if (!ready || selected?.kind !== 'equip' || !/^(node|way)\/\d+$/.test(selected.osm))
+			return undefined;
+		const d = new OsmData(ready.elements);
+		const [type, n] = selected.osm.split('/');
+		const nid = Number(n);
+		const node = type === 'node' ? d.nodes.get(nid) : undefined;
+		const linked =
+			!node ||
+			(d.waysOfNode.get(nid) ?? []).length > 0 ||
+			[...d.relations.values()].some((r) =>
+				r.members.some((m) => m.type === 'node' && m.ref === nid)
+			);
+		return { node, deletable: !linked };
 	});
 	const replaced = $derived(
 		deleting && selected && target
@@ -254,16 +280,63 @@
 		}
 	}
 
-	/** Constat d'une quête sur la fiche d'un objet (Q1 à Q7), dans la langue de l'interface. */
+	// Quai sélectionné (logique) : équipements à relever (Q8).
+	const selPlatform = $derived(
+		selected?.kind === 'quai' && view
+			? view.analysis.platforms.find((p) => `${p.ref.type}/${p.ref.id}` === selected?.osm)
+			: undefined
+	);
+	async function confirmPointDelete() {
+		deleteError = '';
+		if (!pointOf?.node || !pointOf.deletable || !selected || !ready) return;
+		if (!reason) return (deleteError = t('map.del.chooseReason'));
+		if (reason === 'gone' && !survey) return (deleteError = t('map.del.goneOnSite'));
+		const label = selected.title;
+		try {
+			await saveEdit({
+				kind: 'pointdelete',
+				id: newEditId(),
+				station: id,
+				country: ready.station.country,
+				createdAt: Date.now(),
+				target: `node/${pointOf.node.id}`,
+				version: pointOf.node.version,
+				reason,
+				label,
+				summary: t('upload.comment.pointDeleted', {
+					label,
+					why: tk(`equip.reasonInline.${reason}`)
+				})
+			});
+			select(undefined);
+			notice = t('map.del.pending', { name: label });
+		} catch {
+			deleteError = t('common.saveFailed');
+		}
+	}
+
+	/** Constat d'une quête sur la fiche d'un objet (Q1 à Q8), dans la langue de l'interface. */
+	// Escalier sélectionné : questions sans réponse (Q10).
+	const selSteps = $derived(
+		selected?.kind === 'equip' && view
+			? view.analysis.steps.find((s) => `way/${s.way}` === selected?.osm)
+			: undefined
+	);
 	const questText = (q: string) =>
-		// Quai en plusieurs parties : parties aux numéros différents, ou sans numéro.
-		q === 'Q3' && group?.mixed
-			? t('map.quest.mixed')
-			: q === 'Q1' && group?.missingRef
-				? t('map.quest.partial', { count: group.missingRef })
-				: /^Q[1-7]$/.test(q)
-					? tk(`map.quest.${q}`)
-					: q;
+		q === 'Q10'
+			? t('map.quest.Q10', {
+					items: fmtList((selSteps?.missing ?? []).map((m) => tk(`steps.item.${m}`)))
+				})
+			: q === 'Q8'
+				? t('map.quest.Q8', { items: equipmentItems(selPlatform?.equipment.missing ?? []) })
+				: // Quai en plusieurs parties : parties aux numéros différents, ou sans numéro.
+					q === 'Q3' && group?.mixed
+					? t('map.quest.mixed')
+					: q === 'Q1' && group?.missingRef
+						? t('map.quest.partial', { count: group.missingRef })
+						: /^Q([1-79]|11)$/.test(q)
+							? tk(`map.quest.${q}`)
+							: q;
 	// Constats de la feuille basse : une icône par nature (alerte, à relever, à vérifier).
 	const QUEST_ICON: Record<string, 'alert' | 'question' | 'clock'> = {
 		Q3: 'alert',
@@ -271,11 +344,23 @@
 		Q6: 'clock'
 	};
 	/** Légende de la carte (lot 7d) : pointillés réservés aux objets souterrains. */
-	const LEGEND = ['quai', 'voie', 'pancarte', 'sel', 'edited', 'under', 'todo', 'alert'] as const;
+	const LEGEND = [
+		'quai',
+		'voie',
+		'pancarte',
+		'equip',
+		'steps',
+		'sel',
+		'edited',
+		'under',
+		'todo',
+		'alert'
+	] as const;
 	const filters = $derived([
 		{ k: 'quai', label: t('station.gauge.platforms') },
 		{ k: 'voie', label: t('station.gauge.tracks') },
-		{ k: 'pancarte', label: t('station.gauge.signs') }
+		{ k: 'pancarte', label: t('station.gauge.signs') },
+		{ k: 'equip', label: t('map.filterEquip') }
 	] as const);
 	const quoted = (list: { summary: string }[]) =>
 		list.map((e) => t('common.quoted', { text: e.summary })).join(', ');
@@ -426,6 +511,23 @@
 											fill="#B3C8FF"
 											stroke="#14110E"
 										/>{/if}
+								{:else if item.k === 'steps'}
+									<path d="M5 12h30" stroke="#14110E" stroke-opacity=".7" stroke-width="5" />
+									<path d="M5 12h30" stroke="#8CBFE6" stroke-width="3" />
+									<path d="M16 7l9 5-9 5 2-5z" fill="#14110E" stroke="#fff" stroke-width="1" />
+								{:else if item.k === 'equip'}
+									<rect x="11" y="3" width="18" height="18" rx="3" fill="#fff" stroke="#14110E" />
+									<g
+										transform="translate(13 5) scale(.5833)"
+										fill="none"
+										stroke="#1f1b17"
+										stroke-width="2.4"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+									>
+										<rect x="5" y="3" width="14" height="18" rx="1.5" />
+										<path d="M9 10l3-3 3 3M9 14l3 3 3-3" />
+									</g>
 								{:else if item.k === 'pancarte'}
 									<path d="M20 13v8" stroke="#14110E" stroke-width="1.5" />
 									<rect x="12" y="3" width="16" height="10" rx="1" fill="#fff" stroke="#14110E" />
@@ -486,15 +588,45 @@
 		>
 			<Icon name="locate" size={20} />
 		</button>
-		<a class="add" href={placeHref} data-map-avoid
-			><Icon name="plus" size={20} />{t('map.addSign')}</a
+		{#if adding}
+			<nav class="add-menu float" id="add-menu" aria-label={t('map.addMenu')} data-map-avoid>
+				<p>{t('map.addMenu')}</p>
+				<ul>
+					<li>
+						<a href={placeHref}><Icon name="pancarte" size={20} />{t('map.legend.pancarte')}</a>
+					</li>
+					<li>
+						<a href={equipHref('elevator')}
+							><Icon name="elevator" size={20} />{t('equip.kind.elevator')}</a
+						>
+					</li>
+					<li>
+						<a href={equipHref('ticket')}
+							><Icon name="ticket" size={20} />{t('equip.kind.ticket')}</a
+						>
+					</li>
+				</ul>
+			</nav>
+		{/if}
+		<button
+			class="add"
+			type="button"
+			data-map-avoid
+			aria-expanded={adding}
+			aria-controls="add-menu"
+			onclick={() => (adding = !adding)}><Icon name="plus" size={20} />{t('map.add')}</button
 		>
 	{/if}
 
 	{#if selected}
 		<section class="sheet" aria-live="polite" aria-label={t('map.legend.sel')} data-map-avoid>
 			<div class="sheet-head">
-				<span class="fam {selected.kind}"><Icon name={selected.kind} size={20} /></span>
+				<span class="fam {selected.kind}"
+					><Icon
+						name={selected.kind === 'equip' ? (selected.sub ?? 'equip') : selected.kind}
+						size={20}
+					/></span
+				>
 				<div class="titles">
 					<h2>{selected.title}</h2>
 					<p>{selected.detail}</p>
@@ -521,7 +653,56 @@
 					{/if}
 				</ul>
 			{/if}
-			{#if deleting && signOf}
+			{#if deleting && pointOf}
+				<div class="confirm">
+					<h3>{t('map.del.pointTitle')}</h3>
+					<fieldset>
+						<legend>{t('map.del.reason')}</legend>
+						<label class="choice">
+							<input type="radio" name="motif" value="duplicate" bind:group={reason} />
+							{t('equip.reason.duplicate')}
+						</label>
+						<label class="choice">
+							<input type="radio" name="motif" value="misplaced" bind:group={reason} />
+							{t('equip.reason.misplaced')}
+						</label>
+						<label class="choice" class:off={!survey}>
+							<input
+								type="radio"
+								name="motif"
+								value="gone"
+								disabled={!survey}
+								aria-describedby="gone-hint"
+								bind:group={reason}
+							/>
+							{t('equip.reason.gone')}
+						</label>
+						<p id="gone-hint" class="hint">
+							{#if survey}{t('map.del.seenOnSite')}{:else}<Icon name="lock" size={14} />
+								{t('map.del.onSiteOnly')}{/if}
+						</p>
+					</fieldset>
+					<ul class="facts">
+						<li class="info"><Icon name="info" size={18} />{t('map.del.pointPhrase')}</li>
+						{#if replaced.length}
+							<li class="alert">
+								<Icon name="alert" size={18} />{t('map.del.pointReplaced', {
+									list: quoted(replaced)
+								})}
+							</li>
+						{/if}
+					</ul>
+					{#if deleteError}<p class="banner err" role="alert">{deleteError}</p>{/if}
+					<div class="actions">
+						<button class="btn-sm" type="button" onclick={() => (deleting = false)}
+							>{t('common.cancel')}</button
+						>
+						<button class="btn-sm danger" type="button" onclick={confirmPointDelete}
+							><Icon name="trash" size={18} />{t('map.del.pointButton')}</button
+						>
+					</div>
+				</div>
+			{:else if deleting && signOf}
 				<div class="confirm">
 					<h3>{t('map.del.signTitle')}</h3>
 					<fieldset>
@@ -659,8 +840,9 @@
 					{:else}
 						<a
 							class="btn-sm renseigner"
-							href={resolve(`/gare/saisie?id=${encodeURIComponent(id)}&osm=${selected.osm}`)}
-							><Icon name="pen" size={18} />{t('map.fill')}</a
+							href={resolve(
+								`/gare/${selected.kind !== 'equip' ? 'saisie' : isLine(selected) ? 'escalier' : 'equipement'}?id=${encodeURIComponent(id)}&osm=${selected.osm}`
+							)}><Icon name="pen" size={18} />{t('map.fill')}</a
 						>
 						{#if selected.kind === 'voie'}
 							<a class="btn-quiet" href={placeHref}>{t('map.signHere')}</a>
@@ -699,7 +881,7 @@
 									more = !more;
 								}}><Icon name="more" size={20} /></button
 							>
-						{:else if selected.kind === 'pancarte'}
+						{:else if selected.kind === 'pancarte' || (selected.kind === 'equip' && !isLine(selected))}
 							<button
 								class="icon-btn more"
 								type="button"
@@ -715,6 +897,24 @@
 						{/if}
 					{/if}
 				</div>
+				{#if more && selected.kind === 'equip'}
+					<ul class="menu" id="more-menu">
+						{#if pointOf?.deletable}
+							<li>
+								<button class="btn-quiet danger" type="button" onclick={() => (deleting = true)}
+									><Icon name="trash" size={18} />{t('map.deletePoint')}</button
+								>
+							</li>
+						{:else}
+							<li class="note"><Icon name="info" size={18} />{t('map.del.pointLinked')}</li>
+						{/if}
+						<li>
+							<a class="btn-quiet osm" href={`${srv().web}/${selected.osm}`} rel="external">
+								{t('common.seeOnOsm')}<Icon name="ext" size={16} />
+							</a>
+						</li>
+					</ul>
+				{/if}
 				{#if more && selected.kind === 'pancarte'}
 					<ul class="menu" id="more-menu">
 						{#if signOf}
@@ -1002,6 +1202,13 @@
 		border-radius: 1px;
 		background: var(--bg);
 	}
+	.chip.equip .pict {
+		width: 9px;
+		height: 9px;
+		border: 1.5px solid var(--equip);
+		border-radius: 50%;
+		background: var(--equip-soft);
+	}
 	.chip[aria-pressed='false'] .pict {
 		opacity: 0.35;
 	}
@@ -1048,6 +1255,44 @@
 		text-decoration: none;
 		box-shadow: 0 2px 6px rgb(0 0 0 / 0.28);
 	}
+	.add {
+		border: 0;
+		font-family: var(--font);
+		cursor: pointer;
+	}
+	/* Menu « Ajouter » : au-dessus du bouton, liens en lignes de 48 px. */
+	.add-menu {
+		position: absolute;
+		right: calc(12px + env(safe-area-inset-right));
+		bottom: calc(84px + env(safe-area-inset-bottom));
+		width: min(280px, calc(100% - 24px));
+		padding: 6px;
+		background: var(--bg);
+	}
+	.add-menu p {
+		margin: 4px 8px 6px;
+		font-size: 0.875rem;
+		color: var(--text-2);
+	}
+	.add-menu ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.add-menu a {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		min-height: 48px;
+		padding: 0 8px;
+		border-radius: var(--radius);
+		color: var(--text);
+		font-weight: 600;
+		text-decoration: none;
+	}
+	.add-menu a :global(svg) {
+		color: var(--primary);
+	}
 	/* Feuille basse compacte (décision 5) : titre, 1 à 3 constats, un seul bouton discret. */
 	.sheet {
 		position: absolute;
@@ -1090,6 +1335,9 @@
 	.fam.voie {
 		background: var(--voie-soft);
 		color: var(--voie);
+	}
+	.fam.equip {
+		color: var(--equip);
 	}
 	.fam.pancarte {
 		background: var(--pancarte-soft);

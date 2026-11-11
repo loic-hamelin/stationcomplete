@@ -15,6 +15,7 @@ export const MAP = {
 	sel: '#FFF700', // jaune OSRD highlight-30 : sélection, accrochage
 	casing: '#14110E', // liseré
 	plate: '#FFFFFF', // plaque de pancarte
+	equip: '#8CBFE6', // équipements (ascenseur, distributeur), sous z18
 	ground: '#8C877C' // fond sous la photo, le temps qu'elle arrive
 } as const;
 

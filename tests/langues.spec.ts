@@ -108,7 +108,9 @@ for (const [lang, txt] of Object.entries(PARCOURS)) {
 		// E5 — carte ouverte depuis une quête, fiche de l'objet
 		await page.getByRole('link', { name: txt.duplicate }).click();
 		await expect(page.locator('.maplibregl-canvas')).toBeVisible();
-		await expect(page.locator('.rc-badge')).toHaveCount(23);
+		await expect(page.locator('.rc-badge')).toHaveCount(23 + 12);
+		// (dont 12 équipements : 6 ascenseurs, 3 distributeurs de billets, 3 escaliers, lot Équipements)
+		await expect(page.locator('.rc-badge.equip')).toHaveCount(12);
 		const sheet = page.getByRole('region', { name: txt.sheet });
 		await expect(sheet).toContainText(txt.track);
 		await expect(sheet).toContainText(txt.fact);

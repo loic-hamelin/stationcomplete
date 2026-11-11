@@ -26,6 +26,7 @@
 		visiblePart
 	} from './style.js';
 	import { t } from '#lib/i18n/t.js';
+	import { ICONS } from '#lib/icons.js';
 	import { onMount, tick, untrack } from 'svelte';
 
 	type Kind = FeatureProps['kind'];
@@ -93,7 +94,7 @@
 		const p = f.properties;
 		if (p.osm === selected) return 0;
 		if (p.kind === 'quai') return p.status === 'alert' ? 1 : 2;
-		if (p.kind === 'pancarte') return 3;
+		if (p.kind === 'pancarte' || p.kind === 'equip') return 3;
 		return p.status === 'alert' ? 4 : p.status === 'missing' || p.edited ? 5 : 6;
 	}
 
@@ -103,6 +104,7 @@
 		if (!visible[p.kind]) return false;
 		if (p.osm === selected) return true;
 		if (p.kind === 'pancarte') return z >= 18.5;
+		if (p.kind === 'equip') return z >= 18;
 		if (z < 17) return p.status !== 'ok' || !!p.edited;
 		if (p.kind === 'quai' || z >= 18) return true;
 		// 17 ≤ z < 18 : numéros de voie complets masqués sur la vue générale (décision 3).
@@ -172,7 +174,10 @@
 			const state = p.status === 'missing' ? 'todo' : p.status;
 			el.className = `rc-badge ${p.kind} ${state}${p.edited ? ' edited' : ''}${p.label === '?' ? ' unknown' : ''}`;
 			const span = document.createElement('span');
-			span.textContent = p.label;
+			// Équipement : icône du jeu maison (ascenseur, distributeur), nommée par aria-label.
+			if (p.kind === 'equip' && p.sub)
+				span.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[p.sub]}</svg>`;
+			else span.textContent = p.label;
 			el.append(span);
 			el.setAttribute('aria-label', `${p.title}. ${p.detail}`);
 			el.setAttribute('aria-pressed', String(p.osm === selected));
@@ -199,7 +204,8 @@
 		const layers: Record<Kind, string[]> = {
 			quai: ['quai-sel', 'quai-fill', 'quai-casing', 'quai-line', 'quai-line-under'],
 			voie: ['voie-sel', 'voie-casing', 'voie-line', 'voie-line-under'],
-			pancarte: ['pancarte']
+			pancarte: ['pancarte'],
+			equip: ['equip', 'equip-casing', 'equip-line', 'equip-arrow']
 		};
 		for (const k of Object.keys(layers) as Kind[])
 			for (const id of layers[k])
@@ -381,6 +387,61 @@
 									'line-dasharray': UNDER_DASH
 								}
 							},
+							// Escaliers (étape 3) : trait fin bleu pâle sur liseré, flèche vers le haut (ou
+							// sens de marche) quand il est connu ; pointillés estompés si souterrain.
+							{
+								id: 'equip-casing',
+								type: 'line',
+								source: 'gare',
+								filter: ['all', kindIs('equip'), ['==', ['geometry-type'], 'LineString']],
+								layout: line,
+								paint: {
+									'line-color': MAP.casing,
+									'line-opacity': ['case', under, UNDER_CASING, 0.7],
+									'line-width': W(plus(QUAI_W, 2.5))
+								}
+							},
+							{
+								id: 'equip-line',
+								type: 'line',
+								source: 'gare',
+								filter: ['all', kindIs('equip'), ['==', ['geometry-type'], 'LineString']],
+								layout: line,
+								paint: {
+									'line-color': ['case', IS_SEL, MAP.sel, isEdited, MAP.edited, MAP.equip],
+									'line-opacity': ['case', IS_SEL, 1, under, UNDER_LINE, 1],
+									'line-width': W(plus(QUAI_W, 1))
+								}
+							},
+							{
+								id: 'equip-arrow',
+								type: 'symbol',
+								source: 'gare',
+								filter: ['all', kindIs('equip'), ['has', 'arrow']],
+								minzoom: 17.5,
+								layout: {
+									'symbol-placement': 'line-center',
+									'icon-image': 'rc-arrow',
+									'icon-rotation-alignment': 'map',
+									'icon-allow-overlap': true,
+									'icon-ignore-placement': true,
+									'icon-rotate': ['case', ['==', ['get', 'arrow'], 'backward'], 180, 0]
+								}
+							},
+							// Équipements sous z18 : petit rond bleu pâle (étiquette à icône au-delà).
+							{
+								id: 'equip',
+								type: 'circle',
+								source: 'gare',
+								filter: ['all', kindIs('equip'), ['==', ['geometry-type'], 'Point']],
+								maxzoom: 18,
+								paint: {
+									'circle-radius': 3.5,
+									'circle-color': ['case', IS_SEL, MAP.sel, MAP.equip],
+									'circle-stroke-color': MAP.casing,
+									'circle-stroke-width': 1
+								}
+							},
 							// Pancartes sous z18,5 : petit rond blanc (la plaque est un marqueur DOM au-delà).
 							{
 								id: 'pancarte',
@@ -397,6 +458,12 @@
 							}
 						]
 					}
+				});
+				// Flèche des escaliers, dessinée ici (aucune ressource externe) : pointe vers la droite,
+				// c'est-à-dire dans le sens de la ligne.
+				map.on('styleimagemissing', (e) => {
+					if (e.id === 'rc-arrow' && !map!.hasImage('rc-arrow'))
+						map!.addImage('rc-arrow', arrowImage(), { pixelRatio: 2 });
 				});
 				map.on('error', (e) => console.warn('[stationcomplete] carte :', e.error?.message));
 				map.on('moveend', relayout);
@@ -436,6 +503,8 @@
 						],
 						{
 							layers: [
+								'equip',
+								'equip-line',
 								'pancarte',
 								'voie-line',
 								'voie-line-under',
@@ -459,6 +528,25 @@
 			map?.remove();
 		};
 	});
+
+	function arrowImage() {
+		const c = document.createElement('canvas');
+		c.width = c.height = 28;
+		const g = c.getContext('2d')!;
+		g.lineJoin = 'round';
+		g.beginPath();
+		g.moveTo(6, 6);
+		g.lineTo(22, 14);
+		g.lineTo(6, 22);
+		g.lineTo(10, 14);
+		g.closePath();
+		g.fillStyle = MAP.casing;
+		g.strokeStyle = '#ffffff';
+		g.lineWidth = 2;
+		g.stroke();
+		g.fill();
+		return g.getImageData(0, 0, 28, 28);
+	}
 
 	function centerOf(f: F): [number, number] {
 		const pts = ringOf(f);
@@ -511,6 +599,7 @@
 		void visible.quai;
 		void visible.voie;
 		void visible.pancarte;
+		void visible.equip;
 		applyVisibility();
 	});
 </script>
@@ -613,6 +702,20 @@
 		color: #1f1b17;
 		box-shadow: 0 0 0 1px #14110e;
 		font-size: 10px;
+	}
+	/* Équipement : pastille claire à icône fine (ascenseur, distributeur). */
+	:global(.rc-badge.equip > span) {
+		height: 20px;
+		padding: 0 3px;
+		border-radius: 4px;
+		background: #fff;
+		color: #1f1b17;
+		box-shadow: 0 0 0 1px #14110e;
+	}
+	:global(.rc-badge.equip.todo > span) {
+		box-shadow:
+			0 0 0 1px #14110e,
+			0 0 0 3px #ffe08a;
 	}
 	:global(.rc-badge.pancarte::after) {
 		content: '';

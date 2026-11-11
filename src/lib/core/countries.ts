@@ -109,6 +109,14 @@ export interface Country {
 	};
 	/** Langues de l'interface proposées par défaut dans ce pays, la première d'abord. */
 	languages: Language[];
+	/** Équipements des quais (E7) : valeurs proposées en premier, propres au pays. */
+	equipment: {
+		/**
+		 * Hauteurs de quai usuelles, en mètres au-dessus du rail (tag `height`), proposées en
+		 * boutons ; « Autre » permet toujours une autre valeur.
+		 */
+		platformHeights: number[];
+	};
 }
 
 const france: Country = {
@@ -156,7 +164,10 @@ const france: Country = {
 	},
 	timeZones: ['Europe/Paris'],
 	quests: { misplacedTrackRef: /^\s*(voie|v)\s*\w+/i },
-	languages: ['fr']
+	languages: ['fr'],
+	// Hauteurs usuelles des quais en France : 0,55 m (standard européen), 0,76 m (ancienne
+	// norme, encore courante), 0,92 m (RER et Transilien d'Île-de-France).
+	equipment: { platformHeights: [0.55, 0.76, 0.92] }
 };
 
 // Suisse entière (décision de Loïc), pas encore activée. Seules les valeurs établies sont
@@ -187,7 +198,9 @@ const switzerland: Country = {
 	timeZones: ['Europe/Zurich'],
 	// Motifs « Gleis N », « voie N », « binario N » (étude § 6.2, point 10) ; usage non mesuré.
 	quests: { misplacedTrackRef: /^\s*(gleis|voie|binario|v)\s*\w+/i },
-	languages: ['de', 'fr', 'it']
+	languages: ['de', 'fr', 'it'],
+	// Suisse : 0,55 m est la hauteur standard (indication de Loïc, à confirmer à l'activation).
+	equipment: { platformHeights: [0.55] }
 };
 
 export const COUNTRIES: Record<CountryCode, Country> = { fr: france, ch: switzerland };

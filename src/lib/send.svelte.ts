@@ -8,7 +8,7 @@
 
 import { readPref, writePref } from './cache.js';
 import { recordCountry } from './core/countries.js';
-import type { Edit } from './core/edits.js';
+import { isRemoval, type Edit } from './core/edits.js';
 import type { OsmElement } from './core/osm.js';
 import {
 	changesetTags,
@@ -20,6 +20,7 @@ import {
 	planUpload,
 	proposedComment,
 	signsToCheck,
+	pointsToCheck,
 	usageToCheck
 } from './core/upload.js';
 import { uploadBlock } from './core/remote.js';
@@ -163,6 +164,14 @@ async function readFresh(edits: Edit[]): Promise<OsmElement[]> {
 		])
 	);
 	out.push(...signs.flat());
+	// Équipements ponctuels à supprimer (lot Équipements) : ways et relations du nœud.
+	const points = await pool(
+		pointsToCheck(edits).flatMap((n) => [
+			() => gone(`/api/0.6/node/${n}/ways.json`),
+			() => gone(`/api/0.6/node/${n}/relations.json`)
+		])
+	);
+	out.push(...points.flat());
 	return out;
 }
 
@@ -248,14 +257,18 @@ export async function sendStation(
 			survey: sentEdits.some(
 				(e) =>
 					e.kind === 'node' ||
+					e.kind === 'point' ||
 					(e.kind === 'tags' && read(e.tags)) ||
 					(e.kind === 'shape' && read(e.tags)) ||
-					((e.kind === 'delete' || e.kind === 'signdelete') && e.reason === 'gone')
+					(isRemoval(e) && e.reason === 'gone')
 			),
+			// Photo aérienne : dessin, formes, placements sur la photo (un équipement situé sur
+			// un quai ne s'en sert pas), suppressions à distance.
 			imagery: sentEdits.some(
 				(e) =>
 					e.kind !== 'tags' &&
-					!((e.kind === 'delete' || e.kind === 'signdelete') && e.reason === 'gone')
+					!(e.kind === 'point' && e.placed === 'platform') &&
+					!(isRemoval(e) && e.reason === 'gone')
 			)
 		});
 

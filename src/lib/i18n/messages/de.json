@@ -77,7 +77,11 @@
 		"signDirection": "Richtung erfasst",
 		"signNoDirection": "Fahrtrichtung der Züge vor Ort erfassen",
 		"parts": "in {count} Teilen{covered, plural, =0 {} one {, davon # überdeckt} other {, davon # überdeckt}}",
-		"titleParts": "{title} — {parts}"
+		"titleParts": "{title} — {parts}",
+		"level": "Ebene {level}",
+		"wheelchair": "{value, select, yes {Rollstuhlgerecht} other {Nicht rollstuhlgerecht}}",
+		"equipNoDetail": "Keine Angaben",
+		"stepCount": "{count, plural, one {# Stufe} other {# Stufen}}"
 	},
 	"quest": {
 		"q0": {
@@ -109,6 +113,18 @@
 			"title": "{count, plural, one {# falsch platzierte Gleisnummer} other {# falsch platzierte Gleisnummern}}",
 			"duplicate": "Zwei Gleise tragen die Nummer {ref}",
 			"subtitle": "Vorrangig zu prüfen"
+		},
+		"q8": {
+			"title": "{count, plural, one {# Bahnsteig: Ausstattung erfassen} other {# Bahnsteige: Ausstattung erfassen}}"
+		},
+		"q9": {
+			"title": "{count, plural, one {# Aufzug: Rollstuhlzugang erfassen} other {# Aufzüge: Rollstuhlzugang erfassen}}"
+		},
+		"q10": {
+			"title": "{count, plural, one {# Treppe ergänzen} other {# Treppen ergänzen}}"
+		},
+		"q11": {
+			"title": "{count, plural, one {# Rolltreppe oder Fahrsteig: Fahrtrichtung erfassen} other {# Rolltreppen oder Fahrsteige: Fahrtrichtung erfassen}}"
 		}
 	},
 	"signRemoval": {
@@ -366,7 +382,10 @@
 			"signTrack": "Das Gleis der Haltetafel wurde inzwischen gelöscht oder neu gezeichnet.",
 			"ringIncomplete": "Unvollständiger Umriss des Bahnsteigs.",
 			"partGone": "Ein Teil des Bahnsteigs wurde inzwischen auf OpenStreetMap gelöscht: Für diesen Bahnsteig wurde nichts gesendet.",
-			"partClash": "Ein Teil des Bahnsteigs wurde inzwischen von jemand anderem geändert ({key}): Für diesen Bahnsteig wurde nichts gesendet (seine Teile werden zusammen gesendet)."
+			"partClash": "Ein Teil des Bahnsteigs wurde inzwischen von jemand anderem geändert ({key}): Für diesen Bahnsteig wurde nichts gesendet (seine Teile werden zusammen gesendet).",
+			"pointDeleted": "Ausstattung bereits auf OpenStreetMap gelöscht.",
+			"pointChanged": "Die Ausstattung wurde inzwischen auf OpenStreetMap geändert: Für sie wurde nichts hochgeladen. Lösche sie erneut auf der aktuellen Karte.",
+			"pointLinked": "Die Ausstattung wurde inzwischen auf OpenStreetMap mit einem anderen Objekt verbunden: Für sie wurde nichts hochgeladen. Lösche sie mit einem Editor wie iD oder JOSM."
 		},
 		"comment": {
 			"numbers": "Bahnsteig- und Gleisnummern, Haltetafeln",
@@ -375,7 +394,12 @@
 			"deleted": "{name} gelöscht ({why})",
 			"signDeleted": "Haltetafel „{label}“ gelöscht ({why}{mode, select, untag {, Punkt bleibt im Gleis} other {}})",
 			"station": "Bahnhof {name}: {parts}",
-			"parts": "{name} ({count} Teile): Nummer in jedem Teil eingetragen"
+			"parts": "{name} ({count} Teile): Nummer in jedem Teil eingetragen",
+			"equipment": "Bahnsteigausstattung",
+			"pointTags": "Aufzüge und Fahrkartenautomaten ergänzt",
+			"pointsAdded": "hinzugefügt: {list}",
+			"pointDeleted": "{label} gelöscht ({why})",
+			"steps": "Treppen ergänzt"
 		}
 	},
 	"bearing": {
@@ -396,12 +420,15 @@
 			"shape": "Form des Bahnsteigs",
 			"delete": "Löschung · Grund: {why}",
 			"signDelete": "Löschung einer Haltetafel · Grund: {why}",
-			"tags": "Änderung"
+			"tags": "Änderung",
+			"newPoint": "Neue Ausstattung",
+			"pointDelete": "Ausstattung gelöscht · Grund: {why}"
 		},
 		"drawnSummary": "{summary} (gezeichnet)",
 		"error": {
 			"signDeleted": "Diese Haltetafel ist zum Löschen vorgemerkt: Entferne zuerst diese Änderung.",
-			"platformDeleted": "Dieser Bahnsteig ist zum Löschen vorgemerkt: Entferne zuerst diese Änderung."
+			"platformDeleted": "Dieser Bahnsteig ist zum Löschen vorgemerkt: Entferne zuerst diese Änderung.",
+			"pointDeleted": "Diese Ausstattung ist zum Löschen markiert: Entferne zuerst diese Änderung."
 		}
 	},
 	"remote": {
@@ -762,7 +789,9 @@
 			"tracksUnit": "nummeriert",
 			"signs": "Haltetafeln",
 			"signsUnit": "Seiten erfasst",
-			"none": "nichts zu erfassen"
+			"none": "nichts zu erfassen",
+			"equipment": "Ausstattung",
+			"equipmentUnit": "Bahnsteige erfasst"
 		},
 		"offline": {
 			"label": "Offline",
@@ -799,7 +828,9 @@
 			"edited": "Von dir geändert, wartet auf das Hochladen",
 			"under": "Unterirdisch (Tunnel, untere Ebene)",
 			"todo": "Zu ergänzen",
-			"alert": "Vorrangig zu prüfen"
+			"alert": "Vorrangig zu prüfen",
+			"equip": "Ausstattung (Aufzug, Automat)",
+			"steps": "Treppe (Pfeil nach oben)"
 		},
 		"loading": "Bahnhof wird geladen …",
 		"locate": "Meinen Standort anzeigen",
@@ -813,7 +844,11 @@
 			"Q6": "Zu prüfen (kein aktuelles Prüfdatum)",
 			"Q7": "Doppelte oder widersprüchliche Gleisnummer",
 			"mixed": "Die Teile dieses Bahnsteigs haben nicht dieselbe Nummer: prüfe vor Ort",
-			"partial": "Nummer fehlt auf {count, plural, one {# Teil} other {# Teilen}} des Bahnsteigs: auf jeden Teil übertragen"
+			"partial": "Nummer fehlt auf {count, plural, one {# Teil} other {# Teilen}} des Bahnsteigs: auf jeden Teil übertragen",
+			"Q8": "Ausstattung erfassen: {items}",
+			"Q9": "Rollstuhlzugang erfassen",
+			"Q10": "Zu ergänzen: {items}",
+			"Q11": "Fahrtrichtung erfassen"
 		},
 		"editedHere": "Auf diesem Telefon geändert, wartet auf das Hochladen.",
 		"del": {
@@ -831,7 +866,12 @@
 			"points": "{lost, plural, one {# Punkt gelöscht} other {# Punkte gelöscht}}{kept, plural, =0 {} one {; # mit anderen Objekten verbunden, bleibt erhalten} other {; # mit anderen Objekten verbunden, bleiben erhalten}}.",
 			"platformReplaced": "Deine Änderungen an diesem Bahnsteig werden entfernt: {list}.",
 			"platformButton": "Bahnsteig löschen",
-			"partOnly": "Nur dieser Teil wird gelöscht ({part}): Die anderen Teile des Bahnsteigs bleiben."
+			"partOnly": "Nur dieser Teil wird gelöscht ({part}): Die anderen Teile des Bahnsteigs bleiben.",
+			"pointTitle": "Diese Ausstattung löschen?",
+			"pointButton": "Ausstattung löschen",
+			"pointPhrase": "Der Punkt wird gelöscht: Er ist mit keinem anderen Objekt verbunden.",
+			"pointLinked": "Ausstattung mit anderen Objekten verbunden (Weg, Gebäude, Relation) oder als Fläche gezeichnet: mit einem Editor wie iD oder JOSM löschen.",
+			"pointReplaced": "Deine Änderungen an dieser Ausstattung werden entfernt: {list}."
 		},
 		"seeContributions": "Meine Beiträge ansehen",
 		"fill": "Erfassen",
@@ -849,7 +889,11 @@
 			"covered": "Überdeckter Teil ({length})",
 			"choose": "Welcher Teil des Bahnsteigs?",
 			"named": "{name}, {covered, select, yes {überdeckter Teil} other {Teil unter freiem Himmel}}"
-		}
+		},
+		"filterEquip": "Ausstattung",
+		"add": "Hinzufügen",
+		"addMenu": "Was möchtest du hinzufügen?",
+		"deletePoint": "Diese Ausstattung löschen …"
 	},
 	"input": {
 		"title": "Details — stationcomplete",
@@ -915,7 +959,27 @@
 			"letterHint": "Ein Schild mit einem einzelnen Buchstaben (A, B …) ist keine Haltetafel, sondern eine Sektorenkennzeichnung des Bahnsteigs."
 		},
 		"correct": "Stimmt so",
-		"fix": "Korrigieren"
+		"fix": "Korrigieren",
+		"equip": {
+			"title": "Ausstattung des Bahnsteigs",
+			"hint": "Was es an diesem Bahnsteig gibt, vor Ort gesehen. „Weiß nicht“ ändert nichts.",
+			"height": "Bahnsteighöhe über Schienenoberkante",
+			"meters": "{value} m",
+			"other": "Andere",
+			"otherLabel": "Andere Höhe, in Metern",
+			"otherPlaceholder": "z. B. 0,38",
+			"heightFormat": "Höhe unklar: in Metern angeben, zum Beispiel 0,55.",
+			"heightRange": "Unwahrscheinliche Bahnsteighöhe: zwischen 0,10 und 1,50 m.",
+			"display": "Zuganzeiger (Zeiten, Gleis)",
+			"shelter": "Unterstand zum Warten",
+			"shelterParts": "Nur Teile unter freiem Himmel: überdeckte Teile sind nicht betroffen.",
+			"tactile": "Taktile Leitstreifen an der Bahnsteigkante",
+			"bench": "Sitzbänke",
+			"unknown": "Weiß nicht",
+			"summary": "{summary}; Ausstattung: {items}",
+			"summaryAlone": "{name}: Ausstattung ({items})",
+			"needSomething": "Gib eine Gleisnummer oder mindestens eine Ausstattung an."
+		}
 	},
 	"place": {
 		"title": "Haltetafel platzieren — stationcomplete",
@@ -927,7 +991,10 @@
 		"near": "Auf diesem Gleis gibt es bereits eine Haltetafel in weniger als 10 m Entfernung.",
 		"editThis": "Diese bearbeiten",
 		"another": "Es ist eine andere",
-		"validate": "Position bestätigen"
+		"validate": "Position bestätigen",
+		"equipHeading": "Platzieren: {label}",
+		"equipHelp": "Bewege das Kreuz <b>auf die Ausstattung</b>, wie auf dem Luftbild zu sehen.",
+		"equipHere": "Der Punkt wird unter das Kreuz gesetzt."
 	},
 	"drawPage": {
 		"title": "Bahnsteig zeichnen — stationcomplete",
@@ -1019,5 +1086,108 @@
 		"left": "Fadenkreuz nach links verschieben",
 		"right": "Fadenkreuz nach rechts verschieben",
 		"down": "Fadenkreuz nach unten verschieben"
+	},
+	"equip": {
+		"item": {
+			"height": "Höhe",
+			"display": "Anzeigen",
+			"shelter": "Unterstand",
+			"tactile": "taktile Leitstreifen",
+			"bench": "Sitzbänke"
+		},
+		"reasonInline": {
+			"gone": "existiert nicht mehr",
+			"duplicate": "doppelt",
+			"misplaced": "falsch platziert"
+		},
+		"reason": {
+			"gone": "Existiert nicht mehr",
+			"duplicate": "Doppelt",
+			"misplaced": "Falsch platziert"
+		},
+		"kind": {
+			"elevator": "Aufzug",
+			"ticket": "Fahrkartenautomat"
+		},
+		"title": "Ausstattung",
+		"onSite": "Ausstattung wird <b>vor Ort</b> erfasst – hinter der Sicherheitslinie bleiben.",
+		"place": {
+			"where": "Wo befindet es sich?",
+			"outside": "Im Freien",
+			"inside": "Drinnen oder unterirdisch",
+			"outsideHint": "Auf dem Luftbild sichtbar: Setze es genau unter das Kreuz.",
+			"onPhoto": "Auf dem Luftbild platzieren",
+			"insideHint": "Luftbild und GPS helfen hier nicht: Gib die Lage am Bahnsteig an, die App berechnet den Punkt.",
+			"platform": "An welchem Bahnsteig?",
+			"noPlatform": "Kein Bahnsteig in OpenStreetMap für diesen Bahnhof.",
+			"platformTracks": "Gleise {refs} · {length}",
+			"along": "Wo entlang des Bahnsteigs?",
+			"end": "Ende Richtung {dir}",
+			"endInline": "Ende Richtung {dir}",
+			"middle": "Mitte",
+			"distance": "In einem Abstand …",
+			"distanceLabel": "Meter ab dem {end}",
+			"distanceHint": "Der Bahnsteig ist {length} lang.",
+			"distanceBad": "Gib einen Abstand zwischen 0 und der Bahnsteiglänge an.",
+			"side": "Auf welcher Seite?",
+			"sideTrack": "Seite Gleis {refs}",
+			"sideDir": "Seite Richtung {dir}",
+			"center": "In der Mitte",
+			"result": "{platform}: Punkt {along} vom {end}, {inside, select, yes {innerhalb des Bahnsteigumrisses.} other {auf der Bahnsteiglinie.}}",
+			"level": " Ebene des Bahnsteigs: {level}.",
+			"needPlace": "Gib zuerst die Lage an."
+		},
+		"levels": "Angefahrene Ebenen",
+		"level": "Ebene",
+		"levelsHint": "Mit „;“ getrennt, zum Beispiel -1;0 (0 = Erdgeschoss).",
+		"levelHint": "0 = Erdgeschoss, -1 = Untergeschoss.",
+		"levelBad": "Ebenen unklar: Zahlen mit „;“ getrennt, zum Beispiel -1;0.",
+		"wheelchair": "Rollstuhlgerecht",
+		"operator": "Betreiber",
+		"operatorPlaceholder": "z. B. SNCF Voyageurs",
+		"isolated": "Der Punkt wird einzeln hinzugefügt, ohne Verbindung zu Fußwegen: Er kann später mit iD oder JOSM verbunden werden.",
+		"duplicate": "{label} bereits {dist} entfernt erfasst: Ist es dasselbe?",
+		"editThis": "Dieses bearbeiten",
+		"createAnyway": "Ein weiteres anlegen",
+		"summaryEdit": "{label}: {facts}",
+		"summaryVerified": "{label} geprüft"
+	},
+	"steps": {
+		"kind": {
+			"stairs": "Treppe",
+			"escalator": "Rolltreppe",
+			"walkway": "Fahrsteig"
+		},
+		"detail": {
+			"up": "Pfeil zeigt nach oben",
+			"moving": "Pfeil: Fahrtrichtung"
+		},
+		"item": {
+			"incline": "Aufwärtsrichtung",
+			"handrail": "Handläufe",
+			"tactile": "taktile Leitstreifen",
+			"conveying": "Fahrtrichtung"
+		}
+	},
+	"stepsPage": {
+		"sketch": "Skizze: {kind} als dicke Linie, Pfeil in Wegrichtung in OpenStreetMap, benachbarte Bahnsteige hellgrün, Norden oben.",
+		"never": "Der Pfeil folgt der Wegrichtung in OpenStreetMap. Deine Antworten beziehen sich darauf; die App dreht den Weg nie um. (Auf der Karte zeigt der Pfeil, sobald bekannt, nach oben bzw. in Fahrtrichtung.)",
+		"incline": "In Pfeilrichtung: Geht die Treppe hinauf oder hinunter?",
+		"up": "Hinauf",
+		"down": "Hinunter",
+		"conveying": "In welche Richtung fährt sie?",
+		"forward": "In Pfeilrichtung",
+		"backward": "Gegen den Pfeil",
+		"reversible": "Wechselt (je nach Uhrzeit)",
+		"handrail": "Handläufe (in Pfeilrichtung)",
+		"both": "Beidseitig",
+		"left": "Nur links",
+		"right": "Nur rechts",
+		"none": "Keine",
+		"tactile": "Taktile Leitstreifen oben und unten",
+		"stepCount": "Anzahl der Stufen",
+		"stepCountBad": "Stufenzahl unklar: eine ganze Zahl von 1 bis 500.",
+		"nothing": "Beantworte mindestens eine Frage oder tippe auf „Stimmt so“.",
+		"summary": "{kind}: {items}"
 	}
 }

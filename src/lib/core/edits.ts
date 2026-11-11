@@ -40,7 +40,7 @@ export interface TagEdit extends EditBase {
 	 * l'interface, on ne peut plus la déduire de son texte. Absente des saisies plus anciennes
 	 * (résumés en français : « Quai… » ou « Voie… »).
 	 */
-	family?: 'quai' | 'voie';
+	family?: 'quai' | 'voie' | 'equip';
 	/**
 	 * Quai en plusieurs parties : autres parties qui reçoivent les mêmes tags, dans le même
 	 * envoi (un <modify> par partie). La saisie part entière ou pas du tout : si l'une des
@@ -56,7 +56,16 @@ export interface TagPart {
 	target: ElementKey;
 	version?: number;
 	base?: Record<string, string | null>;
+	/**
+	 * Clés de la saisie à ne pas écrire sur cette partie (équipements : l'abri ne concerne pas
+	 * une partie couverte). Absent : tous les tags de la saisie.
+	 */
+	omit?: string[];
 }
+
+/** Tags d'une saisie qui s'appliquent à une partie (sans ses clés exclues). */
+export const partTags = (tags: Record<string, string | null>, omit?: string[]) =>
+	omit?.length ? Object.fromEntries(Object.entries(tags).filter(([k]) => !omit.includes(k))) : tags;
 
 /** Objets visés par une saisie de tags : l'objet, puis les autres parties du même quai. */
 export const tagTargets = (e: TagEdit): TagPart[] => [
@@ -198,19 +207,68 @@ export interface SignDeleteEdit extends EditBase {
 	summary: string;
 }
 
-export type Edit = TagEdit | NewNodeEdit | NewWayEdit | ShapeEdit | DeleteEdit | SignDeleteEdit;
+/**
+ * Nouvel équipement ponctuel (lot Équipements : ascenseur, distributeur de billets) : nœud
+ * isolé, relié à aucun chemin (le wiki l'accepte ; le relier se fait dans un éditeur complet).
+ */
+export interface PointEdit extends EditBase {
+	kind: 'point';
+	/** Identifiant négatif provisoire. */
+	tempId: number;
+	lon: number;
+	lat: number;
+	tags: Tags;
+	/** Placé sur la photo aérienne (« photo ») ou situé sur un quai (« platform »). */
+	placed: 'photo' | 'platform';
+	summary: string;
+}
+
+/**
+ * Suppression d'un équipement ponctuel existant (lot Équipements, comme une pancarte au lot 7d) :
+ * seulement un nœud isolé (dans aucun way ni aucune relation), relu avant l'envoi.
+ */
+export interface PointDeleteEdit extends EditBase {
+	kind: 'pointdelete';
+	target: `node/${number}`;
+	version?: number;
+	/** « gone » : sur place seulement ; « duplicate », « misplaced » : permis à distance. */
+	reason: 'gone' | 'duplicate' | 'misplaced';
+	/** Libellé (« Ascenseur »), pour les résumés et le commentaire du changeset. */
+	label: string;
+	summary: string;
+}
+
+export type Edit =
+	| TagEdit
+	| NewNodeEdit
+	| NewWayEdit
+	| ShapeEdit
+	| DeleteEdit
+	| SignDeleteEdit
+	| PointEdit
+	| PointDeleteEdit;
 
 /** Saisie qui vise un objet existant par `target` (tags, forme, suppressions). */
-export const targets = (e: Edit): e is TagEdit | ShapeEdit | DeleteEdit | SignDeleteEdit =>
-	e.kind === 'tags' || e.kind === 'shape' || e.kind === 'delete' || e.kind === 'signdelete';
+export const targets = (
+	e: Edit
+): e is TagEdit | ShapeEdit | DeleteEdit | SignDeleteEdit | PointDeleteEdit =>
+	e.kind === 'tags' ||
+	e.kind === 'shape' ||
+	e.kind === 'delete' ||
+	e.kind === 'signdelete' ||
+	e.kind === 'pointdelete';
 
 /** Suppression (quai ou pancarte) : jamais renvoyée telle quelle, elle se refait sur la carte. */
-export const isRemoval = (e: Edit): e is DeleteEdit | SignDeleteEdit =>
-	e.kind === 'delete' || e.kind === 'signdelete';
+export const isRemoval = (e: Edit): e is DeleteEdit | SignDeleteEdit | PointDeleteEdit =>
+	e.kind === 'delete' || e.kind === 'signdelete' || e.kind === 'pointdelete';
 
 /** Clé de l'objet principal d'une saisie (« way/-3 », « node/-1 », « way/123 »). */
 export const editKey = (e: Edit): ElementKey =>
-	targets(e) ? e.target : e.kind === 'node' ? `node/${e.tempId}` : `way/${e.tempId}`;
+	targets(e)
+		? e.target
+		: e.kind === 'node' || e.kind === 'point'
+			? `node/${e.tempId}`
+			: `way/${e.tempId}`;
 
 /** Applique des changements de tags (null ou vide = retirer). */
 export function changeTags(tags: Tags | undefined, changes: Record<string, string | null> = {}) {
@@ -226,14 +284,16 @@ export function changeTags(tags: Tags | undefined, changes: Record<string, strin
 export const AREA_TAGS = { area: 'yes' } as const;
 
 /** Famille d'objet d'une saisie (couleur de la ligne dans les listes E8 et E9). */
-export const editFamily = (e: Edit): 'quai' | 'voie' | 'pancarte' =>
-	e.kind === 'node' ||
-	e.kind === 'signdelete' ||
-	(e.kind === 'tags' && e.target.startsWith('node/'))
-		? 'pancarte'
-		: e.kind !== 'tags' || isPlatformTagEdit(e)
-			? 'quai'
-			: 'voie';
+export const editFamily = (e: Edit): 'quai' | 'voie' | 'pancarte' | 'equip' =>
+	e.kind === 'point' || e.kind === 'pointdelete' || (e.kind === 'tags' && e.family === 'equip')
+		? 'equip'
+		: e.kind === 'node' ||
+			  e.kind === 'signdelete' ||
+			  (e.kind === 'tags' && e.target.startsWith('node/'))
+			? 'pancarte'
+			: e.kind !== 'tags' || isPlatformTagEdit(e)
+				? 'quai'
+				: 'voie';
 
 /** Saisie de tags sur un quai (et non sur une voie) ; saisies d'avant le lot traduction : résumé. */
 const isPlatformTagEdit = (e: TagEdit) =>
@@ -246,6 +306,9 @@ export const editIcon = (e: Edit) =>
 /** Nature d'une saisie, en clair (« Forme du quai », « Suppression »…). */
 export function editLabel(e: Edit) {
 	if (e.kind === 'node') return tr('edit.label.newSign');
+	if (e.kind === 'point') return tr('edit.label.newPoint');
+	if (e.kind === 'pointdelete')
+		return tr('edit.label.pointDelete', { why: tk(`equip.reasonInline.${e.reason}`) });
 	if (e.kind === 'way') return tr('edit.label.newPlatform');
 	if (e.kind === 'shape') return e.mode === 'area' ? tr('edit.label.area') : tr('edit.label.shape');
 	if (e.kind === 'delete')
@@ -272,9 +335,10 @@ export function mergeEdit(list: Edit[], edit: Edit): { edit?: Edit; drop: string
 	if (edit.kind === 'tags' && Number(edit.target.split('/')[1]) < 0) {
 		const target = edit.target;
 		const creator = list.find(
-			(e) => (e.kind === 'node' || e.kind === 'way') && editKey(e) === target
+			(e) => (e.kind === 'node' || e.kind === 'way' || e.kind === 'point') && editKey(e) === target
 		);
-		if (!creator || (creator.kind !== 'node' && creator.kind !== 'way')) return { drop: [] };
+		if (!creator || (creator.kind !== 'node' && creator.kind !== 'way' && creator.kind !== 'point'))
+			return { drop: [] };
 		const summary = isPlatformTagEdit(edit)
 			? tr('edit.drawnSummary', { summary: edit.summary })
 			: creator.summary;
@@ -293,8 +357,11 @@ export function mergeEdit(list: Edit[], edit: Edit): { edit?: Edit; drop: string
 	if (edit.kind === 'tags' && edit.target.startsWith('node/')) {
 		if (onTarget(edit.target).some((e) => e.kind === 'signdelete' && !e.conflict))
 			throw new Error(tr('edit.error.signDeleted'));
+		if (onTarget(edit.target).some((e) => e.kind === 'pointdelete' && !e.conflict))
+			throw new Error(tr('edit.error.pointDeleted'));
 	}
-	if (edit.kind === 'signdelete') return { edit, drop: onTarget(edit.target).map((e) => e.id) };
+	if (edit.kind === 'signdelete' || edit.kind === 'pointdelete')
+		return { edit, drop: onTarget(edit.target).map((e) => e.id) };
 	if (edit.kind === 'tags' && edit.target.startsWith('way/')) {
 		const others = onTarget(edit.target);
 		if (others.some((e) => e.kind === 'delete' && !e.conflict))
@@ -322,7 +389,9 @@ export function mergeEdit(list: Edit[], edit: Edit): { edit?: Edit; drop: string
 			? list.find((x) => x.kind === 'tags' && x.target === e.target)
 			: list.find(
 					(x) =>
-						(x.kind === 'node' || x.kind === 'way') && x.kind === e.kind && x.tempId === e.tempId
+						(x.kind === 'node' || x.kind === 'way' || x.kind === 'point') &&
+						x.kind === e.kind &&
+						x.tempId === e.tempId
 				);
 	if (same?.kind === 'tags' && e.kind === 'tags')
 		// Fusion : la nouvelle saisie complète la précédente sur le même objet.
@@ -390,9 +459,13 @@ export function applyEdits(elements: OsmElement[], edits: Edit[]): OsmElement[] 
 	for (const ed of edits) {
 		if (ed.kind === 'tags') {
 			// L'objet, et les autres parties du même quai s'il y en a.
-			for (const { target } of tagTargets(ed)) {
+			for (const { target, omit } of tagTargets(ed)) {
 				const e = out.get(target);
-				if (e) out.set(target, { ...e, tags: changeTags(e.tags, ed.tags) } as OsmElement);
+				if (e)
+					out.set(target, {
+						...e,
+						tags: changeTags(e.tags, partTags(ed.tags, omit))
+					} as OsmElement);
 			}
 		} else if (ed.kind === 'shape') {
 			const w = out.get(ed.target) as OsmWay | undefined;
@@ -435,6 +508,19 @@ export function applyEdits(elements: OsmElement[], edits: Edit[]): OsmElement[] 
 			for (const [k, e] of out)
 				if (e.type === 'way' && e.nodes.includes(id))
 					out.set(k, { ...e, nodes: e.nodes.filter((x) => x !== id) });
+		} else if (ed.kind === 'point') {
+			out.set(`node/${ed.tempId}`, {
+				type: 'node',
+				id: ed.tempId,
+				lon: ed.lon,
+				lat: ed.lat,
+				tags: ed.tags
+			});
+		} else if (ed.kind === 'pointdelete') {
+			// Équipement retiré de la vue locale (seulement un nœud isolé : sinon on le garde).
+			const id = Number(ed.target.split('/')[1]);
+			const used = [...out.values()].some((e) => e.type === 'way' && e.nodes.includes(id));
+			if (!used) out.delete(ed.target);
 		} else if (ed.kind === 'way') {
 			for (const n of ed.nodes)
 				out.set(`node/${n.id}`, { type: 'node', id: n.id, lon: n.lon, lat: n.lat });

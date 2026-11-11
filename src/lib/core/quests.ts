@@ -11,6 +11,7 @@ import {
 	sub,
 	cross,
 	distToSegment,
+	pointInPolygon,
 	type Pt
 } from './geo.ts';
 import {
@@ -28,6 +29,9 @@ import {
 } from './osm.ts';
 import { DEFAULT_COUNTRY, countryConfig, type CountryCode } from './countries.ts';
 import { groupPlatforms, isCoveredPart } from './platformGroups.ts';
+import { platformEquipment, type PlatformEquipment } from './equipment.ts';
+import { pointKindOf, positionOf, type PointKind } from './points.ts';
+import { stepsMissing, wayKindOf, type StepsItem, type WayKind } from './steps.ts';
 
 // Seuils (heuristiques à régler sur les gares de référence).
 export const THRESHOLDS = {
@@ -51,7 +55,8 @@ export const THRESHOLDS = {
 	railJoinAngleDeg: 20
 };
 
-export type QuestId = 'Q0' | 'Q1' | 'Q2' | 'Q3' | 'Q4' | 'Q5' | 'Q6' | 'Q7';
+export type QuestId =
+	'Q0' | 'Q1' | 'Q2' | 'Q3' | 'Q4' | 'Q5' | 'Q6' | 'Q7' | 'Q8' | 'Q9' | 'Q10' | 'Q11';
 export type ElementRef = { type: 'node' | 'way' | 'relation'; id: number };
 
 export interface Quest {
@@ -101,6 +106,8 @@ export interface PlatformInfo {
 	mixed?: { ref?: string[]; local_ref?: string[] };
 	/** Parties sans numéro alors qu'une autre partie en porte un (Q1). */
 	missingRef?: number;
+	/** Équipements du quai (hauteur, écrans, abri…) : connus et à relever (Q8). */
+	equipment: PlatformEquipment;
 }
 
 /** Clés OSM (« way/12 ») de toutes les parties d'un quai. */
@@ -173,6 +180,24 @@ export function trackGapM(contour: Pt[][], line: Pt[]) {
 	return Number.isFinite(facing) ? facing : any;
 }
 
+/** Équipement ponctuel de la gare : nœud, ou way (ascenseur dessiné en surface). */
+export interface StationPoint {
+	ref: ElementRef;
+	kind: PointKind;
+	lon: number;
+	lat: number;
+	tags: Tags;
+}
+
+/** Escalier (ou escalier mécanique, tapis roulant) existant : à compléter, jamais dessiné. */
+export interface StationSteps {
+	way: number;
+	kind: WayKind;
+	tags: Tags;
+	/** Questions sans réponse (sens, mains courantes, bandes podotactiles). */
+	missing: StepsItem[];
+}
+
 export interface StationAnalysis {
 	/** Pays de la gare : schéma des pancartes et règles de quêtes appliqués. */
 	country: CountryCode;
@@ -185,15 +210,38 @@ export interface StationAnalysis {
 	 */
 	otherTracks: number[];
 	stopSigns: OsmNode[];
+	/** Équipements ponctuels (ascenseurs, distributeurs de billets) de l'emprise + 50 m. */
+	points: StationPoint[];
+	/** Escaliers, escaliers mécaniques et tapis roulants existants de l'emprise + 50 m. */
+	steps: StationSteps[];
 	quests: Quest[];
 	completeness: {
 		platforms: { done: number; total: number };
 		tracks: { done: number; total: number };
 		stopSigns: { done: number; total: number };
+		/**
+		 * Quais dont les équipements sont tous connus (Q8). Jauge de E4 seulement : n'entre pas
+		 * dans les trois jauges de l'index hebdomadaire ni dans l'état de la gare.
+		 */
+		equipment: { done: number; total: number };
 	};
 }
 
-const PRIORITY: QuestId[] = ['Q7', 'Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6'];
+// Équipements (Q8) : après les numéros et les pancartes, avant les vérifications.
+const PRIORITY: QuestId[] = [
+	'Q7',
+	'Q0',
+	'Q1',
+	'Q2',
+	'Q3',
+	'Q4',
+	'Q5',
+	'Q8',
+	'Q9',
+	'Q10',
+	'Q11',
+	'Q6'
+];
 const ON_SITE: Record<QuestId, boolean> = {
 	Q0: false, // dessiner un quai : possible à distance (E11)
 	Q1: true,
@@ -202,7 +250,11 @@ const ON_SITE: Record<QuestId, boolean> = {
 	Q4: true,
 	Q5: true,
 	Q6: false, // vérifier : possible à distance
-	Q7: true
+	Q7: true,
+	Q8: true, // équipements : relevés sur place (rien ne se voit sûrement sur la photo)
+	Q9: true, // ascenseur : accès en fauteuil roulant, relevé sur place
+	Q10: true, // escalier : sens, mains courantes, bandes podotactiles, sur place
+	Q11: true // escalier mécanique, tapis roulant : sens de marche, sur place
 };
 
 export function analyzeStation(
@@ -299,6 +351,33 @@ export function analyzeStation(
 		})),
 		THRESHOLDS
 	);
+	// Équipements cartographiés à part (abri, banc) et bords de quai : ils renseignent déjà
+	// certaines caractéristiques du quai (Q8).
+	const amenityPts = (kind: string) =>
+		[
+			...[...data.nodes.values()].filter((n) => n.tags?.amenity === kind),
+			...[...data.ways.values()]
+				.filter((w) => w.tags?.amenity === kind)
+				.map((w) => data.nodes.get(w.nodes[0]))
+				.filter((n): n is OsmNode => !!n)
+		].map(P);
+	const shelters = amenityPts('shelter');
+	const benches = amenityPts('bench');
+	const edges = [...data.ways.values()].filter((w) => w.tags?.railway === 'platform_edge');
+	const equipmentOf = (members: number[]) => {
+		const nodes = new Set(members.flatMap((i) => raw[i].nodes));
+		const rings = members.filter((i) => raw[i].polygon).flatMap((i) => raw[i].contour);
+		const on = (pts: Pt[]) => pts.some((q) => rings.some((r) => pointInPolygon(q, r)));
+		return platformEquipment(
+			members.map((i) => ({ tags: raw[i].tags, covered: isCoveredPart(raw[i].tags) })),
+			{
+				edges: edges.filter((e) => e.nodes.some((n) => nodes.has(n))).map((e) => e.tags ?? {}),
+				shelterMapped: on(shelters),
+				benchMapped: on(benches)
+			}
+		);
+	};
+
 	const platforms: PlatformInfo[] = groups.map((g) => {
 		const main = raw[g.principal];
 		const many = g.members.length > 1;
@@ -326,7 +405,8 @@ export function analyzeStation(
 			lengthM: Math.round(axis.length),
 			axis: { center: axis.center, u: axis.u, min: axis.min, max: axis.max },
 			tracks,
-			stopSigns: signs
+			stopSigns: signs,
+			equipment: equipmentOf(g.members)
 		};
 		if (!many) return info;
 		// Numéros communs du quai : ceux de la partie principale, sinon ceux d'une autre partie.
@@ -431,6 +511,45 @@ export function analyzeStation(
 			});
 	}
 
+	// Q8 : caractéristiques du quai à relever sur place (hauteur, écrans, abri, bandes, bancs).
+	for (const p of platforms)
+		if (p.equipment.missing.length)
+			push({ id: 'Q8', target: p.ref, details: { missing: [...p.equipment.missing] } });
+
+	// Équipements ponctuels de la gare (lot Équipements, étape 2).
+	const points: StationPoint[] = [];
+	for (const e of [...data.nodes.values(), ...data.ways.values()]) {
+		const kind = pointKindOf(e.tags);
+		if (!kind) continue;
+		const at = positionOf(e, (id) => data.nodes.get(id));
+		if (!at || !inBBox(wide, at[0], at[1])) continue;
+		points.push({
+			ref: { type: e.type, id: e.id },
+			kind,
+			lon: at[0],
+			lat: at[1],
+			tags: e.tags ?? {}
+		});
+	}
+	// Q9 : ascenseur dont l'accès en fauteuil roulant n'est pas renseigné.
+	for (const pt of points)
+		if (pt.kind === 'elevator' && !pt.tags.wheelchair) push({ id: 'Q9', target: pt.ref });
+
+	// Escaliers et escaliers mécaniques existants (lot Équipements, étape 3).
+	const steps: StationSteps[] = [];
+	for (const w of data.ways.values()) {
+		const kind = wayKindOf(w.tags);
+		if (!kind || !nodePts(w).some((n) => inBBox(wide, n.lon, n.lat))) continue;
+		const missing = stepsMissing(kind, w.tags);
+		steps.push({ way: w.id, kind, tags: w.tags ?? {}, missing });
+		if (missing.length)
+			push({
+				id: kind === 'stairs' ? 'Q10' : 'Q11',
+				target: { type: 'way', id: w.id },
+				details: { missing }
+			});
+	}
+
 	// Q6 : objets renseignés jamais vérifiés, ou vérifiés il y a plus de 2 ans.
 	const limit = new Date(now);
 	limit.setFullYear(limit.getFullYear() - THRESHOLDS.checkDateMaxYears);
@@ -495,6 +614,8 @@ export function analyzeStation(
 			)
 			.map((w) => w.id),
 		stopSigns,
+		points,
+		steps,
 		quests,
 		completeness: {
 			// Un quai en plusieurs parties compte une fois, fait quand toutes ont un numéro.
@@ -503,7 +624,11 @@ export function analyzeStation(
 				total: platforms.length
 			},
 			tracks: { done: [...adjacentWays.values()].filter(Boolean).length, total: adjacentWays.size },
-			stopSigns: { done: sidesDone, total: sides.length }
+			stopSigns: { done: sidesDone, total: sides.length },
+			equipment: {
+				done: platforms.filter((p) => !p.equipment.missing.length).length,
+				total: platforms.length
+			}
 		}
 	};
 

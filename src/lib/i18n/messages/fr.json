@@ -77,7 +77,11 @@
 		"signDirection": "Sens renseigné",
 		"signNoDirection": "Sens des trains à relever sur place",
 		"parts": "en {count} parties{covered, plural, =0 {} one {, dont # couverte} other {, dont # couvertes}}",
-		"titleParts": "{title} — {parts}"
+		"titleParts": "{title} — {parts}",
+		"level": "Niveau {level}",
+		"wheelchair": "{value, select, yes {Accessible en fauteuil} other {Non accessible en fauteuil}}",
+		"equipNoDetail": "Aucune précision",
+		"stepCount": "{count, plural, one {# marche} other {# marches}}"
 	},
 	"quest": {
 		"q0": {
@@ -109,6 +113,18 @@
 			"title": "{count, plural, one {# numéro de voie mal placé} other {# numéros de voie mal placés}}",
 			"duplicate": "Deux voies portent le numéro {ref}",
 			"subtitle": "À vérifier en priorité"
+		},
+		"q8": {
+			"title": "{count, plural, one {# quai : équipements à relever} other {# quais : équipements à relever}}"
+		},
+		"q9": {
+			"title": "{count, plural, one {# ascenseur : accès en fauteuil à préciser} other {# ascenseurs : accès en fauteuil à préciser}}"
+		},
+		"q10": {
+			"title": "{count, plural, one {# escalier à compléter} other {# escaliers à compléter}}"
+		},
+		"q11": {
+			"title": "{count, plural, one {# escalier mécanique ou tapis : sens de marche à relever} other {# escaliers mécaniques ou tapis : sens de marche à relever}}"
 		}
 	},
 	"signRemoval": {
@@ -366,7 +382,10 @@
 			"signTrack": "La voie de la pancarte a été supprimée ou redessinée entre-temps.",
 			"ringIncomplete": "Contour du quai incomplet.",
 			"partGone": "Une partie du quai a été supprimée entre-temps sur OpenStreetMap : rien n’a été envoyé pour ce quai.",
-			"partClash": "Une partie du quai a été modifiée par quelqu’un d’autre entre-temps ({key}) : rien n’a été envoyé pour ce quai (ses parties partent ensemble)."
+			"partClash": "Une partie du quai a été modifiée par quelqu’un d’autre entre-temps ({key}) : rien n’a été envoyé pour ce quai (ses parties partent ensemble).",
+			"pointDeleted": "Équipement déjà supprimé sur OpenStreetMap.",
+			"pointChanged": "L’équipement a été modifié entre-temps sur OpenStreetMap : rien n’a été envoyé pour lui. Refaites la suppression sur la carte à jour.",
+			"pointLinked": "L’équipement a été relié à un autre objet entre-temps sur OpenStreetMap : rien n’a été envoyé pour lui. À supprimer avec un éditeur comme iD ou JOSM."
 		},
 		"comment": {
 			"numbers": "numéros de quais et de voies, pancartes d’arrêt",
@@ -375,7 +394,12 @@
 			"deleted": "{name} supprimé ({why})",
 			"signDeleted": "pancarte d’arrêt « {label} » supprimée ({why}{mode, select, untag {, point gardé dans la voie} other {}})",
 			"station": "Gare de {name} : {parts}",
-			"parts": "{name} ({count} parties) : numéro renseigné sur chaque partie"
+			"parts": "{name} ({count} parties) : numéro renseigné sur chaque partie",
+			"equipment": "équipements des quais",
+			"pointTags": "ascenseurs et distributeurs complétés",
+			"pointsAdded": "ajouté : {list}",
+			"pointDeleted": "{label} supprimé ({why})",
+			"steps": "escaliers complétés"
 		}
 	},
 	"bearing": {
@@ -396,12 +420,15 @@
 			"shape": "Forme du quai",
 			"delete": "Suppression · motif : {why}",
 			"signDelete": "Suppression de pancarte · motif : {why}",
-			"tags": "Modification"
+			"tags": "Modification",
+			"newPoint": "Nouvel équipement",
+			"pointDelete": "Suppression d’équipement · motif : {why}"
 		},
 		"drawnSummary": "{summary} (dessiné)",
 		"error": {
 			"signDeleted": "Cette pancarte est marquée à supprimer : retirez d’abord cette saisie.",
-			"platformDeleted": "Ce quai est marqué à supprimer : retirez d’abord cette saisie."
+			"platformDeleted": "Ce quai est marqué à supprimer : retirez d’abord cette saisie.",
+			"pointDeleted": "Cet équipement est marqué à supprimer : retirez d’abord cette saisie."
 		}
 	},
 	"remote": {
@@ -762,7 +789,9 @@
 			"tracksUnit": "numérotées",
 			"signs": "Pancartes",
 			"signsUnit": "côtés relevés",
-			"none": "aucun à relever"
+			"none": "aucun à relever",
+			"equipment": "Équipements",
+			"equipmentUnit": "quais relevés"
 		},
 		"offline": {
 			"label": "Hors-ligne",
@@ -799,7 +828,9 @@
 			"edited": "Modifié par vous, en attente d’envoi",
 			"under": "Souterrain (tunnel, niveau inférieur)",
 			"todo": "À compléter",
-			"alert": "À vérifier en priorité"
+			"alert": "À vérifier en priorité",
+			"equip": "Équipement (ascenseur, distributeur)",
+			"steps": "Escalier (flèche vers le haut)"
 		},
 		"loading": "Chargement de la gare…",
 		"locate": "Me localiser",
@@ -813,7 +844,11 @@
 			"Q6": "À vérifier (aucune date de vérification récente)",
 			"Q7": "Numéro de voie en double ou incohérent",
 			"mixed": "Les parties de ce quai n’ont pas le même numéro : vérifiez sur place",
-			"partial": "Numéro absent sur {count, plural, one {# partie} other {# parties}} du quai : à reporter sur chacune"
+			"partial": "Numéro absent sur {count, plural, one {# partie} other {# parties}} du quai : à reporter sur chacune",
+			"Q8": "Équipements à relever : {items}",
+			"Q9": "Accès en fauteuil roulant à préciser",
+			"Q10": "À compléter : {items}",
+			"Q11": "Sens de marche à relever"
 		},
 		"editedHere": "Modifié sur ce téléphone, en attente d’envoi.",
 		"del": {
@@ -831,7 +866,12 @@
 			"points": "{lost, plural, one {# point supprimé} other {# points supprimés}}{kept, plural, =0 {} one { ; # relié à d’autres objets, conservé} other { ; # reliés à d’autres objets, conservés}}.",
 			"platformReplaced": "Vos saisies sur ce quai seront retirées : {list}.",
 			"platformButton": "Supprimer le quai",
-			"partOnly": "Seule cette partie sera supprimée ({part}) : les autres parties du quai restent."
+			"partOnly": "Seule cette partie sera supprimée ({part}) : les autres parties du quai restent.",
+			"pointTitle": "Supprimer cet équipement ?",
+			"pointButton": "Supprimer l’équipement",
+			"pointPhrase": "Le point sera supprimé : il n’est relié à aucun autre objet.",
+			"pointLinked": "Équipement relié à d’autres objets (chemin, bâtiment, relation) ou dessiné en surface : à supprimer avec un éditeur comme iD ou JOSM.",
+			"pointReplaced": "Vos saisies sur cet équipement seront retirées : {list}."
 		},
 		"seeContributions": "Voir mes contributions",
 		"fill": "Renseigner",
@@ -849,7 +889,11 @@
 			"covered": "Partie couverte ({length})",
 			"choose": "Quelle partie du quai ?",
 			"named": "{name}, {covered, select, yes {partie couverte} other {partie à l’air libre}}"
-		}
+		},
+		"filterEquip": "Équipements",
+		"add": "Ajouter",
+		"addMenu": "Que voulez-vous ajouter ?",
+		"deletePoint": "Supprimer cet équipement…"
 	},
 	"input": {
 		"title": "Fiche — stationcomplete",
@@ -915,7 +959,27 @@
 			"letterHint": "Une plaque avec une seule lettre (A, B…) n’est pas une pancarte d’arrêt : c’est un repère de quai."
 		},
 		"correct": "C’est correct",
-		"fix": "Corriger"
+		"fix": "Corriger",
+		"equip": {
+			"title": "Équipements du quai",
+			"hint": "Ce qui existe sur ce quai, vu sur place. « Je ne sais pas » ne change rien.",
+			"height": "Hauteur du quai au-dessus du rail",
+			"meters": "{value} m",
+			"other": "Autre",
+			"otherLabel": "Autre hauteur, en mètres",
+			"otherPlaceholder": "Ex. 0,38",
+			"heightFormat": "Hauteur illisible : indiquez des mètres, par exemple 0,55.",
+			"heightRange": "Hauteur peu probable pour un quai : entre 0,10 et 1,50 m.",
+			"display": "Écrans d’affichage des trains (horaires, voie)",
+			"shelter": "Abri pour attendre",
+			"shelterParts": "Parties à l’air libre seulement : les parties couvertes ne sont pas concernées.",
+			"tactile": "Bandes podotactiles le long du bord du quai",
+			"bench": "Bancs",
+			"unknown": "Je ne sais pas",
+			"summary": "{summary} ; équipements : {items}",
+			"summaryAlone": "{name} : équipements ({items})",
+			"needSomething": "Indiquez un numéro de voie ou au moins un équipement."
+		}
 	},
 	"place": {
 		"title": "Placer une pancarte — stationcomplete",
@@ -927,7 +991,10 @@
 		"near": "Une pancarte existe déjà à moins de 10 m sur cette voie.",
 		"editThis": "Modifier celle-ci",
 		"another": "C’est une autre",
-		"validate": "Valider la position"
+		"validate": "Valider la position",
+		"equipHeading": "Placer : {label}",
+		"equipHelp": "Amenez la croix <b>sur l’équipement</b>, vu sur la photo aérienne.",
+		"equipHere": "Le point sera posé sous la croix."
 	},
 	"drawPage": {
 		"title": "Dessiner un quai — stationcomplete",
@@ -1019,5 +1086,108 @@
 		"left": "Déplacer la croix vers la gauche",
 		"right": "Déplacer la croix vers la droite",
 		"down": "Déplacer la croix vers le bas"
+	},
+	"equip": {
+		"item": {
+			"height": "hauteur",
+			"display": "écrans",
+			"shelter": "abri",
+			"tactile": "bandes podotactiles",
+			"bench": "bancs"
+		},
+		"reasonInline": {
+			"gone": "n’existe plus",
+			"duplicate": "en double",
+			"misplaced": "mal placé"
+		},
+		"reason": {
+			"gone": "N’existe plus",
+			"duplicate": "En double",
+			"misplaced": "Mal placé"
+		},
+		"kind": {
+			"elevator": "Ascenseur",
+			"ticket": "Distributeur de billets"
+		},
+		"title": "Équipement",
+		"onSite": "Les équipements se relèvent <b>sur place</b>, en restant derrière la ligne de sécurité.",
+		"place": {
+			"where": "Où se trouve-t-il ?",
+			"outside": "Dehors",
+			"inside": "À l’intérieur ou sous terre",
+			"outsideHint": "Visible sur la photo aérienne : placez-le précisément sous la croix.",
+			"onPhoto": "Placer sur la photo aérienne",
+			"insideHint": "Ici, la photo et le GPS ne servent à rien : situez-le par rapport à un quai, l’appli calcule le point.",
+			"platform": "Sur quel quai ?",
+			"noPlatform": "Aucun quai dans OpenStreetMap pour cette gare.",
+			"platformTracks": "voies {refs} · {length}",
+			"along": "Où, le long du quai ?",
+			"end": "Bout côté {dir}",
+			"endInline": "bout côté {dir}",
+			"middle": "Milieu",
+			"distance": "À une distance…",
+			"distanceLabel": "Mètres depuis le {end}",
+			"distanceHint": "Le quai mesure {length}.",
+			"distanceBad": "Indiquez une distance entre 0 et la longueur du quai.",
+			"side": "De quel côté ?",
+			"sideTrack": "Côté voie {refs}",
+			"sideDir": "Côté {dir}",
+			"center": "Au milieu",
+			"result": "{platform} : point à {along} du {end}, {inside, select, yes {dans le contour du quai.} other {sur le tracé du quai.}}",
+			"level": " Niveau du quai : {level}.",
+			"needPlace": "Situez d’abord l’équipement."
+		},
+		"levels": "Niveaux desservis",
+		"level": "Niveau",
+		"levelsHint": "Séparés par « ; », par exemple -1;0 (0 = rez-de-chaussée).",
+		"levelHint": "0 = rez-de-chaussée, -1 = sous-sol.",
+		"levelBad": "Niveaux illisibles : des nombres séparés par « ; », par exemple -1;0.",
+		"wheelchair": "Accessible en fauteuil roulant",
+		"operator": "Exploitant",
+		"operatorPlaceholder": "Ex. SNCF Voyageurs",
+		"isolated": "Le point est ajouté seul, sans être relié aux cheminements piétons : on pourra le relier plus tard avec iD ou JOSM.",
+		"duplicate": "{label} déjà cartographié à {dist} : est-ce le même ?",
+		"editThis": "Modifier celui-ci",
+		"createAnyway": "En créer un autre",
+		"summaryEdit": "{label} : {facts}",
+		"summaryVerified": "{label} vérifié"
+	},
+	"steps": {
+		"kind": {
+			"stairs": "Escalier",
+			"escalator": "Escalier mécanique",
+			"walkway": "Tapis roulant"
+		},
+		"detail": {
+			"up": "Flèche vers le haut",
+			"moving": "Flèche : sens de marche"
+		},
+		"item": {
+			"incline": "sens de montée",
+			"handrail": "mains courantes",
+			"tactile": "bandes podotactiles",
+			"conveying": "sens de marche"
+		}
+	},
+	"stepsPage": {
+		"sketch": "Schéma : {kind} en trait épais, flèche dans le sens du chemin dans OpenStreetMap, quais voisins en vert pâle, nord en haut.",
+		"never": "La flèche suit le sens du chemin dans OpenStreetMap. Vos réponses la suivent ; l’appli ne retourne jamais le chemin. (Sur la carte, une fois le sens connu, la flèche montre le haut ou le sens de marche.)",
+		"incline": "Dans le sens de la flèche, l’escalier monte-t-il ou descend-il ?",
+		"up": "Il monte",
+		"down": "Il descend",
+		"conveying": "Dans quel sens avance-t-il ?",
+		"forward": "Dans le sens de la flèche",
+		"backward": "À contre-sens de la flèche",
+		"reversible": "Le sens change (selon l’heure)",
+		"handrail": "Mains courantes (en suivant la flèche)",
+		"both": "Des deux côtés",
+		"left": "À gauche seulement",
+		"right": "À droite seulement",
+		"none": "Aucune",
+		"tactile": "Bandes podotactiles en haut et en bas",
+		"stepCount": "Nombre de marches",
+		"stepCountBad": "Nombre de marches illisible : un nombre entier de 1 à 500.",
+		"nothing": "Répondez à au moins une question, ou touchez « C’est correct ».",
+		"summary": "{kind} : {items}"
 	}
 }

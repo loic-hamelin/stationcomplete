@@ -66,6 +66,47 @@ Forme et suppression « en double » sont permises **à distance** (photo aérie
 
 ---
 
+## Lot « Équipements » — informations utiles aux voyageurs (11 novembre 2026)
+
+Demande de Loïc, validée : compléter dans OSM des informations utiles aux voyageurs, avec des tags établis (rapport tags § 10). OSM ne garde que le durable : aucun état de panne n'est écrit. Tout se relève **sur place** (`canSurvey`), y compris l'abri (choix documenté au rapport § 10). `check_date` est posé à l'enregistrement sur place.
+
+### Étape 1 — Caractéristiques des quais
+
+- **E7, fiche d'un quai** : sous les numéros, une section **« Équipements du quai »** (filet en tête, icône banc, consigne « Ce qui existe sur ce quai, vu sur place. « Je ne sais pas » ne change rien. »). Une question par groupe (`fieldset` + `legend`) :
+  - **Hauteur du quai au-dessus du rail** : puces des hauteurs usuelles du pays (France : 0,55 m, 0,76 m, 0,92 m ; Suisse : 0,55 m), « Autre » (champ en mètres, « 0,38 » ; « 55 » ou « 55 cm » lus 0,55 m) et « Je ne sais pas ». Contrôle à l'enregistrement : « Hauteur illisible : indiquez des mètres, par exemple 0,55. » ; « Hauteur peu probable pour un quai : entre 0,10 et 1,50 m. » (`role=alert`).
+  - **Écrans d'affichage des trains (horaires, voie)**, **Abri pour attendre**, **Bandes podotactiles le long du bord du quai**, **Bancs** : contrôle segmenté compact Oui / Non / Je ne sais pas.
+  - Préremplissage avec ce qui est connu (tags du quai, bord de quai relié, abri ou banc cartographiés à part) ; sinon « Je ne sais pas » est choisi.
+  - Quai en plusieurs parties : les réponses valent pour toutes les parties ; sous « Abri », la mention « Parties à l'air libre seulement : les parties couvertes ne sont pas concernées. ». Quai entièrement couvert : pas de question « Abri ».
+- **Un seul « Enregistrer »** pour les numéros et les équipements : une seule saisie, un seul `<modify>` par partie. Sans numéro de voie, on peut enregistrer les équipements seuls ; sans rien du tout, le message habituel (« Indiquez au moins un numéro de voie le long du quai. »). Résumés : « Quai A : voies 1, 2 ; équipements : hauteur et abri », « Quai A : équipements (bancs) ». Commentaire du changeset : « … équipements des quais ».
+- **Quête Q8 « Équipements à relever »** (sur place) : un quai dont une caractéristique manque. Priorité : après les numéros et les pancartes (Q1–Q5), avant les vérifications (Q6). **E4** : un groupe « 2 quais : équipements à relever », sous-titre « Hauteur, écrans et abri », icône banc, couleur « équipements » (`--equip`, 6,99:1 en clair, 9,37:1 en sombre). **E5** : constat « Équipements à relever : hauteur et abri » dans la feuille du quai ; l'étiquette du quai ne change pas (« ? » reste réservé au numéro).
+- **E4, 4e jauge « Équipements »** : ligne compacte sous les trois tuiles (« Équipements 1/3 quais relevés » + barre segmentée). Elle **ne compte pas** dans les trois jauges existantes, ni dans l'état de la gare, ni dans l'index hebdomadaire (E3).
+
+### Étape 2 — Ascenseurs et distributeurs de billets
+
+- **E5** : nouveau filtre **« Équipements »** (puce ronde bleu ardoise) à côté de Quais · Voies · Pancartes ; légende « Équipement (ascenseur, distributeur) ». Sous le zoom 18 : petit rond bleu pâle ; au-delà : étiquette carrée blanche portant l'icône fine (ascenseur, billet), nommée « Ascenseur. Niveau -1, 0 · Accessible en fauteuil » pour le lecteur d'écran ; liseré jaune pâle si une précision manque. Un ascenseur cartographié en surface apparaît en son centre.
+- **Feuille basse** : « Ascenseur » / « Niveau -1, 0 · Accessible en fauteuil » (ou « Aucune précision ») ; constat Q9 « Accès en fauteuil roulant à préciser » ; « Renseigner » ; ⋮ « Supprimer cet équipement… » (nœud isolé seulement, sinon « Équipement relié à d'autres objets (chemin, bâtiment, relation) ou dessiné en surface : à supprimer avec un éditeur comme iD ou JOSM. ») et « Voir sur OpenStreetMap ». Confirmation comme pour une pancarte : motifs « En double », « Mal placé » (à distance), « N'existe plus » (sur place), « Le point sera supprimé : il n'est relié à aucun autre objet. », saisies remplacées.
+- **« + Ajouter »** devient un bouton à menu (`aria-expanded`) : « Que voulez-vous ajouter ? » → Pancarte d'arrêt (E6 comme avant), Ascenseur, Distributeur de billets.
+- **Nouvel écran « Équipement »** (`/gare/equipement`, chargé à la demande) :
+  - **« Où se trouve-t-il ? »** : « Dehors » → « Placer sur la photo aérienne » (E6 en placement libre : croix au centre, sans accrochage, « Le point sera posé sous la croix. ») ; « À l'intérieur ou sous terre » → placement **relatif au quai** (la photo et le GPS n'aident pas) : « Sur quel quai ? » (une ligne par quai : « Quai A — voies 1, 2 · 160 m »), « Où, le long du quai ? » (« Bout côté ouest », « Milieu », « Bout côté est », « À une distance… » en mètres depuis le premier bout, bornée à la longueur), « De quel côté ? » (« Côté voie 2 », « Au milieu », « Côté voie 1 » ; sans numéro : « Côté nord »). Les bouts et les côtés sont nommés par leur cap, jamais « tête/queue » (ambigu selon le sens des trains). Constat : « Quai A : point à 8 m du bout côté ouest, dans le contour du quai. Niveau du quai : 0. ». Le point est calculé dans le contour (à 1 m du bord pour un côté, au milieu sinon ; à 8 m d'un bout) ; quai tracé en ligne : sur la ligne.
+  - **Attributs** : « Niveaux desservis » (ascenseur) ou « Niveau » (distributeur), facultatif, prérempli avec le niveau du quai ; « Accessible en fauteuil roulant » Oui / Non / Je ne sais pas (ascenseur) ; « Exploitant » facultatif (distributeur). Mention : le point est ajouté seul, non relié aux cheminements.
+  - **Doublon** : à l'enregistrement, si un équipement du même type est à moins de 5 m : alerte « Ascenseur déjà cartographié à 2 m : est-ce le même ? » avec « Modifier celui-ci » et « En créer un autre ».
+  - **Équipement existant** (`&osm=`) : mêmes attributs, « C'est correct » (`check_date`) et « Enregistrer » ; sur place seulement (bandeau cadenas comme E7).
+- **Quête Q9** : ascenseur sans `wheelchair` (sur place). E4 : « 3 ascenseurs : accès en fauteuil à préciser ». Pas de jauge.
+- **E8/E9** : ligne couleur « équipements », icône banc ; « Nouvel équipement », « Suppression d'équipement · motif : en double ». Commentaire du changeset : « ajouté : Ascenseur », « ascenseurs et distributeurs complétés », « Distributeur de billets supprimé (en double) ». `imagery_used` seulement si l'équipement a été placé sur la photo.
+
+### Étape 3 — Escaliers et escaliers mécaniques existants
+
+- **Compléter, pas dessiner** : les ways `highway=steps` (escalier), `highway=steps` + `conveying` (escalier mécanique) et `highway=footway` + `conveying` (tapis roulant) de la gare. Ni création, ni suppression, ni retournement.
+- **E5** : sous le filtre « Équipements », trait fin bleu pâle sur liseré (estompé si souterrain), étiquette carrée à icône (escalier, escalier mécanique, tapis) posée au premier bout du trait, **flèche** au milieu quand le sens est connu (vers le haut, ou sens de marche). Légende : « Escalier (flèche vers le haut) ». Feuille : « Escalier » / « Flèche vers le haut · Niveau -1, 0 · 24 marches », constat Q10 « À compléter : sens de montée, mains courantes et bandes podotactiles » ou Q11 « Sens de marche à relever » ; « Renseigner » et « Voir sur OpenStreetMap » (pas de menu ⋮ : rien à supprimer).
+- **Fiche « Escalier »** (`/gare/escalier`, chargée à la demande) : en tête, un **schéma** (SVG, nord en haut) du chemin en trait épais bleu avec une flèche **dans le sens du way**, et les quais voisins en vert pâle (`role=img`, description complète) ; légende « La flèche suit le sens du chemin dans OpenStreetMap. Vos réponses la suivent ; l'appli ne retourne jamais le chemin. ». Questions (Oui / Non / Je ne sais pas, ou puces) :
+  - escalier mécanique, tapis : « Dans quel sens avance-t-il ? » — « Dans le sens de la flèche », « À contre-sens de la flèche », « Le sens change (selon l'heure) » ;
+  - escalier, escalier mécanique : « Dans le sens de la flèche, l'escalier monte-t-il ou descend-il ? » — « ↑ Il monte », « ↓ Il descend » ;
+  - escalier : « Mains courantes (en suivant la flèche) » — « Des deux côtés », « À gauche seulement », « À droite seulement », « Aucune » ; « Bandes podotactiles en haut et en bas » ; « Nombre de marches » (facultatif, contrôlé : « Nombre de marches illisible : un nombre entier de 1 à 500. »).
+  - « C'est correct » (`check_date` seul) et « Enregistrer » (sur place) ; sans aucune réponse nouvelle : « Répondez à au moins une question, ou touchez « C'est correct ». ».
+- **Quêtes** Q10 « 1 escalier à compléter » (sous-titre : ce qui manque) et Q11 « 1 escalier mécanique ou tapis : sens de marche à relever », sur place, après Q9, sans jauge. Commentaire du changeset : « escaliers complétés ».
+
+---
+
 ## 0 bis. Décisions validées (5 novembre 2026)
 
 | Sujet            | Décision                                                                                                                                                                     |
@@ -627,16 +668,18 @@ Refonte du 7 novembre 2026 : mélange des pistes A (liste enrichie) et C (à com
 
 Une quête = **un manque ou un doute détecté automatiquement** dans les données OSM de la gare, formulé en langage voyageur, regroupé par type et par quai.
 
-| Quête                  | Condition de détection (à aligner sur le rapport tags)                                               | Formulation                        | Écran ouvert               |
-| ---------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------- | -------------------------- |
-| Q0 Quais absents       | Aucun `railway=platform`/`public_transport=platform` dans l'emprise de la gare                       | « Aucun quai cartographié »        | **E11**                    |
-| Q1 Numéro de quai      | Quai sans `ref`                                                                                      | « 2 quais sans numéro »            | E5 centré → E7 (sur place) |
-| Q2 Numéro de voie      | `railway=rail` longeant un quai, sans `railway:track_ref`                                            | « 5 voies sans numéro »            | E5 centré → E7 (sur place) |
-| Q3 Lien quai–voie      | `ref` du quai ≠ `railway:track_ref` des voies adjacentes                                             | « Quai A : numéros à vérifier »    | E7                         |
-| Q4 Pancartes d'arrêt   | Tronçon de voie le long d'un quai sans nœud `railway:signal:stop`                                    | « Quai B : pancartes à relever »   | E6 (série, sur place)      |
-| Q5 Pancarte incomplète | Pancarte sans `railway:signal:direction`, ou en ancien format `FR:ARRET_*`                           | « 3 pancartes à compléter »        | E7 (sur place)             |
-| Q6 Vérification        | Objet sans `check_date` ou `check_date` > 2 ans                                                      | « 3 objets à vérifier »            | E7 (vérif.)                |
-| Q7 Incohérence         | Deux voies de la gare avec le même `railway:track_ref`, valeur non standard (« Voie 1 » dans `name`) | « Deux voies portent le numéro 2 » | E7                         |
+| Quête                  | Condition de détection (à aligner sur le rapport tags)                                                        | Formulation                                     | Écran ouvert                             |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | ---------------------------------------- |
+| Q0 Quais absents       | Aucun `railway=platform`/`public_transport=platform` dans l'emprise de la gare                                | « Aucun quai cartographié »                     | **E11**                                  |
+| Q1 Numéro de quai      | Quai sans `ref`                                                                                               | « 2 quais sans numéro »                         | E5 centré → E7 (sur place)               |
+| Q2 Numéro de voie      | `railway=rail` longeant un quai, sans `railway:track_ref`                                                     | « 5 voies sans numéro »                         | E5 centré → E7 (sur place)               |
+| Q3 Lien quai–voie      | `ref` du quai ≠ `railway:track_ref` des voies adjacentes                                                      | « Quai A : numéros à vérifier »                 | E7                                       |
+| Q4 Pancartes d'arrêt   | Tronçon de voie le long d'un quai sans nœud `railway:signal:stop`                                             | « Quai B : pancartes à relever »                | E6 (série, sur place)                    |
+| Q5 Pancarte incomplète | Pancarte sans `railway:signal:direction`, ou en ancien format `FR:ARRET_*`                                    | « 3 pancartes à compléter »                     | E7 (sur place)                           |
+| Q6 Vérification        | Objet sans `check_date` ou `check_date` > 2 ans                                                               | « 3 objets à vérifier »                         | E7 (vérif.)                              |
+| Q7 Incohérence         | Deux voies de la gare avec le même `railway:track_ref`, valeur non standard (« Voie 1 » dans `name`)          | « Deux voies portent le numéro 2 »              | E7                                       |
+| Q9 Ascenseur           | `highway=elevator` sans `wheelchair` (lot Équipements)                                                        | « 3 ascenseurs : accès en fauteuil à préciser » | E5 centré → fiche Équipement (sur place) |
+| Q8 Équipements du quai | Quai sans `height`, `passenger_information_display`, `shelter`, `tactile_paving` ou `bench` (lot Équipements) | « 2 quais : équipements à relever »             | E5 centré → E7 (sur place)               |
 
 Les quêtes marquées « sur place » s'affichent à distance avec un cadenas et la mention « À faire en gare ».
 

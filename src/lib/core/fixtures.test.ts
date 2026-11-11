@@ -40,7 +40,12 @@ describe('gares de référence', () => {
 			// Un objet de carte par partie de quai (quai en plusieurs parties : une par partie).
 			const parts = a.platforms.reduce((n, p) => n + (p.parts?.length ?? 1), 0);
 			expect(f.features.length).toBe(
-				parts + a.tracks.length + a.otherTracks.length + a.stopSigns.length
+				parts +
+					a.tracks.length +
+					a.otherTracks.length +
+					a.stopSigns.length +
+					a.points.length +
+					a.steps.length
 			);
 			// Aucune gare de référence n'a de quai découpé : aucun faux regroupement.
 			expect(a.platforms.filter((p) => p.parts)).toEqual([]);

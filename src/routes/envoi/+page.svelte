@@ -225,7 +225,7 @@
 									<a
 										class="btn-sm"
 										href={resolve(
-											`/gare/saisie?id=${encodeURIComponent(id)}&osm=${e.kind === 'node' ? `way/${e.way}` : editKey(e)}`
+											`/gare/${editFamily(e) === 'equip' ? 'equipement' : 'saisie'}?id=${encodeURIComponent(id)}&osm=${e.kind === 'node' ? `way/${e.way}` : editKey(e)}`
 										)}>{t('sendPage.open')}</a
 									>
 									<button class="btn-sm" type="button" onclick={() => retry(e)}
@@ -343,6 +343,9 @@
 	}
 	li.pancarte > :global(svg) {
 		color: var(--pancarte);
+	}
+	li.equip > :global(svg) {
+		color: var(--equip);
 	}
 	li.review {
 		flex-wrap: wrap;

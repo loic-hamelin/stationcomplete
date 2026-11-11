@@ -14,12 +14,17 @@ import {
 import { countryConfig } from './countries';
 import { fmtDistance, t as msg } from '../i18n/t.ts';
 import type { QuestId, StationAnalysis } from './quests';
+import { arrowOf } from './steps';
 
 /** État d'un objet sur la carte : renseigné, manquant (quête « à faire ») ou en alerte. */
 export type Status = 'ok' | 'missing' | 'alert';
 
 export interface FeatureProps {
-	kind: 'quai' | 'voie' | 'pancarte';
+	kind: 'quai' | 'voie' | 'pancarte' | 'equip';
+	/** Équipement : ascenseur, distributeur de billets (icône de l'étiquette). */
+	sub?: 'elevator' | 'ticket' | 'stairs' | 'escalator' | 'walkway';
+	/** Escalier : flèche vers le haut (ou sens de marche), par rapport au sens du way. */
+	arrow?: 'forward' | 'backward';
 	/** Identifiant OSM « way/123 ». */
 	osm: string;
 	status: Status;
@@ -287,6 +292,70 @@ export function buildFeatures(
 						? msg('feature.signDirection')
 						: msg('feature.signNoDirection'),
 				quests: (questsOf.get(k) ?? []).join(',')
+			}
+		});
+	}
+
+	// Équipements ponctuels (lot Équipements, étape 2) : un point, étiquette à icône.
+	for (const pt of a.points ?? []) {
+		const k = `${pt.ref.type}/${pt.ref.id}`;
+		const t = pt.tags;
+		const facts = [
+			t.level ? msg('feature.level', { level: t.level.replaceAll(';', ', ') }) : '',
+			pt.kind === 'elevator' && t.wheelchair
+				? msg('feature.wheelchair', { value: t.wheelchair === 'no' ? 'no' : 'yes' })
+				: '',
+			pt.kind === 'ticket' && t.operator ? t.operator : ''
+		].filter(Boolean);
+		features.push({
+			type: 'Feature',
+			id: fid++,
+			geometry: { type: 'Point', coordinates: [pt.lon, pt.lat] },
+			properties: {
+				kind: 'equip',
+				sub: pt.kind,
+				osm: k,
+				status: statusOf(k, !(questsOf.get(k) ?? []).includes('Q9')),
+				// (Étiquette dessinée par une icône ; le texte sert à créer le repère.)
+				label: pt.kind,
+				title: msg(pt.kind === 'elevator' ? 'equip.kind.elevator' : 'equip.kind.ticket'),
+				detail: facts.join(' · ') || msg('feature.equipNoDetail'),
+				quests: (questsOf.get(k) ?? []).join(',')
+			}
+		});
+	}
+
+	// Escaliers, escaliers mécaniques, tapis roulants existants (étape 3) : trait fin, flèche.
+	for (const st of a.steps ?? []) {
+		const w = data.ways.get(st.way);
+		if (!w) continue;
+		const k = `way/${w.id}`;
+		const arrow = arrowOf(st.kind, st.tags);
+		const facts = [
+			st.tags.level ? msg('feature.level', { level: st.tags.level.replaceAll(';', ', ') }) : '',
+			st.tags.step_count ? msg('feature.stepCount', { count: Number(st.tags.step_count) }) : ''
+		].filter(Boolean);
+		const line = coords(w);
+		features.push({
+			type: 'Feature',
+			id: fid++,
+			// Étiquette au premier bout : la flèche, au milieu du trait, reste visible.
+			anchor: line[0],
+			geometry: { type: 'LineString', coordinates: line },
+			properties: {
+				kind: 'equip',
+				sub: st.kind,
+				osm: k,
+				status: st.missing.length ? 'missing' : 'ok',
+				label: st.kind,
+				title: msg(`steps.kind.${st.kind}`),
+				detail:
+					(arrow ? msg(`steps.detail.${st.kind === 'stairs' ? 'up' : 'moving'}`) : '') +
+						(arrow && facts.length ? ' · ' : '') +
+						facts.join(' · ') || msg('feature.equipNoDetail'),
+				quests: (questsOf.get(k) ?? []).join(','),
+				...(arrow ? { arrow } : {}),
+				...(isUnderground(w.tags) ? { under: true } : {})
 			}
 		});
 	}

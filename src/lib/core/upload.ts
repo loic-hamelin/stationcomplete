@@ -10,14 +10,18 @@ import {
 	type NewNodeEdit,
 	type NewWayEdit,
 	type OrigNode,
+	type PointDeleteEdit,
+	type PointEdit,
 	type ShapeEdit,
 	type SignDeleteEdit,
 	type TagEdit,
+	partTags,
 	tagTargets
 } from './edits';
 import { DEFAULT_COUNTRY, imageryOf, type CountryCode } from './countries';
 import type { BBox, OsmElement, OsmNode, OsmRelation, OsmWay, Tags } from './osm';
 import { locale, t as tr, tk } from '../i18n/t.ts';
+import { EQUIPMENT_KEYS } from './equipment';
 import { complexText, followers, followersPhrase, hasTags, isLinked, shapeDiff } from './shape';
 import { signRemoval, withoutSign } from './sign';
 
@@ -45,8 +49,8 @@ export function elementsToFetch(edits: Edit[]) {
 		relations = new Set<number>();
 	for (const e of edits) {
 		if (e.kind === 'node') ways.add(e.way);
-		else if (e.kind === 'way')
-			continue; // quai dessiné : rien à relire, tout est nouveau
+		else if (e.kind === 'way' || e.kind === 'point')
+			continue; // quai dessiné, nouvel équipement : rien à relire, tout est nouveau
 		else
 			for (const target of e.kind === 'tags' ? tagTargets(e).map((p) => p.target) : [e.target]) {
 				const [type, id] = target.split('/');
@@ -94,6 +98,12 @@ export const signsToCheck = (edits: Edit[]) =>
 	edits
 		.filter((e): e is SignDeleteEdit => e.kind === 'signdelete')
 		.map((e) => ({ node: Number(e.target.split('/')[1]), way: e.way }));
+
+/** Équipements ponctuels à supprimer : on relit les ways et relations du nœud (usage à jour). */
+export const pointsToCheck = (edits: Edit[]) =>
+	edits
+		.filter((e): e is PointDeleteEdit => e.kind === 'pointdelete')
+		.map((e) => Number(e.target.split('/')[1]));
 
 /** Ways quais supprimés (leurs relations sont relues explicitement avant l'envoi). */
 export const deletedWays = (edits: Edit[]) =>
@@ -168,7 +178,7 @@ export function planUpload(edits: Edit[], fresh: OsmElement[]): Plan {
 			const tags: Tags = el.tags ?? {};
 			let clash = '';
 			if (p.version !== undefined && el.version !== p.version)
-				for (const [k, v] of Object.entries(ed.tags)) {
+				for (const [k, v] of Object.entries(partTags(ed.tags, p.omit))) {
 					const now = tags[k] ?? null;
 					const before = p.base ? (p.base[k] ?? null) : now;
 					if (now !== before && now !== (v || null)) clash = k;
@@ -186,7 +196,7 @@ export function planUpload(edits: Edit[], fresh: OsmElement[]): Plan {
 		}
 		for (const p of all) {
 			const el = byKey.get(p.target)!;
-			el.tags = changeTags(el.tags, ed.tags);
+			el.tags = changeTags(el.tags, partTags(ed.tags, p.omit));
 			modified.add(p.target);
 		}
 		sent(
@@ -406,6 +416,32 @@ export function planUpload(edits: Edit[], fresh: OsmElement[]): Plan {
 		}
 	}
 
+	// Équipements ponctuels supprimés (lot Équipements) : seulement un nœud isolé, à la même
+	// version ; s'il est relié entre-temps à un way ou à une relation, rien ne part (« à revoir »).
+	for (const ed of edits.filter((e): e is PointDeleteEdit => e.kind === 'pointdelete')) {
+		const n = byKey.get(ed.target) as OsmNode | undefined;
+		if (!n) {
+			conflict(ed.id, tr('upload.conflict.pointDeleted'));
+			continue;
+		}
+		if (ed.version !== undefined && n.version !== ed.version) {
+			conflict(ed.id, tr('upload.conflict.pointChanged'));
+			continue;
+		}
+		if ((waysOf.get(n.id)?.size ?? 0) > 0 || (relationsOf.get(ed.target) ?? []).length) {
+			conflict(ed.id, tr('upload.conflict.pointLinked'));
+			continue;
+		}
+		deleteNodes.push(n);
+		sent(ed.id, [ed.target]);
+	}
+
+	// Nouveaux équipements ponctuels : nœuds isolés, tous nouveaux.
+	for (const ed of edits.filter((e): e is PointEdit => e.kind === 'point')) {
+		plan.create.push({ type: 'node', id: ed.tempId, lat: ed.lat, lon: ed.lon, tags: ed.tags });
+		sent(ed.id, [`node/${ed.tempId}`]);
+	}
+
 	// Quais dessinés : nœuds puis way fermé, tous nouveaux.
 	const newWays: OsmWay[] = [];
 	for (const ed of edits.filter((e): e is NewWayEdit => e.kind === 'way')) {
@@ -433,17 +469,50 @@ export function planUpload(edits: Edit[], fresh: OsmElement[]): Plan {
  */
 export function proposedComment(stationName: string, edits: Edit[]) {
 	const parts: string[] = [];
-	if (edits.some((e) => (e.kind === 'tags' && !e.parts?.length) || e.kind === 'node'))
+	// Saisie d'équipements seuls (et date de vérification) : pas de numéro dans le commentaire.
+	const equipOnly = (e: TagEdit) =>
+		Object.keys(e.tags).some((k) => EQUIPMENT_KEYS.has(k)) &&
+		Object.keys(e.tags).every((k) => EQUIPMENT_KEYS.has(k) || k === 'check_date');
+	if (
+		edits.some(
+			(e) =>
+				(e.kind === 'tags' && !e.parts?.length && !equipOnly(e) && e.family !== 'equip') ||
+				e.kind === 'node'
+		)
+	)
 		parts.push(tr('upload.comment.numbers'));
 	// Quai en plusieurs parties : le commentaire dit que chaque partie reçoit le même numéro.
 	for (const e of edits)
-		if (e.kind === 'tags' && e.parts?.length)
+		if (e.kind === 'tags' && e.parts?.length && 'ref' in e.tags)
 			parts.push(
 				tr('upload.comment.parts', {
 					name: e.name ?? e.summary,
 					count: e.parts.length + 1
 				})
 			);
+	if (
+		edits.some((e) => e.kind === 'tags' && Object.keys(e.tags).some((k) => EQUIPMENT_KEYS.has(k)))
+	)
+		parts.push(tr('upload.comment.equipment'));
+	// (Escalier : saisie sur un way ; ascenseur, distributeur : sur un nœud ou un way-ascenseur.)
+	const stepsEdit = (e: Edit) =>
+		e.kind === 'tags' &&
+		e.family === 'equip' &&
+		('incline' in e.tags ||
+			'conveying' in e.tags ||
+			'handrail' in e.tags ||
+			'step_count' in e.tags ||
+			('tactile_paving' in e.tags && e.target.startsWith('way/')));
+	if (edits.some((e) => e.kind === 'tags' && e.family === 'equip' && !stepsEdit(e)))
+		parts.push(tr('upload.comment.pointTags'));
+	if (edits.some(stepsEdit)) parts.push(tr('upload.comment.steps'));
+	const added = edits.filter((e): e is PointEdit => e.kind === 'point');
+	if (added.length)
+		parts.push(
+			tr('upload.comment.pointsAdded', {
+				list: [...new Set(added.map((e) => e.summary))].join(', ')
+			})
+		);
 	if (edits.some((e) => e.kind === 'way')) parts.push(tr('upload.comment.drawn'));
 	const shapes = edits.filter((e): e is ShapeEdit => e.kind === 'shape');
 	if (shapes.length) {
@@ -463,6 +532,13 @@ export function proposedComment(stationName: string, edits: Edit[]) {
 				tr('upload.comment.deleted', {
 					name: e.name,
 					why: tk(`shape.reasonComment.${e.reason}`)
+				})
+			);
+		else if (e.kind === 'pointdelete')
+			parts.push(
+				tr('upload.comment.pointDeleted', {
+					label: e.label,
+					why: tk(`equip.reasonInline.${e.reason}`)
 				})
 			);
 		else if (e.kind === 'signdelete')

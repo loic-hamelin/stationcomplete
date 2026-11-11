@@ -179,6 +179,9 @@
 	li.pancarte > :global(svg) {
 		color: var(--pancarte);
 	}
+	li.equip > :global(svg) {
+		color: var(--equip);
+	}
 	.txt {
 		flex-grow: 1;
 		min-width: 0;

@@ -31,7 +31,8 @@ export interface Station {
 }
 
 /** Jauges d'une gare : quais numérotés, voies numérotées, côtés de quai avec pancarte. */
-export type Gauges = StationAnalysis['completeness'];
+// (Les équipements, jauge de E4 seulement, n'entrent pas dans l'index : trois jauges.)
+export type Gauges = Omit<StationAnalysis['completeness'], 'equipment'>;
 
 /** Ligne compacte de l'index (tableaux) ; jauges : [quais faits, total, voies…, côtés…]. */
 type Row = [

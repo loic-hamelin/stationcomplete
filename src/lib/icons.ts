@@ -44,6 +44,17 @@ export const ICONS = {
 	// Lot 7 : forme d'un quai (contour et sommets).
 	shape:
 		'<path d="M5 7l12-2 2 10-14 3z"/><circle cx="5" cy="7" r="1.6"/><circle cx="17" cy="5" r="1.6"/><circle cx="19" cy="15" r="1.6"/><circle cx="5" cy="18" r="1.6"/>',
+	// Lot « Équipements » : équipements des quais (banc), ascenseur, distributeur de billets,
+	// escalier, escalier mécanique.
+	equip: '<path d="M4 10.5h16M4 14.5h16M6 14.5v5M18 14.5v5M6.5 10.5V6h11v4.5"/>',
+	elevator:
+		'<rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M9 10l3-3 3 3M9 14l3 3 3-3"/>',
+	ticket:
+		'<path d="M3.5 7h17v3a2 2 0 0 0 0 4v3h-17v-3a2 2 0 0 0 0-4z"/><path d="M14.5 8v1.5M14.5 11.25v1.5M14.5 14.5V16"/>',
+	steps: '<path d="M3 20h5v-4h4v-4h4V8h5"/>',
+	stairs: '<path d="M3 20h5v-4h4v-4h4V8h5"/>',
+	walkway: '<path d="M3 17.5h18M3 13.5h18M7 8h9M13.5 5.5L16 8l-2.5 2.5"/>',
+	escalator: '<path d="M3 19.5h5L17 9h4M3 15h3.5l9-10.5H21"/>',
 	// Ajout pour l'intégration : pavé de micro-déplacement (quatre flèches).
 	nudge:
 		'<path d="M12 4v16M4 12h16M9.5 6.5L12 4l2.5 2.5M9.5 17.5L12 20l2.5-2.5M6.5 9.5L4 12l2.5 2.5M17.5 9.5L20 12l-2.5 2.5"/>'
