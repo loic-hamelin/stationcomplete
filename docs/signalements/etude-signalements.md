@@ -1,5 +1,7 @@
 # stationcomplete — Signalement des dysfonctionnements (ascenseurs, escalators, écrans) : étude
 
+> **Décision de Loïc (11/11/2026)** : minimum de responsabilité et de stockage. On retient **l'option 1 seule** : afficher l'état officiel publié par l'exploitant et renvoyer vers ses canaux de signalement (liens, 3212), **sans stocker aucun signalement ni donnée personnelle**. Les options avec service de signalement (Scaleway, Cloudflare) sont écartées.
+
 _Étude de l'architecte et de l'expert sécurité (SSI), 11 novembre 2026. Dépôt `stationcomplete` lu en lecture seule (dernier commit lu : `cb73cd5`). Rapport rédigé section par section._
 
 > **Méthode.** Chaque fait externe est sourcé (URL). Ce qui a été essayé en direct (curl, WebFetch) est signalé « testé le 11/11/2026 ». Ce qui n'a pas pu être vérifié porte la mention **[non vérifié]**, avec la façon de le vérifier. Rien n'est inventé : en cas de doute, c'est écrit.
