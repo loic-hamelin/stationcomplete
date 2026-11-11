@@ -1,0 +1,84 @@
+# Robot de mise à jour des dépendances (Dependabot, intégré à GitHub).
+# Mode d'emploi pour le mainteneur : docs/securite/robot-dependances.md
+#
+# Chaque mardi matin, Dependabot propose des pull requests :
+#   - « appli »      : versions mineures et correctives des bibliothèques LIVRÉES aux téléphones
+#                      (carte, base locale, connexion OSM, Svelte, police) et de la chaîne de
+#                      construction qui écrit le code livré (vite, plugins SvelteKit) → relecture par Loïc ;
+#   - « outils-dev » : versions mineures et correctives des autres outils de développement
+#                      (eslint, prettier, vitest, playwright…) → fusion automatique si toute la CI passe ;
+#   - une PR par version MAJEURE (changements incompatibles possibles) → relecture par Loïc ;
+#   - « actions »    : actions GitHub des workflows (empreintes SHA + commentaire de version) → relecture.
+# Les correctifs de sécurité arrivent eux dès qu'une faille est publiée, sans attendre mardi,
+# regroupés dans « securite » (fusion automatique si non majeurs et si toute la CI passe).
+# La règle de fusion automatique est dans .github/workflows/dependabot-fusion.yml.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: tuesday
+      time: '06:00'
+      timezone: Europe/Paris
+    # Délai de stabilité : une version n'est proposée que 7 jours après sa publication (14 pour une
+    # majeure). Un paquet piégé ou compromis est en général repéré et retiré avant.
+    # Ce délai ne s'applique pas aux correctifs de sécurité.
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'Dépendances'
+      include: scope
+    groups:
+      securite:
+        applies-to: security-updates
+        patterns: ['*']
+      # Livré aux téléphones : à garder EN TÊTE (un paquet va dans le premier groupe qui le prend).
+      # Même liste que LIVRES dans .github/workflows/dependabot-fusion.yml.
+      appli:
+        patterns:
+          - maplibre-gl
+          - idb
+          - osm-auth
+          - svelte
+          - '@sveltejs/kit'
+          - '@fontsource/*'
+          # Chaîne de construction : écrit elle-même le code livré.
+          - vite
+          - '@sveltejs/vite-plugin-svelte'
+          - '@sveltejs/adapter-static'
+        update-types: [minor, patch]
+      outils-dev:
+        dependency-type: development
+        exclude-patterns:
+          - svelte
+          - '@sveltejs/kit'
+          - '@fontsource/*'
+          - vite
+          - '@sveltejs/vite-plugin-svelte'
+          - '@sveltejs/adapter-static'
+        update-types: [minor, patch]
+    ignore:
+      # Les types de Node suivent la version de Node du projet (22) : pas de majeure 23, 24…
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: tuesday
+      time: '06:00'
+      timezone: Europe/Paris
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: 'Actions'
+    groups:
+      actions:
+        update-types: [minor, patch]
+        patterns: ['*']

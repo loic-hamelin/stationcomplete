@@ -1,0 +1,68 @@
+# Fusion automatique des pull requests de Dependabot SANS RISQUE, une fois toute la CI passée.
+#
+# Déclenché quand le workflow « Déploiement » se termine. Ne fait quelque chose que si :
+#   - cette exécution vérifiait une pull request de Dependabot (branche dependabot/… du dépôt) ;
+#   - elle a RÉUSSI (types, mise en forme, lint, tests unitaires, audit, build, budget, e2e) ;
+#   - la règle de .github/scripts/dependabot-decision.mjs l'accepte : correctif de sécurité non
+#     majeur, ou outil de développement en version mineure ou corrective, ne touchant que
+#     package.json et package-lock.json. Tout le reste attend la relecture de Loïc.
+# Le code de la pull request n'est jamais exécuté ici : seul le script de main est lu.
+# Après la fusion, la publication est relancée (une fusion faite par le robot ne la déclenche pas
+# toute seule : règle de GitHub pour éviter les boucles).
+# Désactiver : onglet Actions → « Dependabot : fusion automatique » → ⋯ → Disable workflow.
+# Mode d'emploi : docs/securite/robot-dependances.md
+name: 'Dependabot : fusion automatique'
+
+on:
+  # workflow_run donne des droits d'écriture : sans danger ici, car le code de la pull request n'est
+  # ni récupéré ni exécuté, aucun artefact n'est lu, et seules les branches dependabot/ du dépôt passent.
+  workflow_run: # zizmor: ignore[dangerous-triggers]
+    workflows: [Déploiement]
+    types: [completed]
+
+permissions: {}
+
+concurrency:
+  group: dependabot-fusion
+  cancel-in-progress: false
+
+jobs:
+  fusion:
+    if: >-
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.actor.login == 'dependabot[bot]' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      startsWith(github.event.workflow_run.head_branch, 'dependabot/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # fusionner la pull request
+      pull-requests: write # fusionner la pull request
+      actions: write # relancer « Déploiement » sur main
+    steps:
+      # Branche par défaut (main) uniquement : jamais le code de la pull request.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+      - name: Décision
+        id: decision
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          BRANCHE: ${{ github.event.workflow_run.head_branch }}
+          PR: ${{ github.event.workflow_run.pull_requests[0].number }}
+        run: node .github/scripts/dependabot-decision.mjs
+      - name: Fusion et publication
+        if: steps.decision.outputs.fusion == 'oui'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          PR: ${{ steps.decision.outputs.pr }}
+        run: |
+          # --match-head-commit : refuse si la pull request a changé depuis la vérification.
+          gh pr merge "$PR" --repo "$REPO" --squash --match-head-commit "$SHA"
+          gh workflow run deploy.yml --repo "$REPO" --ref main

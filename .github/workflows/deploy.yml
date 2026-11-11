@@ -1,40 +1,53 @@
-# Construit le site et le publie sur GitHub Pages à chaque envoi sur la branche main.
+# Vérifie le site à chaque proposition de modification (pull request), et le vérifie puis le publie
+# sur GitHub Pages à chaque envoi sur la branche main (ou lancement manuel sur main).
+# Une pull request ne publie jamais rien : seul le job « verifications » tourne.
+# Sécurité des workflows : docs/securite/robot-dependances.md.
+# Les actions sont figées par empreinte de commit (SHA) ; le commentaire donne la version,
+# et Dependabot met les deux à jour (.github/dependabot.yml).
 name: Déploiement
 
 on:
   push:
     branches: [main]
   pull_request:
+    branches: [main]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-  deployments: read
+# Aucun droit par défaut : chaque job demande seulement ce dont il a besoin.
+permissions: {}
 
-# Une publication à la fois, sans interrompre celle en cours : interrompre une publication
-# GitHub Pages peut la laisser bloquée « en cours » et faire échouer les suivantes.
+# Une pull request mise à jour annule sa vérification précédente (inutile de finir l'ancienne).
+# Sur main, on n'interrompt jamais une exécution en cours.
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  group: verifications-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  build:
+  verifications:
+    name: Vérifications
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      # --ignore-scripts : aucun script d'installation de paquet ne s'exécute (protection contre un
+      # paquet piégé). `npm run check` fait lui-même le `svelte-kit sync` du script « prepare ».
+      - run: npm ci --ignore-scripts
       - name: Vérifications (types, mise en forme, lint)
         run: |
           npm run check
           npm run lint
       - name: Tests unitaires (moteur de quêtes)
         run: npm test
+      - name: Audit des dépendances (bloquant si faille élevée dans ce qui est livré)
+        run: node .github/scripts/audit-dependances.mjs
       - run: npm run build
       - name: Budget de poids (sobriété)
         run: npm run budget
@@ -42,21 +55,33 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Tests de bout en bout (parcours, accessibilité, hors-ligne)
         run: npm run test:e2e
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure()
         with:
           name: rapport-playwright
           path: test-results
           retention-days: 7
-      - uses: actions/upload-pages-artifact@v3
-        if: github.event_name != 'pull_request'
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         with:
           path: build
 
   deploy:
-    if: github.event_name != 'pull_request'
-    needs: build
+    # Publication : envoi sur main, ou lancement manuel (onglet Actions, ou robots « Index des gares »
+    # et « Dependabot : fusion automatique ») sur main. Jamais pour une pull request.
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: verifications
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      pages: write # publier sur GitHub Pages (et annuler une publication bloquée)
+      id-token: write # prouver à GitHub Pages que la publication vient de ce workflow
+      deployments: read # lister les publications précédentes
+    # Une publication à la fois, sans interrompre celle en cours : interrompre une publication
+    # GitHub Pages peut la laisser bloquée « en cours » et faire échouer les suivantes.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -66,18 +91,20 @@ jobs:
       - name: Débloquer une publication précédente
         env:
           GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
         run: |
-          for sha in $(gh api "repos/${{ github.repository }}/deployments?environment=github-pages&per_page=5" --jq '.[].sha'); do
-            [ "$sha" = "${{ github.sha }}" ] && continue
-            status=$(gh api "repos/${{ github.repository }}/pages/deployments/$sha" --jq '.status' 2>/dev/null || true)
+          for sha in $(gh api "repos/$REPO/deployments?environment=github-pages&per_page=5" --jq '.[].sha'); do
+            [ "$sha" = "$SHA" ] && continue
+            status=$(gh api "repos/$REPO/pages/deployments/$sha" --jq '.status' 2>/dev/null || true)
             case "$status" in
               deployment_queued|deployment_in_progress|syncing_files|updating_pages|deployment_cancelled_pending)
                 echo "Annulation de la publication bloquée $sha ($status)"
-                gh api -X POST "repos/${{ github.repository }}/pages/deployments/$sha/cancel" || true ;;
+                gh api -X POST "repos/$REPO/pages/deployments/$sha/cancel" || true ;;
             esac
           done
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
         with:
           # GitHub Pages est parfois lent : 20 minutes au lieu de 10.
           timeout: 1200000

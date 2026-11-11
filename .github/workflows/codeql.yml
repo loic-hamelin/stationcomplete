@@ -1,0 +1,51 @@
+# Analyse de sécurité du code (CodeQL, outil gratuit de GitHub pour les dépôts publics).
+#   - javascript-typescript : le code de l'appli (src/, scripts/) ;
+#   - actions : les workflows eux-mêmes (droits trop larges, injection de commandes…).
+# Les résultats arrivent dans l'onglet Security → Code scanning ; ils n'empêchent pas la publication.
+# Ne PAS activer en plus le « default setup » de CodeQL dans les réglages : les deux s'excluent.
+# Mode d'emploi : docs/securite/robot-dependances.md
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '41 4 * * 3' # mercredi 4 h 41 UTC : nouvelles règles même sans changement de code
+
+permissions: {}
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  analyse:
+    name: Analyse (${{ matrix.langage }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write # envoyer les résultats dans l'onglet Security
+    strategy:
+      fail-fast: false
+      matrix:
+        langage: [javascript-typescript, actions]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          languages: ${{ matrix.langage }}
+          build-mode: none
+          # Données générées (index des gares) : volumineuses et sans code.
+          config: |
+            paths-ignore:
+              - static/data
+              - data
+              - tests/fixtures
+      - uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          category: /language:${{ matrix.langage }}

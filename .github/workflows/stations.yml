@@ -19,9 +19,8 @@ on:
         type: string
         default: ''
 
-permissions:
-  contents: write
-  actions: write
+# Aucun droit par défaut : chaque job demande seulement ce dont il a besoin.
+permissions: {}
 
 concurrency:
   group: stations
@@ -30,11 +29,15 @@ concurrency:
 jobs:
   pays:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       matrix: ${{ steps.liste.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
       - name: Pays à construire
@@ -56,12 +59,16 @@ jobs:
       matrix:
         pays: ${{ fromJSON(needs.pays.outputs.matrix) }}
     name: Index ${{ matrix.pays.code }}
+    permissions:
+      contents: read
     env:
       CC: ${{ matrix.pays.code }}
       GEOFABRIK: ${{ matrix.pays.geofabrik }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
       - name: Outil osmium
@@ -88,11 +95,13 @@ jobs:
       - name: Construction de l'index
         run: node scripts/build-stations.mjs "rail-$CC.geojsonseq" --country "$CC" --osm "jauges-$CC.opl"
       - name: Taille de l'index
+        env:
+          FICHIER: ${{ matrix.pays.file }}
         run: |
-          echo "brut : $(stat -c %s '${{ matrix.pays.file }}') octets"
-          echo "gzip : $(gzip -9 -c '${{ matrix.pays.file }}' | wc -c) octets"
+          echo "brut : $(stat -c %s "$FICHIER") octets"
+          echo "gzip : $(gzip -9 -c "$FICHIER" | wc -c) octets"
       # Les fichiers gardent leur chemin dans le dépôt (racine commune : le dépôt).
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: index-${{ matrix.pays.code }}
           path: |
@@ -107,13 +116,21 @@ jobs:
     # Même si un pays a échoué : les index réussis sont enregistrés.
     if: ${{ !cancelled() && needs.pays.result == 'success' }}
     runs-on: ubuntu-latest
+    # Écrit l'index dans le dépôt (git push) et relance la publication (gh workflow run).
+    permissions:
+      contents: write # git push de l'index
+      actions: write # gh workflow run deploy.yml
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      # Identifiants gardés (persist-credentials par défaut) : ce job pousse le commit de l'index.
+      # Aucun artefact n'est envoyé depuis ce job : pas de fuite possible du jeton par ce biais.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: true # zizmor: ignore[artipacked]
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
       - name: Index construits
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: index-*
           merge-multiple: true
