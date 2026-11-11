@@ -164,6 +164,16 @@ export function sameLogicalPlatform(
 	// Axe de référence : celui de la plus longue des deux parties.
 	const [L, S] = a.axis.length >= b.axis.length ? [a, b] : [b, a];
 	const u = L.axis.u;
+	const nodesA = new Set(a.nodes);
+	const touch = () =>
+		b.nodes.some((n) => nodesA.has(n)) ||
+		contourDistance(a.contour, b.contour, th.groupTouchM) <= th.groupTouchM;
+	// Même nom (« Voie 27 ») et contact : c'est le même quai, même si les parties se chevauchent
+	// ou sont décalées (données découpées à la main, Paris-Saint-Lazare). Seule réserve : ne
+	// jamais réunir deux quais de part et d'autre d'une même voie.
+	const na = norm(a.tags.name),
+		nb = norm(b.tags.name);
+	if (na && na === nb && touch()) return !oppositeSides(a, b, u, chainOf);
 	// Décalage latéral mesuré au raccord (bouts d'axe en regard), pas aux centres : un quai en
 	// légère courbe, coupé en deux, reste dans le prolongement.
 	const end = (p: PartInput, toward: Pt) => {
@@ -179,25 +189,10 @@ export function sameLogicalPlatform(
 	if (overlap > Math.min(th.groupMaxOverlapM, th.groupMaxOverlapRatio * shorter)) return false;
 	// Contact : nœud partagé, sinon bords proches (l'écart le long de l'axe le borne déjà).
 	if (overlap < -th.groupTouchM) return false;
-	const nodesA = new Set(a.nodes);
-	if (
-		!b.nodes.some((n) => nodesA.has(n)) &&
-		contourDistance(a.contour, b.contour, th.groupTouchM) > th.groupTouchM
-	)
-		return false;
+	if (!touch()) return false;
 	// Mêmes voies, du même côté (côtés ramenés à l'axe de référence).
-	const sides = (p: PartInput) => {
-		const flip = dot(p.axis.u, u) < 0;
-		const m = new Map<number, Set<'left' | 'right'>>();
-		for (const t of p.tracks) {
-			const c = chainOf.get(t.way) ?? t.way;
-			const s = flip ? (t.side === 'left' ? 'right' : 'left') : t.side;
-			m.set(c, new Set([...(m.get(c) ?? []), s]));
-		}
-		return m;
-	};
-	const sa = sides(a),
-		sb = sides(b);
+	const sa = trackSides(a, u, chainOf),
+		sb = trackSides(b, u, chainOf);
 	if (!sa.size && !sb.size) return true;
 	let common = 0;
 	for (const [c, s] of sa) {
@@ -207,6 +202,29 @@ export function sameLogicalPlatform(
 		common++;
 	}
 	return common > 0;
+}
+
+/** Voies longées par une partie, avec leur côté ramené à l'axe de référence `u`. */
+function trackSides(p: PartInput, u: Pt, chainOf: Map<number, number>) {
+	const flip = dot(p.axis.u, u) < 0;
+	const m = new Map<number, Set<'left' | 'right'>>();
+	for (const t of p.tracks) {
+		const c = chainOf.get(t.way) ?? t.way;
+		const s = flip ? (t.side === 'left' ? 'right' : 'left') : t.side;
+		m.set(c, new Set([...(m.get(c) ?? []), s]));
+	}
+	return m;
+}
+
+/** Une même voie longe-t-elle les deux parties de côtés opposés (quais de part et d'autre) ? */
+function oppositeSides(a: PartInput, b: PartInput, u: Pt, chainOf: Map<number, number>) {
+	const sa = trackSides(a, u, chainOf),
+		sb = trackSides(b, u, chainOf);
+	for (const [c, s] of sa) {
+		const o = sb.get(c);
+		if (o && [...s].some((x) => !o.has(x)) && [...o].some((x) => !s.has(x))) return true;
+	}
+	return false;
 }
 
 /**

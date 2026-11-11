@@ -179,6 +179,31 @@ describe('quai logique : regroupement', () => {
 		expect(g.analysis().platforms).toHaveLength(2);
 	});
 
+	it('même nom et contact (« Voie 27 », parties qui se chevauchent) → un seul quai', () => {
+		// Paris-Saint-Lazare : parties découpées à la main, qui se recouvrent sur leur longueur.
+		const name = { name: 'Voie 27' };
+		const g = build({
+			cut: null,
+			parts: [
+				{ x0: -100, x1: 100, y0: 0, y1: 4, tags: name },
+				{ x0: -100, x1: 100, y0: -4, y1: 0, tags: { ...name, ...covered } }
+			]
+		});
+		expect(g.analysis().platforms).toHaveLength(1);
+	});
+
+	it('même nom mais de part et d’autre d’une voie → deux quais', () => {
+		const name = { name: 'Voie 27' };
+		const g = build({
+			cut: null,
+			parts: [
+				{ x0: -100, x1: 0, y0: 1, y1: 5, tags: name },
+				{ x0: 0, x1: 100, y0: 7, y1: 11, tags: name }
+			]
+		});
+		expect(g.analysis().platforms).toHaveLength(2);
+	});
+
 	it('quais de part et d’autre d’une voie → jamais regroupés, même avec des seuils relâchés', async () => {
 		const { groupPlatforms } = await import('./platformGroups');
 		// Deux quais bout à bout en quinconce, la voie A (y = 6) entre les deux.
