@@ -225,7 +225,7 @@ describe('politique de sécurité générée', () => {
 		expect(d['img-src']).toContain('https://data.geopf.fr');
 		expect(d['connect-src']).toContain('https://data.geopf.fr');
 	});
-	it('est identique à la politique écrite à la main avant le lot P1', () => {
+	it('est la politique écrite à la main avant le lot P1, plus l’état officiel SNCF', () => {
 		expect(cspDirectives()).toEqual({
 			'default-src': ['self'],
 			'script-src': ['self'],
@@ -237,7 +237,9 @@ describe('politique de sécurité générée', () => {
 				'https://api.openstreetmap.org',
 				'https://www.openstreetmap.org',
 				'https://master.apis.dev.openstreetmap.org',
-				'https://data.geopf.fr'
+				'https://data.geopf.fr',
+				// D4 bis (lot S1) : état officiel des ascenseurs, lecture seule
+				'https://ressources.data.sncf.com'
 			],
 			'worker-src': ['self', 'blob:'],
 			'manifest-src': ['self'],
@@ -245,6 +247,15 @@ describe('politique de sécurité générée', () => {
 			'form-action': ['self'],
 			'object-src': ['none']
 		});
+	});
+	it('n’autorise l’état officiel qu’en lecture (connect-src), pour les pays activés seulement', () => {
+		const d = cspDirectives();
+		expect(d['img-src']).not.toContain('https://ressources.data.sncf.com');
+		expect(cspDirectives(['https://data.geopf.fr'], [])['connect-src']).not.toContain(
+			'https://ressources.data.sncf.com'
+		);
+		// La Suisse, désactivée, n'a pas encore de source : rien à ajouter.
+		expect(COUNTRIES.ch.equipmentStatus).toBeNull();
 	});
 	it('ajoute l’origine d’un nouveau fournisseur sans autre changement', () => {
 		const d = cspDirectives(['https://data.geopf.fr', 'https://tuiles.example.org']);

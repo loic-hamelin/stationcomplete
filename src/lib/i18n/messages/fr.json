@@ -574,7 +574,8 @@
 			"osm": "Données cartographiques : © les contributeurs OpenStreetMap, sous licence <odbl>ODbL</odbl>.",
 			"photos": "Photographies aériennes : {product}, sous <licence>{licence}</licence>.",
 			"code": "Code de l’appli : licence GPL-3.0 ou ultérieure, <code>code source sur GitHub</code>.",
-			"independent": "stationcomplete est un projet personnel : ce n’est pas un service de la SNCF ni de la Fondation OpenStreetMap."
+			"independent": "stationcomplete est un projet personnel : ce n’est pas un service de la SNCF ni de la Fondation OpenStreetMap.",
+			"status": "État des ascenseurs et escaliers mécaniques : © {operator}, sous licence <lic>{licence}</lic> et ses conditions particulières d’utilisation, affiché tel que publié, sans modification (<src>jeu de données</src>)."
 		}
 	},
 	"country": {
@@ -606,7 +607,8 @@
 			"lead": "Comme pour tout site web, ces services voient l’adresse IP de votre connexion :",
 			"github": "<b>GitHub Pages</b> (GitHub, Inc., États-Unis) : hébergement de l’appli. <gh>Déclaration de confidentialité de GitHub</gh>.",
 			"osm": "<b>OpenStreetMap</b> (Fondation OpenStreetMap, Royaume-Uni) : lecture des données des gares, connexion et envoi des contributions.",
-			"photos": "<b>{operator}</b> ({seat}) : photos aériennes."
+			"photos": "<b>{operator}</b> ({seat}) : photos aériennes.",
+			"status": "<b>{platform}</b> ({seat}) : état officiel des ascenseurs et escaliers mécaniques, lu quand vous ouvrez une gare. Ce service voit la gare consultée ; stationcomplete n’envoie aucun identifiant et ne garde rien."
 		},
 		"rights": {
 			"title": "Vos droits",
@@ -809,6 +811,29 @@
 		"allDone": "Tout est renseigné dans cette gare. Bravo !",
 		"onSite": "À faire en gare",
 		"drawMissing": "Un quai manque sur la carte ? Le dessiner"
+	},
+	"official": {
+		"title": "Ascenseurs et escaliers mécaniques — état officiel",
+		"loading": "Lecture de l’état officiel…",
+		"summary": "{total, plural, one {# équipement} other {# équipements}} · {ko, plural, =0 {aucun hors service} one {# hors service} other {# hors service}}",
+		"state": {
+			"ok": "En service",
+			"ko": "Hors service",
+			"unknown": "Statut inconnu"
+		},
+		"read": "Lu le {date}. L’exploitant met cet état à jour toutes les heures.",
+		"stale": "Hors connexion : état lu le {date}, peut-être dépassé.",
+		"source": "Source : <src>{operator}</src> (<lic>{licence}</lic>). Information non contractuelle, affichée telle que publiée par l’exploitant.",
+		"unavailable": "État officiel indisponible pour le moment.",
+		"refresh": "Actualiser l’état officiel",
+		"report": {
+			"title": "Signaler une panne",
+			"lead": "stationcomplete ne transmet rien à l’exploitant. Pour signaler une panne, utilisez ses canaux officiels :",
+			"stations": "<a>Site {operator}</a> : cherchez la gare pour voir l’état de ses équipements.",
+			"contact": "<a>Formulaire de contact {operator}</a>.",
+			"assistance": "Besoin d’aide pour voyager (handicap, mobilité réduite) ? <a>{name}</a>, tous les jours de {from} h à {to} h :",
+			"abroad": "depuis l’étranger :"
+		}
 	},
 	"map": {
 		"title": "Carte — {name} — stationcomplete",

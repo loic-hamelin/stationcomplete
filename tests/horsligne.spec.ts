@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+import { sansEtatOfficiel } from './etat-officiel-simule';
 
 // Lot 4 : gare téléchargée (données + photos), saisie sans réseau, envoi au retour du réseau.
 const fixture = JSON.parse(readFileSync('tests/fixtures/amberieu-en-bugey.json', 'utf8'));
@@ -23,6 +24,8 @@ async function mockTiles(page: Page) {
 	});
 	return () => n;
 }
+
+test.beforeEach(({ page }) => sansEtatOfficiel(page));
 
 test('télécharger une gare puis la consulter, carte comprise, sans réseau', async ({
 	page,

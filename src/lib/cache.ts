@@ -112,5 +112,7 @@ export async function wipeAll() {
 		/* stockage indisponible */
 	}
 	if ('caches' in globalThis)
-		for (const k of await caches.keys()) if (k.startsWith('rc-tiles')) await caches.delete(k);
+		for (const k of await caches.keys())
+			// Photos des gares téléchargées et dernier état officiel des équipements (D4 bis).
+			if (k.startsWith('rc-tiles') || k === 'rc-status') await caches.delete(k);
 }

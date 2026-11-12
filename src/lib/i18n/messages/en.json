@@ -574,7 +574,8 @@
 			"osm": "Map data: © OpenStreetMap contributors, under the <odbl>ODbL</odbl> licence.",
 			"photos": "Aerial photos: {product}, under <licence>{licence}</licence>.",
 			"code": "App code: GPL-3.0-or-later licence, <code>source code on GitHub</code>.",
-			"independent": "stationcomplete is a personal project: it is not a service of SNCF or of the OpenStreetMap Foundation."
+			"independent": "stationcomplete is a personal project: it is not a service of SNCF or of the OpenStreetMap Foundation.",
+			"status": "Status of lifts and escalators: © {operator}, under the <lic>{licence}</lic> licence and its specific terms of use, shown as published, unmodified (<src>dataset</src>)."
 		}
 	},
 	"country": {
@@ -606,7 +607,8 @@
 			"lead": "As with any website, these services see the IP address of your connection:",
 			"github": "<b>GitHub Pages</b> (GitHub, Inc., United States): hosting of the app. <gh>GitHub privacy statement</gh>.",
 			"osm": "<b>OpenStreetMap</b> (OpenStreetMap Foundation, United Kingdom): reading station data, logging in and uploading contributions.",
-			"photos": "<b>{operator}</b> ({seat}): aerial photos."
+			"photos": "<b>{operator}</b> ({seat}): aerial photos.",
+			"status": "<b>{platform}</b> ({seat}): official status of lifts and escalators, read when you open a station. This service sees which station you look at; stationcomplete sends no identifier and keeps nothing."
 		},
 		"rights": {
 			"title": "Your rights",
@@ -809,6 +811,29 @@
 		"allDone": "Everything is filled in at this station. Well done!",
 		"onSite": "To do at the station",
 		"drawMissing": "A platform is missing from the map? Draw it"
+	},
+	"official": {
+		"title": "Lifts and escalators — official status",
+		"loading": "Reading the official status…",
+		"summary": "{total, plural, one {# item} other {# items}} · {ko, plural, =0 {none out of service} one {# out of service} other {# out of service}}",
+		"state": {
+			"ok": "In service",
+			"ko": "Out of service",
+			"unknown": "Status unknown"
+		},
+		"read": "Read on {date}. The operator updates this status every hour.",
+		"stale": "Offline: status read on {date}, may be out of date.",
+		"source": "Source: <src>{operator}</src> (<lic>{licence}</lic>). Not contractual; shown as published by the operator.",
+		"unavailable": "Official status unavailable at the moment.",
+		"refresh": "Refresh the official status",
+		"report": {
+			"title": "Report a breakdown",
+			"lead": "stationcomplete sends nothing to the operator. To report a breakdown, use its official channels:",
+			"stations": "<a>{operator} website</a>: search for the station to see the status of its equipment.",
+			"contact": "<a>{operator} contact form</a>.",
+			"assistance": "Need help to travel (disability, reduced mobility)? <a>{name}</a>, every day from {from}:00 to {to}:00:",
+			"abroad": "from abroad:"
+		}
 	},
 	"map": {
 		"title": "Map — {name} — stationcomplete",

@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+import { sansEtatOfficiel } from './etat-officiel-simule';
 
 // Lot traduction : langue choisie dans les Réglages (E10), puis parcours principal sur la gare
 // d'Ambérieu-en-Bugey (API OSM et photos simulées) ; détection d'après la langue du téléphone.
@@ -39,6 +40,8 @@ async function expectAccessible(page: Page, exclude?: string) {
 	const { violations } = await b.analyze();
 	expect(violations.map((v) => `${v.id} : ${v.help}`)).toEqual([]);
 }
+
+test.beforeEach(({ page }) => sansEtatOfficiel(page));
 
 const PARCOURS = {
 	en: {

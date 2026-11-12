@@ -70,6 +70,12 @@ Forme et suppression « en double » sont permises **à distance** (photo aérie
 
 Demande de Loïc, validée : compléter dans OSM des informations utiles aux voyageurs, avec des tags établis (rapport tags § 10). OSM ne garde que le durable : aucun état de panne n'est écrit. Tout se relève **sur place** (`canSurvey`), y compris l'abri (choix documenté au rapport § 10). `check_date` est posé à l'enregistrement sur place.
 
+### Lot S1 — État officiel des ascenseurs et escaliers mécaniques (E4, 12 novembre 2026)
+
+- **E4**, sous la liste des quêtes et la mention OSM, section discrète (filet en tête) **« Ascenseurs et escaliers mécaniques — état officiel »**, bouton « Actualiser l'état officiel » (icône). Résumé « 3 équipements · 1 hors service » ; liste : état en icône **et** texte (✓ En service, ✕ Hors service, ? Statut inconnu ; hors service d'abord), libellé et localisation **tels que publiés** ; « Lu le 12/11/2026 14:05. L'exploitant met cet état à jour toutes les heures. » ; « Source : SNCF Gares & Connexions (ODbL). Information non contractuelle, affichée telle que publiée par l'exploitant. »
+- **« Signaler une panne »** (repliable) : « stationcomplete ne transmet rien à l'exploitant… », lien vers le site Gares & Connexions (chercher la gare), formulaire de contact, Assist'enGare (handicap, mobilité réduite) tous les jours de 8 h à 20 h, **3212** et +33 9 72 72 00 92 en texte sélectionnable.
+- États : gare non couverte ou coupure par `config.json` → rien ; source injoignable → « État officiel indisponible pour le moment. » ; hors connexion (≤ 3 h) → bandeau « Hors connexion : état lu le …, peut-être dépassé. ». Rien sur la carte (pas de position).
+
 ### Étape 1 — Caractéristiques des quais
 
 - **E7, fiche d'un quai** : sous les numéros, une section **« Équipements du quai »** (filet en tête, icône banc, consigne « Ce qui existe sur ce quai, vu sur place. « Je ne sais pas » ne change rien. »). Une question par groupe (`fieldset` + `legend`) :

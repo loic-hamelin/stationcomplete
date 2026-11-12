@@ -574,7 +574,8 @@
 			"osm": "Kartendaten: © OpenStreetMap-Mitwirkende, unter der Lizenz <odbl>ODbL</odbl>.",
 			"photos": "Luftbilder: {product}, unter <licence>{licence}</licence>.",
 			"code": "Code der App: Lizenz GPL-3.0 oder neuer, <code>Quellcode auf GitHub</code>.",
-			"independent": "stationcomplete ist ein persönliches Projekt: Es ist weder ein Dienst der SNCF noch der OpenStreetMap Foundation."
+			"independent": "stationcomplete ist ein persönliches Projekt: Es ist weder ein Dienst der SNCF noch der OpenStreetMap Foundation.",
+			"status": "Status der Aufzüge und Rolltreppen: © {operator}, unter der Lizenz <lic>{licence}</lic> und ihren besonderen Nutzungsbedingungen, so angezeigt, wie veröffentlicht, ohne Änderung (<src>Datensatz</src>)."
 		}
 	},
 	"country": {
@@ -606,7 +607,8 @@
 			"lead": "Wie bei jeder Website sehen diese Dienste die IP-Adresse deiner Verbindung:",
 			"github": "<b>GitHub Pages</b> (GitHub, Inc., USA): Hosting der App. <gh>Datenschutzerklärung von GitHub</gh>.",
 			"osm": "<b>OpenStreetMap</b> (OpenStreetMap Foundation, Vereinigtes Königreich): Lesen der Bahnhofsdaten, Anmeldung und Hochladen der Beiträge.",
-			"photos": "<b>{operator}</b> ({seat}): Luftbilder."
+			"photos": "<b>{operator}</b> ({seat}): Luftbilder.",
+			"status": "<b>{platform}</b> ({seat}): offizieller Status der Aufzüge und Rolltreppen, gelesen, wenn Sie einen Bahnhof öffnen. Dieser Dienst sieht, welchen Bahnhof Sie ansehen; stationcomplete sendet keine Kennung und speichert nichts."
 		},
 		"rights": {
 			"title": "Deine Rechte",
@@ -809,6 +811,29 @@
 		"allDone": "In diesem Bahnhof ist alles erfasst. Bravo!",
 		"onSite": "Vor Ort im Bahnhof zu tun",
 		"drawMissing": "Fehlt ein Bahnsteig auf der Karte? Zeichne ihn"
+	},
+	"official": {
+		"title": "Aufzüge und Rolltreppen – offizieller Status",
+		"loading": "Offizieller Status wird gelesen …",
+		"summary": "{total, plural, one {# Anlage} other {# Anlagen}} · {ko, plural, =0 {keine außer Betrieb} one {# außer Betrieb} other {# außer Betrieb}}",
+		"state": {
+			"ok": "In Betrieb",
+			"ko": "Außer Betrieb",
+			"unknown": "Status unbekannt"
+		},
+		"read": "Gelesen am {date}. Der Betreiber aktualisiert diesen Status stündlich.",
+		"stale": "Offline: Status vom {date}, möglicherweise veraltet.",
+		"source": "Quelle: <src>{operator}</src> (<lic>{licence}</lic>). Unverbindliche Angabe, so angezeigt, wie der Betreiber sie veröffentlicht.",
+		"unavailable": "Offizieller Status derzeit nicht verfügbar.",
+		"refresh": "Offiziellen Status aktualisieren",
+		"report": {
+			"title": "Störung melden",
+			"lead": "stationcomplete übermittelt nichts an den Betreiber. Um eine Störung zu melden, nutzen Sie seine offiziellen Kanäle:",
+			"stations": "<a>Website von {operator}</a>: Suchen Sie den Bahnhof, um den Status seiner Anlagen zu sehen.",
+			"contact": "<a>Kontaktformular von {operator}</a>.",
+			"assistance": "Brauchen Sie Hilfe beim Reisen (Behinderung, eingeschränkte Mobilität)? <a>{name}</a>, täglich von {from} bis {to} Uhr:",
+			"abroad": "aus dem Ausland:"
+		}
 	},
 	"map": {
 		"title": "Karte — {name} — stationcomplete",

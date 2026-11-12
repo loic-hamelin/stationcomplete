@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+import { sansEtatOfficiel } from './etat-officiel-simule';
 
 // Quai en plusieurs parties (gare synthétique « type Saint-Lazare ») : quai P coupé en 3 parties,
 // dont 2 couvertes (layer=-1) ; quai Q en 2 parties aux numéros différents ; voies coupées en
@@ -87,6 +88,8 @@ async function tapCenter(page: Page) {
 	const box = (await page.locator('.map').boundingBox())!;
 	await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
 }
+
+test.beforeEach(({ page }) => sansEtatOfficiel(page));
 
 test('quai en 3 parties : une étiquette, toucher la partie couverte sélectionne le quai entier', async ({
 	page

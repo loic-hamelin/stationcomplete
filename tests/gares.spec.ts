@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+import { sansEtatOfficiel } from './etat-officiel-simule';
 
 // E3 « Choisir une gare » (carte Reprendre, recherche, favorites) et étape « langue » du premier
 // lancement (E1). API OSM simulée avec les données réelles d'Ambérieu-en-Bugey.
@@ -38,6 +39,8 @@ async function expectAccessible(page: Page) {
 /** Présentation déjà vue (utilisateur existant). */
 const onboarded = (page: Page) =>
 	page.addInitScript(() => localStorage.setItem('rc:intro', 'true'));
+
+test.beforeEach(({ page }) => sansEtatOfficiel(page));
 
 test.describe('premier lancement : langue', () => {
 	test('la langue proposée est celle du téléphone ; choisir l’anglais traduit l’appli', async ({

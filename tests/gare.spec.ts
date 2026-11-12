@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+import { sansEtatOfficiel } from './etat-officiel-simule';
 
 // Parcours du lot 1 (lecture seule) avec des données réelles d'Ambérieu-en-Bugey :
 // l'API OSM et les tuiles IGN sont simulées pour que le test ne dépende pas du réseau.
@@ -39,6 +40,8 @@ async function expectAccessible(page: Page, exclude?: string) {
 	const { violations } = await b.analyze();
 	expect(violations.map((v) => `${v.id} : ${v.help}`)).toEqual([]);
 }
+
+test.beforeEach(({ page }) => sansEtatOfficiel(page));
 
 test('chercher une gare, voir ce qui manque, ouvrir la carte', async ({ page }) => {
 	const errors = watchErrors(page);

@@ -15,13 +15,19 @@ export interface RemoteConfig {
 	 * null = tout le monde. Ne concerne pas le serveur de test.
 	 */
 	pilotUsers: string[] | null;
+	/**
+	 * false : l'état officiel des ascenseurs et escaliers mécaniques (D4 bis) n'est plus lu ni
+	 * affiché, sans republier l'appli (source fausse, changement de format, demande de l'exploitant).
+	 */
+	officialStatusEnabled: boolean;
 }
 
 export const DEFAULT_CONFIG: RemoteConfig = {
 	uploadsEnabled: true,
 	minVersion: '0',
 	message: null,
-	pilotUsers: null
+	pilotUsers: null,
+	officialStatusEnabled: true
 };
 
 /** Lit un config.json en tolérant les champs absents ou mal formés. */
@@ -33,7 +39,8 @@ export function parseConfig(raw: unknown): RemoteConfig {
 		message: typeof o.message === 'string' && o.message.trim() ? o.message.trim() : null,
 		pilotUsers: Array.isArray(o.pilotUsers)
 			? o.pilotUsers.filter((u): u is string => typeof u === 'string')
-			: null
+			: null,
+		officialStatusEnabled: o.officialStatusEnabled !== false
 	};
 }
 

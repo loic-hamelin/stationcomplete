@@ -16,6 +16,7 @@
 	import { onMount, untrack } from 'svelte';
 	import Rich from '#lib/i18n/Rich.svelte';
 	import { fmtDateTime, fmtMegabytes, t } from '#lib/i18n/t.js';
+	import { countryConfig } from '#lib/core/countries.js';
 
 	// Page statique : l'identifiant de la gare n'est lu que dans le navigateur.
 	let mounted = $state(false);
@@ -306,6 +307,13 @@
 				>
 			{/if}
 			<p class="attribution">{t('common.osmAttribution')}</p>
+			<!-- État officiel des ascenseurs (D4 bis, lot S1) : code chargé à la demande, seulement
+			     dans un pays qui a une source. -->
+			{#if countryConfig(ready.station.country).equipmentStatus}
+				{#await import('#lib/OfficialStatus.svelte') then m}
+					<m.default station={ready.station} />
+				{/await}
+			{/if}
 		{/if}
 	</main>
 	<BottomNav current="gare" />

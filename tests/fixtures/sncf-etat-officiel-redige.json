@@ -1,0 +1,65 @@
+{
+	"_note": "FIXTURE RÉDIGÉE d'après la documentation publique (data.gouv.fr, Opendatasoft Explore v2.1), PAS un échantillon réel : l'API n'a pas pu être lue depuis l'environnement de développement (11/11/2026). Identifiants de gare et d'équipements fictifs. Noms techniques des champs supposés (Opendatasoft dérive les noms des libellés). À remplacer par un vrai extrait : docs/signalements/s1-verifications.md.",
+	"stations": {
+		"total_count": 2,
+		"results": [
+			{
+				"id_gare": "fictif-amberieu",
+				"nom_gare": "Ambérieu-en-Bugey",
+				"trigramme": "ABU",
+				"codes_uic": "87743714"
+			},
+			{
+				"id_gare": "fictif-autre",
+				"nom_gare": "Gare voisine fictive",
+				"trigramme": "XXX",
+				"codes_uic": "87743999"
+			}
+		]
+	},
+	"status": {
+		"total_count": 6,
+		"results": [
+			{
+				"id_gare": "fictif-amberieu",
+				"id_equipement": "fictif-asc-1",
+				"nom_de_l_equipement": "Ascenseur - Quai 1",
+				"localisation": "Quai 1 / Souterrain",
+				"etat_de_fonctionnement_de_l_equipement": "OK"
+			},
+			{
+				"id_gare": "fictif-amberieu",
+				"id_equipement": "fictif-asc-2",
+				"nom_de_l_equipement": "Ascenseur - Quai 2/3",
+				"localisation": "Voies 2 et 3 / Souterrain",
+				"etat_de_fonctionnement_de_l_equipement": "KO"
+			},
+			{
+				"id_gare": "fictif-amberieu",
+				"id_equipement": "fictif-esc-1",
+				"nom_de_l_equipement": "esc mec - Hall",
+				"localisation": "Hall / Souterrain",
+				"etat_de_fonctionnement_de_l_equipement": "Inconnu"
+			},
+			{
+				"id_gare": "fictif-amberieu",
+				"id_equipement": "fictif-asc-1",
+				"nom_de_l_equipement": "Ascenseur - Quai 1",
+				"localisation": "Quai 1 / Souterrain",
+				"etat_de_fonctionnement_de_l_equipement": "OK"
+			},
+			{
+				"id_gare": "fictif-amberieu",
+				"id_equipement": "fictif-sans-nom",
+				"etat_de_fonctionnement_de_l_equipement": "OK"
+			},
+			{
+				"id_gare": "fictif-autre",
+				"id_equipement": "fictif-asc-9",
+				"nom_de_l_equipement": "Ascenseur d'une autre gare",
+				"localisation": "Quai A",
+				"etat_de_fonctionnement_de_l_equipement": "KO"
+			}
+		]
+	}
+}

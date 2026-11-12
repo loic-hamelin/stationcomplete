@@ -3,7 +3,7 @@
 	import Logo from '#lib/Logo.svelte';
 	import { wipeAll } from '#lib/cache.js';
 	import { CONTACT_EMAIL } from '#lib/config.js';
-	import { photoCredits } from '#lib/core/countries.js';
+	import { equipmentStatusSources, photoCredits } from '#lib/core/countries.js';
 	import { loadEdits, pending } from '#lib/edits.svelte.js';
 	import { lang } from '#lib/i18n/i18n.svelte.js';
 	import Rich from '#lib/i18n/Rich.svelte';
@@ -75,6 +75,16 @@
 						text={t('data.services.photos', {
 							operator: c.operator,
 							seat: c.operatorSeat === 'France' ? t('country.fr.name') : c.operatorSeat
+						})}
+					/>
+				</li>
+			{/each}
+			{#each equipmentStatusSources() as s (s.origin)}
+				<li>
+					<Rich
+						text={t('data.services.status', {
+							platform: s.platform,
+							seat: s.platformSeat === 'France' ? t('country.fr.name') : s.platformSeat
 						})}
 					/>
 				</li>

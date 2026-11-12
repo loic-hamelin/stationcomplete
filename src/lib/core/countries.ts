@@ -73,6 +73,44 @@ export interface StationIndexSource {
 	stats: string;
 }
 
+/**
+ * État officiel des ascenseurs et escaliers mécaniques publié en open data par l'exploitant des
+ * gares du pays (décision D4 bis, lot S1) : lu par le navigateur, gare par gare, en lecture seule.
+ * Le format de chaque exploitant est isolé dans un adaptateur (core/officialStatus.ts).
+ */
+export interface EquipmentStatusSource {
+	/** Adaptateur qui sait interroger et lire la source. */
+	adapter: 'sncf-gc';
+	/** Origine exacte interrogée (CSP connect-src, service worker) : « https://hôte ». */
+	origin: string;
+	/** Producteur, cité tel quel (« SNCF Gares & Connexions »). */
+	operator: string;
+	/** Plateforme qui reçoit les requêtes (page Données personnelles). */
+	platform: string;
+	/** Pays de la plateforme. */
+	platformSeat: string;
+	licence: string;
+	licenceUrl: string;
+	/** Page publique du jeu de données (lien « Source »). */
+	datasetUrl: string;
+	/** Canaux officiels de l'exploitant, affichés sous « Signaler une panne ». */
+	channels: {
+		/** Page où chercher la gare et voir l'état de ses équipements. */
+		stationsUrl: string;
+		/** Formulaire de contact de l'exploitant. */
+		contactUrl: string;
+		/** Assistance aux voyageurs handicapés ou à mobilité réduite (pas une maintenance). */
+		assistance: {
+			name: string;
+			phone: string;
+			phoneAbroad: string;
+			/** Heures d'ouverture, tous les jours : [début, fin]. */
+			hours: [number, number];
+			url: string;
+		};
+	};
+}
+
 export interface Country {
 	code: CountryCode;
 	/** Pays proposé dans l'appli. Un pays désactivé n'est ni sélectionnable ni chargé. */
@@ -117,6 +155,8 @@ export interface Country {
 		 */
 		platformHeights: number[];
 	};
+	/** null : pas de source officielle d'état des ascenseurs intégrée pour ce pays. */
+	equipmentStatus: EquipmentStatusSource | null;
 }
 
 const france: Country = {
@@ -167,7 +207,32 @@ const france: Country = {
 	languages: ['fr'],
 	// Hauteurs usuelles des quais en France : 0,55 m (standard européen), 0,76 m (ancienne
 	// norme, encore courante), 0,92 m (RER et Transilien d'Île-de-France).
-	equipment: { platformHeights: [0.55, 0.76, 0.92] }
+	equipment: { platformHeights: [0.55, 0.76, 0.92] },
+	// Jeu « Etat de fonctionnement des équipements d'élévatique en gare » (ODbL, mis à jour toutes
+	// les heures) : docs/signalements/etude-signalements.md § 1.2 et § 2. Canaux vérifiés sur
+	// garesetconnexions.sncf le 11/11/2026 ; l'API n'a pas pu être lue depuis l'environnement de
+	// développement (adaptateur et points à vérifier : core/officialStatus.ts).
+	equipmentStatus: {
+		adapter: 'sncf-gc',
+		origin: 'https://ressources.data.sncf.com',
+		operator: 'SNCF Gares & Connexions',
+		platform: 'SNCF Open Data (plateforme Opendatasoft)',
+		platformSeat: 'France',
+		licence: 'ODbL',
+		licenceUrl: 'https://opendatacommons.org/licenses/odbl/1-0/',
+		datasetUrl: 'https://www.data.gouv.fr/fr/datasets/equipements-delevatique-en-gare/',
+		channels: {
+			stationsUrl: 'https://www.garesetconnexions.sncf/fr/gares-services',
+			contactUrl: 'https://www.garesetconnexions.sncf/fr/contacts',
+			assistance: {
+				name: 'Assist’enGare',
+				phone: '3212',
+				phoneAbroad: '+33 9 72 72 00 92',
+				hours: [8, 20],
+				url: 'https://www.garesetconnexions.sncf/fr/service-client/service-assistance-gare-PMR/nous-contacter'
+			}
+		}
+	}
 };
 
 // Suisse entière (décision de Loïc), pas encore activée. Seules les valeurs établies sont
@@ -200,7 +265,10 @@ const switzerland: Country = {
 	quests: { misplacedTrackRef: /^\s*(gleis|voie|binario|v)\s*\w+/i },
 	languages: ['de', 'fr', 'it'],
 	// Suisse : 0,55 m est la hauteur standard (indication de Loïc, à confirmer à l'activation).
-	equipment: { platformHeights: [0.55] }
+	equipment: { platformHeights: [0.55] },
+	// Jeu CFF « Aufzugzustand » : Zurich seulement, champs non vérifiés (étude des signalements
+	// § 1.3) ; à décider à l'activation de la Suisse.
+	equipmentStatus: null
 };
 
 export const COUNTRIES: Record<CountryCode, Country> = { fr: france, ch: switzerland };
@@ -221,6 +289,11 @@ export function countryProblems(c: Country): string[] {
 		if (!im.attribution || !im.imageryUsed) out.push('attribution de la photo');
 	}
 	if (!c.languages.length) out.push('langues');
+	const es = c.equipmentStatus;
+	if (es) {
+		if (!/^https:\/\/[^/]+$/.test(es.origin)) out.push('origine de l’état officiel');
+		if (!es.operator || !es.licence || !es.licenceUrl) out.push('attribution de l’état officiel');
+	}
 	// Pas de schéma de pancartes : permis (quêtes de pancartes désactivées).
 	return out;
 }
@@ -269,6 +342,18 @@ export const imageryOrigins = (): string[] => [
 export const photoCredits = (): Imagery['credit'][] => [
 	...new Map(enabledCountries().map((c) => [c.imagery!.id, c.imagery!.credit])).values()
 ];
+
+/** Sources d'état officiel des équipements des pays activés (CSP, service worker, pages légales). */
+export const equipmentStatusSources = (): EquipmentStatusSource[] => [
+	...new Map(
+		enabledCountries()
+			.filter((c) => c.equipmentStatus)
+			.map((c) => [c.equipmentStatus!.origin, c.equipmentStatus!])
+	).values()
+];
+
+/** Origines (exactes) des sources d'état officiel des pays activés, sans doublon. */
+export const equipmentStatusOrigins = (): string[] => equipmentStatusSources().map((s) => s.origin);
 
 /**
  * Pays proposé au premier lancement d'après le téléphone, sans localisation : fuseau horaire

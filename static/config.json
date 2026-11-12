@@ -2,5 +2,6 @@
 	"uploadsEnabled": true,
 	"minVersion": "0.4",
 	"message": null,
-	"pilotUsers": ["LoicHam"]
+	"pilotUsers": ["LoicHam"],
+	"officialStatusEnabled": false
 }

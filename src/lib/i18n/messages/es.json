@@ -574,7 +574,8 @@
 			"osm": "Datos cartográficos: © colaboradores de OpenStreetMap, bajo licencia <odbl>ODbL</odbl>.",
 			"photos": "Fotos aéreas: {product}, bajo <licence>{licence}</licence>.",
 			"code": "Código de la aplicación: licencia GPL-3.0 o posterior, <code>código fuente en GitHub</code>.",
-			"independent": "stationcomplete es un proyecto personal: no es un servicio de la SNCF ni de la Fundación OpenStreetMap."
+			"independent": "stationcomplete es un proyecto personal: no es un servicio de la SNCF ni de la Fundación OpenStreetMap.",
+			"status": "Estado de ascensores y escaleras mecánicas: © {operator}, bajo licencia <lic>{licence}</lic> y sus condiciones particulares de uso, mostrado tal como se publica, sin modificaciones (<src>conjunto de datos</src>)."
 		}
 	},
 	"country": {
@@ -606,7 +607,8 @@
 			"lead": "Como en cualquier sitio web, estos servicios ven la dirección IP de tu conexión:",
 			"github": "<b>GitHub Pages</b> (GitHub, Inc., Estados Unidos): alojamiento de la aplicación. <gh>Declaración de privacidad de GitHub</gh>.",
 			"osm": "<b>OpenStreetMap</b> (Fundación OpenStreetMap, Reino Unido): lectura de los datos de las estaciones, inicio de sesión y envío de las contribuciones.",
-			"photos": "<b>{operator}</b> ({seat}): fotos aéreas."
+			"photos": "<b>{operator}</b> ({seat}): fotos aéreas.",
+			"status": "<b>{platform}</b> ({seat}): estado oficial de ascensores y escaleras mecánicas, leído cuando abre una estación. Este servicio ve la estación consultada; stationcomplete no envía ningún identificador y no guarda nada."
 		},
 		"rights": {
 			"title": "Tus derechos",
@@ -809,6 +811,29 @@
 		"allDone": "Todo está completo en esta estación. ¡Bravo!",
 		"onSite": "Por hacer en la estación",
 		"drawMissing": "¿Falta un andén en el mapa? Dibújalo"
+	},
+	"official": {
+		"title": "Ascensores y escaleras mecánicas — estado oficial",
+		"loading": "Leyendo el estado oficial…",
+		"summary": "{total, plural, one {# equipo} other {# equipos}} · {ko, plural, =0 {ninguno fuera de servicio} one {# fuera de servicio} other {# fuera de servicio}}",
+		"state": {
+			"ok": "En servicio",
+			"ko": "Fuera de servicio",
+			"unknown": "Estado desconocido"
+		},
+		"read": "Leído el {date}. El operador actualiza este estado cada hora.",
+		"stale": "Sin conexión: estado leído el {date}, quizá desactualizado.",
+		"source": "Fuente: <src>{operator}</src> (<lic>{licence}</lic>). Información no contractual, mostrada tal como la publica el operador.",
+		"unavailable": "Estado oficial no disponible por el momento.",
+		"refresh": "Actualizar el estado oficial",
+		"report": {
+			"title": "Avisar de una avería",
+			"lead": "stationcomplete no transmite nada al operador. Para avisar de una avería, use sus canales oficiales:",
+			"stations": "<a>Web de {operator}</a>: busque la estación para ver el estado de sus equipos.",
+			"contact": "<a>Formulario de contacto de {operator}</a>.",
+			"assistance": "¿Necesita ayuda para viajar (discapacidad, movilidad reducida)? <a>{name}</a>, todos los días de {from} a {to} h:",
+			"abroad": "desde el extranjero:"
+		}
 	},
 	"map": {
 		"title": "Mapa — {name} — stationcomplete",

@@ -12,6 +12,7 @@ L'utilisateur choisit une gare. L'appli lit les données de la gare par l'API OS
 
 * Les numéros ne peuvent être saisis '''que sur place''' (position vérifiée sur le téléphone, jamais envoyée). À distance, on peut seulement placer ou vérifier des objets, dessiner un quai absent ou corriger la forme d'un quai sur la photo aérienne.
 * Fond de carte : BD ORTHO de l'IGN (Licence Ouverte 2.0), précision visée de l'ordre du mètre.
+* Sur la page d'une gare française, l'appli affiche aussi l'état officiel des ascenseurs et escaliers mécaniques publié en open data par SNCF Gares & Connexions (ODbL), en lecture seule : '''rien n'est écrit dans OSM''' (aucun état de panne), rien n'est envoyé à la SNCF, et les pannes se signalent aux canaux officiels de l'exploitant.
 * L'appli ne modifie que les clés listées ci-dessous. Elle peut aussi corriger la '''forme''' d'un quai, '''supprimer''' un quai (en double, ou disparu constaté sur place) '''supprimer''' une pancarte d'arrêt (en double, mal placée, ou disparue constatée sur place) et '''supprimer''' un ascenseur ou un distributeur de billets isolé (mêmes motifs), selon les règles décrites plus bas ; elle ne supprime aucun autre type d'objet, et '''jamais une voie'''.
 
 == Ce que l'appli modifie ==

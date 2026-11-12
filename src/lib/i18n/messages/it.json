@@ -574,7 +574,8 @@
 			"osm": "Dati cartografici: © collaboratori di OpenStreetMap, con licenza <odbl>ODbL</odbl>.",
 			"photos": "Foto aeree: {product}, con licenza <licence>{licence}</licence>.",
 			"code": "Codice dell’app: licenza GPL-3.0 o successiva, <code>codice sorgente su GitHub</code>.",
-			"independent": "stationcomplete è un progetto personale: non è un servizio della SNCF né della OpenStreetMap Foundation."
+			"independent": "stationcomplete è un progetto personale: non è un servizio della SNCF né della OpenStreetMap Foundation.",
+			"status": "Stato di ascensori e scale mobili: © {operator}, con licenza <lic>{licence}</lic> e le sue condizioni particolari d’uso, mostrato così come pubblicato, senza modifiche (<src>dataset</src>)."
 		}
 	},
 	"country": {
@@ -606,7 +607,8 @@
 			"lead": "Come per qualsiasi sito web, questi servizi vedono l’indirizzo IP della tua connessione:",
 			"github": "<b>GitHub Pages</b> (GitHub, Inc., Stati Uniti): hosting dell’app. <gh>Informativa sulla privacy di GitHub</gh>.",
 			"osm": "<b>OpenStreetMap</b> (OpenStreetMap Foundation, Regno Unito): lettura dei dati delle stazioni, accesso e invio dei contributi.",
-			"photos": "<b>{operator}</b> ({seat}): foto aeree."
+			"photos": "<b>{operator}</b> ({seat}): foto aeree.",
+			"status": "<b>{platform}</b> ({seat}): stato ufficiale di ascensori e scale mobili, letto quando apri una stazione. Questo servizio vede la stazione consultata; stationcomplete non invia alcun identificativo e non conserva nulla."
 		},
 		"rights": {
 			"title": "I tuoi diritti",
@@ -809,6 +811,29 @@
 		"allDone": "In questa stazione è tutto completo. Bravo!",
 		"onSite": "Da fare in stazione",
 		"drawMissing": "Manca un marciapiede sulla mappa? Disegnalo"
+	},
+	"official": {
+		"title": "Ascensori e scale mobili — stato ufficiale",
+		"loading": "Lettura dello stato ufficiale…",
+		"summary": "{total, plural, one {# impianto} other {# impianti}} · {ko, plural, =0 {nessuno fuori servizio} one {# fuori servizio} other {# fuori servizio}}",
+		"state": {
+			"ok": "In servizio",
+			"ko": "Fuori servizio",
+			"unknown": "Stato sconosciuto"
+		},
+		"read": "Letto il {date}. Il gestore aggiorna questo stato ogni ora.",
+		"stale": "Offline: stato letto il {date}, forse non aggiornato.",
+		"source": "Fonte: <src>{operator}</src> (<lic>{licence}</lic>). Informazione non contrattuale, mostrata così come pubblicata dal gestore.",
+		"unavailable": "Stato ufficiale non disponibile al momento.",
+		"refresh": "Aggiorna lo stato ufficiale",
+		"report": {
+			"title": "Segnalare un guasto",
+			"lead": "stationcomplete non trasmette nulla al gestore. Per segnalare un guasto, usa i suoi canali ufficiali:",
+			"stations": "<a>Sito {operator}</a>: cerca la stazione per vedere lo stato dei suoi impianti.",
+			"contact": "<a>Modulo di contatto {operator}</a>.",
+			"assistance": "Serve aiuto per viaggiare (disabilità, mobilità ridotta)? <a>{name}</a>, tutti i giorni dalle {from} alle {to}:",
+			"abroad": "dall’estero:"
+		}
 	},
 	"map": {
 		"title": "Mappa — {name} — stationcomplete",

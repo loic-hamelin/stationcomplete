@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+import { sansEtatOfficiel } from './etat-officiel-simule';
 
 // Lot 5 : dessiner un quai absent d'OSM (Planès : aucun quai cartographié), puis l'envoyer.
 const fixture = JSON.parse(readFileSync('tests/fixtures/planes.json', 'utf8'));
@@ -75,6 +76,8 @@ async function press(page: Page, key: string) {
 		)
 		.toBe(true);
 }
+
+test.beforeEach(({ page }) => sansEtatOfficiel(page));
 
 test('dessiner un quai sur une gare sans quai, puis l’envoyer', async ({ page }) => {
 	const uploads = await setup(page);

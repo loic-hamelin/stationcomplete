@@ -16,7 +16,18 @@ describe('config.json', () => {
 				message: 'Bug',
 				pilotUsers: ['a', 3]
 			})
-		).toEqual({ uploadsEnabled: false, minVersion: '0.4', message: 'Bug', pilotUsers: ['a'] });
+		).toEqual({
+			uploadsEnabled: false,
+			minVersion: '0.4',
+			message: 'Bug',
+			pilotUsers: ['a'],
+			officialStatusEnabled: true
+		});
+	});
+	it('coupe l’état officiel des équipements seulement sur un false explicite', () => {
+		expect(parseConfig({ officialStatusEnabled: false }).officialStatusEnabled).toBe(false);
+		expect(parseConfig({ officialStatusEnabled: 'non' }).officialStatusEnabled).toBe(true);
+		expect(parseConfig({}).officialStatusEnabled).toBe(true);
 	});
 });
 
@@ -61,6 +72,7 @@ describe('static/config.json publié', () => {
 				(Array.isArray(raw.pilotUsers) &&
 					raw.pilotUsers.every((u: unknown) => typeof u === 'string'))
 		).toBe(true);
+		expect(typeof raw.officialStatusEnabled).toBe('boolean');
 		expect(parseConfig(raw)).toEqual({ ...raw, message: raw.message?.trim() || null });
 	});
 });

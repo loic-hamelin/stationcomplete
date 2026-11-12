@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+import { sansEtatOfficiel } from './etat-officiel-simule';
 
 // Lot 2 : saisie locale (numéro de voie, nouvelle pancarte), avec les données réelles d'Ambérieu.
 const fixture = JSON.parse(readFileSync('tests/fixtures/amberieu-en-bugey.json', 'utf8'));
@@ -49,6 +50,8 @@ function watchErrors(page: Page) {
 	page.on('pageerror', (e) => errors.push(e.message));
 	return errors;
 }
+
+test.beforeEach(({ page }) => sansEtatOfficiel(page));
 
 test('hors de la gare, la saisie des numéros est verrouillée', async ({ page }) => {
 	await mockNetwork(page);

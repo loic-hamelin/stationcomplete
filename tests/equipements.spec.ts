@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+import { sansEtatOfficiel } from './etat-officiel-simule';
 
 // Lot « Équipements » : informations utiles aux voyageurs, relevées sur place (mode
 // démonstration) et envoyées sur le serveur de test simulé (aucun appel réel à OSM).
@@ -102,6 +103,8 @@ async function expectAccessible(page: Page) {
 
 /** Groupe « Oui / Non / Je ne sais pas » d'une caractéristique (fieldset nommé par sa légende). */
 const group = (page: Page, name: string | RegExp) => page.getByRole('group', { name });
+
+test.beforeEach(({ page }) => sansEtatOfficiel(page));
 
 test('quai en 3 parties : équipements saisis une fois, envoyés sur chaque partie (abri à l’air libre seulement)', async ({
 	page
