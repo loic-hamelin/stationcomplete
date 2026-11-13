@@ -342,8 +342,14 @@ test('équipement existant : compléter l’ascenseur ; supprimer un distributeu
 	await sheet.getByRole('button', { name: 'Supprimer l’équipement' }).click();
 	await expect(page.getByText(/Distributeur de billets/).first()).toBeVisible();
 
-	await page.goto(`/envoi/?id=${AMB_ID}`);
-	await page.getByRole('button', { name: 'Envoyer 2 modifications' }).click();
+	// La suppression est enregistrée en arrière-plan : sur une machine lente (CI), la page
+	// d'envoi peut s'ouvrir avant. On la recharge tant que les 2 modifications n'y sont pas.
+	const send = page.getByRole('button', { name: 'Envoyer 2 modifications' });
+	await expect(async () => {
+		await page.goto(`/envoi/?id=${AMB_ID}`);
+		await expect(send).toBeVisible({ timeout: 2000 });
+	}).toPass({ timeout: 15_000 });
+	await send.click();
 	await expect(page.getByText('2 modifications envoyées.')).toBeVisible();
 	const create = calls.find((c) => c.path.endsWith('/changeset/create'))!.body;
 	expect(create).toContain('Distributeur de billets supprimé (en double)');
