@@ -66,3 +66,11 @@ transport.data.gouv.fr indique « ODbL et Conditions Particulières d'utilisatio
 - Formulaire : <https://www.garesetconnexions.sncf/fr/contacts>.
 - Assist'enGare : 3212, tous les jours 8 h–20 h ; +33 (0)9 72 72 00 92 depuis l'étranger (<https://www.garesetconnexions.sncf/fr/service-client/service-assistance-gare-PMR/nous-contacter>). C'est un service d'**assistance**, pas de maintenance.
 - [ ] Si Gares & Connexions indique un vrai canal de signalement de panne (ou la « Ligne d'Urgence Accessibilité » citée dans sa FAQ, numéro non trouvé), le remplacer dans `countries.ts` (`equipmentStatus.channels`).
+
+## Résultats (13/11/2026, vérifiés par Loïc)
+
+- Étape 1 : 2 547 équipements ; champs réels `gareid`, `id`, `libelle`, `localisationdescriptive`, `etat_de_fonctionnement`.
+- Étape 2 : le référentiel `gares-de-voyageurs` existe ; Ambérieu-en-Bugey trouvée par `search(*, "8774371")` : `id` = `dd738eff-6705-4a38-aa3e-4b61045b8d78`, `codes_uic` = `87743716` (8 chiffres).
+- Étape 3 : `id_gare` n'existe pas (« Unknown field ») ; le filtre correct est `gareid="…"`. L'adaptateur a été corrigé en conséquence.
+- CGU d'Open Data SNCF (décembre 2021) lues : jeux de données sous ODbL (art. 8.2) ; consultation libre sans compte, 10 000 requêtes de téléchargement par jour et par utilisateur (art. 6.1) — l'appli fait au plus 2 requêtes par gare ouverte toutes les 10 minutes, depuis le téléphone de chaque utilisateur ; ne pas imposer de charge disproportionnée (art. 11). Contact : opendata@sncf.fr.
+- Reste à faire : étape 4 (CORS, dans la console de stationcomplete.org).

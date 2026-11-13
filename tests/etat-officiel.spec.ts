@@ -111,7 +111,7 @@ test('liste officielle : états (icône et texte), heure, source, canaux de sign
 		expect(h.referer).toBeUndefined();
 		expect(new URL(r.url()).searchParams.get('where')).toBeTruthy();
 	}
-	expect(new URL(requests[1].url()).searchParams.get('where')).toBe('id_gare="fictif-amberieu"');
+	expect(new URL(requests[1].url()).searchParams.get('where')).toBe('gareid="fictif-amberieu"');
 
 	// Signaler une panne : canaux officiels de l'exploitant, numéro affiché en texte
 	await s.getByText('Signaler une panne', { exact: true }).click();

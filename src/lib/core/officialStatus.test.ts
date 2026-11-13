@@ -79,10 +79,10 @@ describe('adaptateur SNCF Gares & Connexions', () => {
 		expect(stationIdsFromUic(fixture.stations, '8774399')).toEqual(['fictif-autre']);
 		expect(stationIdsFromUic(fixture.stations, '8700000')).toEqual([]);
 		// Code en liste ou en nombre, plusieurs codes : acceptés
-		const list = { results: [{ Id_Gare: 'a', Code_UIC: ['87000018', '87743005'] }] };
+		const list = { results: [{ id: 'a', codes_uic: ['87000018', '87743005'] }] };
 		expect(stationIdsFromUic(list, '8774300')).toEqual(['a']);
 		// Identifiant suspect (guillemet) : refusé, jamais recopié dans une requête
-		const evil = { results: [{ id_gare: 'x" OR "1"="1', codes_uic: '87743005' }] };
+		const evil = { results: [{ id: 'x" OR "1"="1', codes_uic: '87743005' }] };
 		expect(stationIdsFromUic(evil, '8774300')).toEqual([]);
 	});
 	it('ne demande que la gare ouverte (filtre), jamais le jeu entier', () => {
@@ -93,10 +93,10 @@ describe('adaptateur SNCF Gares & Connexions', () => {
 		expect(st.pathname).toBe(
 			'/api/explore/v2.1/catalog/datasets/etat-fonctionnement-elevatique-gare/records'
 		);
-		expect(st.searchParams.get('where')).toBe('id_gare="fictif-amberieu"');
+		expect(st.searchParams.get('where')).toBe('gareid="fictif-amberieu"');
 		expect(st.searchParams.get('limit')).toBe('100');
 		expect(new URL(sncfStatusUrl(ORIGIN, ['a', 'b'])).searchParams.get('where')).toBe(
-			'id_gare="a" OR id_gare="b"'
+			'gareid="a" OR gareid="b"'
 		);
 	});
 	it('lit les équipements de la gare : libellés tels quels, sans doublon, hors service d’abord', () => {
@@ -112,7 +112,7 @@ describe('adaptateur SNCF Gares & Connexions', () => {
 		const raw = {
 			results: [
 				{
-					Id_Gare: 'g',
+					gareid: 'g',
 					Id_equipement: 'e',
 					"Nom de l'équipement": 'Ascenseur',
 					Localisation: 'Quai 1',
@@ -127,8 +127,8 @@ describe('adaptateur SNCF Gares & Connexions', () => {
 	it('données manquantes : état absent = inconnu ; ni nom ni localisation = ignoré', () => {
 		const raw = {
 			results: [
-				{ id_gare: 'g', localisation: 'Quai 2' },
-				{ id_gare: 'g', etat: 'OK' },
+				{ gareid: 'g', localisationdescriptive: 'Quai 2' },
+				{ gareid: 'g', etat_de_fonctionnement: 'OK' },
 				null,
 				'texte'
 			]

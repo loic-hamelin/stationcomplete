@@ -1,19 +1,19 @@
 {
-	"_note": "FIXTURE RÉDIGÉE d'après la documentation publique (data.gouv.fr, Opendatasoft Explore v2.1), PAS un échantillon réel : l'API n'a pas pu être lue depuis l'environnement de développement (11/11/2026). Identifiants de gare et d'équipements fictifs. Noms techniques des champs supposés (Opendatasoft dérive les noms des libellés). À remplacer par un vrai extrait : docs/signalements/s1-verifications.md.",
+	"_note": "Format RÉEL vérifié le 13/11/2026 (réponses de l'API ouvertes par Loïc dans son navigateur : champs gareid, id, libelle, localisationdescriptive, etat_de_fonctionnement ; référentiel « gares-de-voyageurs » : id, nom, codes_uic sur 8 chiffres). Identifiants et équipements fictifs.",
 	"stations": {
 		"total_count": 2,
 		"results": [
 			{
-				"id_gare": "fictif-amberieu",
-				"nom_gare": "Ambérieu-en-Bugey",
-				"trigramme": "ABU",
-				"codes_uic": "87743714"
+				"nom": "Ambérieu-en-Bugey",
+				"libellecourt": "ABU",
+				"codes_uic": "87743714",
+				"id": "fictif-amberieu"
 			},
 			{
-				"id_gare": "fictif-autre",
-				"nom_gare": "Gare voisine fictive",
-				"trigramme": "XXX",
-				"codes_uic": "87743999"
+				"nom": "Gare voisine fictive",
+				"libellecourt": "XXX",
+				"codes_uic": "87743999",
+				"id": "fictif-autre"
 			}
 		]
 	},
@@ -21,44 +21,44 @@
 		"total_count": 6,
 		"results": [
 			{
-				"id_gare": "fictif-amberieu",
-				"id_equipement": "fictif-asc-1",
-				"nom_de_l_equipement": "Ascenseur - Quai 1",
-				"localisation": "Quai 1 / Souterrain",
-				"etat_de_fonctionnement_de_l_equipement": "OK"
+				"gareid": "fictif-amberieu",
+				"id": "fictif-asc-1",
+				"libelle": "Ascenseur - Quai 1",
+				"localisationdescriptive": "Quai 1 / Souterrain",
+				"etat_de_fonctionnement": "OK"
 			},
 			{
-				"id_gare": "fictif-amberieu",
-				"id_equipement": "fictif-asc-2",
-				"nom_de_l_equipement": "Ascenseur - Quai 2/3",
-				"localisation": "Voies 2 et 3 / Souterrain",
-				"etat_de_fonctionnement_de_l_equipement": "KO"
+				"gareid": "fictif-amberieu",
+				"id": "fictif-asc-2",
+				"libelle": "Ascenseur - Quai 2/3",
+				"localisationdescriptive": "Voies 2 et 3 / Souterrain",
+				"etat_de_fonctionnement": "KO"
 			},
 			{
-				"id_gare": "fictif-amberieu",
-				"id_equipement": "fictif-esc-1",
-				"nom_de_l_equipement": "esc mec - Hall",
-				"localisation": "Hall / Souterrain",
-				"etat_de_fonctionnement_de_l_equipement": "Inconnu"
+				"gareid": "fictif-amberieu",
+				"id": "fictif-esc-1",
+				"libelle": "esc mec - Hall",
+				"localisationdescriptive": "Hall / Souterrain",
+				"etat_de_fonctionnement": "Inconnu"
 			},
 			{
-				"id_gare": "fictif-amberieu",
-				"id_equipement": "fictif-asc-1",
-				"nom_de_l_equipement": "Ascenseur - Quai 1",
-				"localisation": "Quai 1 / Souterrain",
-				"etat_de_fonctionnement_de_l_equipement": "OK"
+				"gareid": "fictif-amberieu",
+				"id": "fictif-asc-1",
+				"libelle": "Ascenseur - Quai 1",
+				"localisationdescriptive": "Quai 1 / Souterrain",
+				"etat_de_fonctionnement": "OK"
 			},
 			{
-				"id_gare": "fictif-amberieu",
-				"id_equipement": "fictif-sans-nom",
-				"etat_de_fonctionnement_de_l_equipement": "OK"
+				"gareid": "fictif-amberieu",
+				"id": "fictif-sans-nom",
+				"etat_de_fonctionnement": "OK"
 			},
 			{
-				"id_gare": "fictif-autre",
-				"id_equipement": "fictif-asc-9",
-				"nom_de_l_equipement": "Ascenseur d'une autre gare",
-				"localisation": "Quai A",
-				"etat_de_fonctionnement_de_l_equipement": "KO"
+				"gareid": "fictif-autre",
+				"id": "fictif-asc-9",
+				"libelle": "Ascenseur d'une autre gare",
+				"localisationdescriptive": "Quai A",
+				"etat_de_fonctionnement": "KO"
 			}
 		]
 	}

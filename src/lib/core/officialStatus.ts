@@ -17,14 +17,12 @@
 // « Gares de voyageurs » (Id_Gare et Code_UIC), comme l'a indiqué Gares & Connexions
 // (data.gouv.fr, 24/04/2026).
 //
-// [NON VÉRIFIÉ — le proxy de l'environnement de développement bloquait l'API] :
-//   - les noms techniques des champs dans l'API (Opendatasoft les dérive des libellés) : la
-//     lecture tolère les variantes (minuscules, accents, espaces → « _ »), mais le filtre
-//     `where` nomme `id_gare` (constante SNCF.stationField) ;
-//   - l'identifiant du jeu « Gares de voyageurs » sur le portail (constante SNCF.stationsDataset) ;
-//   - le format du code UIC dans ce jeu (7 ou 8 chiffres, texte ou liste) : la recherche est
-//     plein texte sur les 7 premiers chiffres, puis le code est contrôlé ici, exactement ;
-//   - les en-têtes CORS de l'API.
+// VÉRIFIÉ le 13/11/2026 sur des réponses réelles ouvertes dans un navigateur :
+//   - jeu d'état : champs `gareid`, `id`, `libelle`, `localisationdescriptive`,
+//     `etat_de_fonctionnement` (OK / KO / Inconnu) ; le filtre `where` porte sur `gareid` ;
+//   - référentiel `gares-de-voyageurs` : `id` (= gareid), `nom`, `codes_uic` sur 8 chiffres
+//     (« 87743716 ») ; la recherche plein texte sur les 7 premiers chiffres le trouve.
+// [NON VÉRIFIÉ] : les en-têtes CORS de l'API (essai dans la console de stationcomplete.org).
 // Points à vérifier dans un navigateur : docs/signalements/s1-verifications.md.
 
 import { countryConfig, type EquipmentStatusSource } from './countries.ts';
@@ -139,10 +137,11 @@ export function parseEquipment(
 	for (const rec of records(json)) {
 		const station = text(field(rec, (k) => k === stationField));
 		if (!stationIds.includes(station)) continue;
-		const name = text(field(rec, (k) => k.startsWith('nom')));
+		const name = text(field(rec, (k) => k === 'libelle' || k.startsWith('nom')));
 		const location = text(field(rec, (k) => k.startsWith('localisation')));
 		if (!name && !location) continue;
-		const id = text(field(rec, (k) => k.startsWith('id_equip'))) || `${name}|${location}`;
+		const id =
+			text(field(rec, (k) => k === 'id' || k.startsWith('id_equip'))) || `${name}|${location}`;
 		if (out.has(id)) continue;
 		out.set(id, {
 			id,
@@ -166,13 +165,13 @@ export const uic7 = (uic: string) => (/^\d{7,8}$/.test(uic.trim()) ? uic.trim().
  * Le code peut être un texte, un nombre ou une liste ; plusieurs codes dans un même texte sont
  * acceptés. Au plus 3 identifiants (une gare de l'index peut couvrir plusieurs gares SNCF).
  */
-export function stationIdsFromUic(json: unknown, uic: string, stationField = SNCF.stationField) {
+export function stationIdsFromUic(json: unknown, uic: string, idField = SNCF.stationsIdField) {
 	const ids: string[] = [];
 	for (const rec of records(json)) {
 		const codes = JSON.stringify(field(rec, (k) => k.includes('uic')) ?? '').match(/\d{7,8}/g);
 		if (!codes?.some((c) => c.startsWith(uic))) continue;
 		const id = text(
-			field(rec, (k) => k === stationField),
+			field(rec, (k) => k === idField),
 			60
 		);
 		if (SAFE_ID.test(id) && !ids.includes(id)) ids.push(id);
@@ -188,8 +187,12 @@ const SAFE_ID = /^[\w.-]{1,60}$/;
 export const SNCF = {
 	statusDataset: 'etat-fonctionnement-elevatique-gare',
 	stationsDataset: 'gares-de-voyageurs',
-	/** Nom technique du champ Id_Gare dans les deux jeux [non vérifié]. */
-	stationField: 'id_gare',
+	/**
+	 * Noms techniques vérifiés le 13/11/2026 sur des réponses réelles : la gare est `id` dans le
+	 * référentiel et `gareid` dans le jeu d'état.
+	 */
+	stationField: 'gareid',
+	stationsIdField: 'id',
 	/** Une gare a au plus quelques dizaines d'équipements (Paris-Nord : 57 le 11/11/2026). */
 	limit: 100
 };
