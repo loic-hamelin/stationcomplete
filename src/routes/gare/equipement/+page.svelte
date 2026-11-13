@@ -29,6 +29,7 @@
 	import { current, openStation } from '#lib/current.svelte.js';
 	import { editsOf, loadEdits, nextTempId, pending, saveEdit } from '#lib/edits.svelte.js';
 	import { canSurvey, checkOnSite, where } from '#lib/onsite.svelte.js';
+	import UndergroundStart from '#lib/UndergroundStart.svelte';
 	import { stationView } from '#lib/view.js';
 	import { onMount, untrack } from 'svelte';
 	import Rich from '#lib/i18n/Rich.svelte';
@@ -308,6 +309,7 @@
 								links={{ settings: { href: resolve('/reglages') } }}
 							/>
 						</p>
+						{#if ready}<UndergroundStart station={ready.station} compact />{/if}
 					</div>
 				</div>
 			{/if}
@@ -548,7 +550,7 @@
 
 <style>
 	.screen {
-		min-height: 100dvh;
+		min-height: calc(100dvh - var(--band));
 		display: flex;
 		flex-direction: column;
 	}

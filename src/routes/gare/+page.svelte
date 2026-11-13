@@ -17,6 +17,7 @@
 	import Rich from '#lib/i18n/Rich.svelte';
 	import { fmtDateTime, fmtMegabytes, t } from '#lib/i18n/t.js';
 	import { countryConfig } from '#lib/core/countries.js';
+	import UndergroundStart from '#lib/UndergroundStart.svelte';
 
 	// Page statique : l'identifiant de la gare n'est lu que dans le navigateur.
 	let mounted = $state(false);
@@ -256,6 +257,8 @@
 						<Icon name="alert" size={18} />{progress.error}
 					</p>{/if}
 			</div>
+			<!-- Mode souterrain : sur place vérifié à l'entrée (ou déclaré), valable 2 h. -->
+			<UndergroundStart station={ready.station} />
 
 			<div class="list-head">
 				<h2>{t('station.todo')}</h2>
@@ -322,7 +325,7 @@
 <style>
 	/* Coque d'appli : seul le contenu défile, la barre basse ne recouvre jamais rien. */
 	.screen {
-		height: 100dvh;
+		height: calc(100dvh - var(--band));
 		display: flex;
 		flex-direction: column;
 	}

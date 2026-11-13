@@ -332,7 +332,7 @@
 <style>
 	.screen {
 		position: relative;
-		height: 100dvh;
+		height: calc(100dvh - var(--band));
 		overflow: hidden;
 		background: #8c877c;
 	}

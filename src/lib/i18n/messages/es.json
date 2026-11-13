@@ -1214,5 +1214,51 @@
 		"stepCountBad": "Número de escalones no válido: un entero de 1 a 500.",
 		"nothing": "Responde al menos una pregunta, o toca «Es correcto».",
 		"summary": "{kind}: {items}"
+	},
+	"underground": {
+		"label": "Estación subterránea",
+		"start": "Voy a una estación subterránea",
+		"hint": "Bajo tierra no hay GPS ni red. Comprueba tu posición en la entrada, en la superficie: después podrás registrar in situ en esta estación durante 2 horas, incluso sin conexión.",
+		"downloading": "Descargando la estación para usarla sin conexión… {done} / {total}",
+		"downloadFailed": "Descarga incompleta ({error}). Si puedes, vuelve a intentarlo antes de bajar.",
+		"notDownloaded": "Sin red: la estación no está descargada, pueden faltar fotos aéreas.",
+		"locating": "Comprobando tu posición…",
+		"away": "Tu posición está fuera de la estación. Acércate a una entrada, en la superficie, y vuelve a intentarlo.",
+		"noGps": "El GPS no responde. Si de verdad estás en esta estación, puedes declararlo.",
+		"swear": "Declaro por mi honor que estoy en la estación de <b>{name}</b>. Solo registro lo que veo, detrás de la línea de seguridad.",
+		"declare": "Activar el modo subterráneo",
+		"active": "Modo subterráneo activo para esta estación hasta las {time}.",
+		"band": "Modo subterráneo",
+		"leftHours": "quedan {h} h {m}",
+		"leftMinutes": "quedan {m} min",
+		"stop": "Detener",
+		"stopLabel": "Detener el modo subterráneo"
+	},
+	"validate": {
+		"shape": "Forma del andén: {detail}",
+		"trackCrossing": "El andén cruza una vía.",
+		"duplicateNode": "Dos puntos del mismo trazado están en el mismo sitio (menos de 5 cm).",
+		"signOffTrack": "El cartel de parada no está sobre una vía.",
+		"signDirection": "Falta el sentido del cartel de parada.",
+		"tagValue": "Valor inesperado para {key}: «{value}».",
+		"refFormat": "Número mal escrito para {key}: «{value}» (espacio, duplicado o valor vacío alrededor de «;»).",
+		"refWord": "«{value}»: escribe solo el número, sin «vía» ni «andén».",
+		"trackRefPlace": "Un número de vía (railway:track_ref) solo va en una vía.",
+		"height": "Altura inusual: {value} m (normalmente entre {min} y {max} m).",
+		"duplicateTrackRef": "Otra vía de la estación ya tiene el número {ref}.",
+		"platformRef": "El número del andén ({ref}) no coincide con las vías que lo bordean ({tracks}).",
+		"duplicateEquipment": "Ya existe un elemento del mismo tipo a {distance}.",
+		"error": "Error:",
+		"warning": "Por comprobar:",
+		"fix": "Corregir",
+		"verified": "Lo he comprobado",
+		"errorsHint": "{count, plural, one {# edición no se enviará hasta que se corrija.} other {# ediciones no se enviarán hasta que se corrijan.}}",
+		"warningsHint": "Una edición «por comprobar» se envía si marcas «Lo he comprobado».",
+		"held": "Controles antes del envío: ninguna edición puede salir. Corrígelas o marca «Lo he comprobado»."
+	},
+	"reviewRequest": {
+		"label": "Deseo una revisión",
+		"help": "Mapeadores con experiencia podrán revisar este conjunto de cambios en OSMCha.",
+		"why": "Marcada de oficio: este envío contiene un borrado, un punto compartido desplazado, una edición por declaración o un aviso comprobado."
 	}
 }

@@ -497,7 +497,9 @@ Ces seuils sont des **heuristiques**, à régler sur les 5 gares de référence.
 | Q7    | Deux **chaînes** distinctes portant le même `railway:track_ref` ; ou `name`/`ref` du type « Voie 1 » sur un `railway=rail`                                                                                                                                                                                                                        |
 | Q8    | Quai (logique) dont une caractéristique manque sur une partie concernée : `height`, `passenger_information_display` (ou `departures_board=realtime/delay/no`), `shelter` (parties à l'air libre), `tactile_paving`, `bench` ; connues aussi par un `platform_edge` relié (hauteur, bandes) ou un `amenity=shelter`/`bench` dans le quai (§ 4.4.9) |
 
-**Étape 4 — Priorité et filtrage selon le lieu** (spécification UX § 4.2). L'appli est « sur place » si le dernier relevé GPS, de moins de 20 minutes, tombe dans l'emprise avec une précision de 100 m ou mieux. Il s'agit d'un **contrôle de bonne foi**, pas d'une sécurité : un GPS peut être falsifié.
+**Étape 4 — Priorité et filtrage selon le lieu** (spécification UX § 4.2). L'appli est « sur place » si le dernier relevé GPS, de moins de 10 minutes (`FRESH_MS`, `src/lib/onsite.svelte.ts` ; ce document disait 20 minutes), tombe dans l'emprise avec une précision de 100 m ou mieux. Il s'agit d'un **contrôle de bonne foi**, pas d'une sécurité : un GPS peut être falsifié.
+
+**Mode souterrain (13 novembre 2026, validé par Loïc ; spécification UX « Mode souterrain »).** Sous terre, ni GPS ni réseau : « sur place » est établi **une fois**, à l'entrée en surface, par le GPS (`gps-entree`) ou, si le GPS ne répond pas, par une **déclaration sur l'honneur** (`declaration`), puis vaut **2 heures pour cette gare seulement** (`src/lib/underground.svelte.ts`, préférence `rc:underground` avec serveur, gare et heure d'expiration ; une durée restante de plus de 2 h, horloge changée, n'est pas crue). `canSurvey` l'accepte comme un GPS frais. La règle reste une **règle de bonne foi** : la déclaration ne prouve rien, pas plus que le GPS ; elle rappelle qu'on relève ce qu'on voit, et elle fait cocher d'office la demande de relecture à l'envoi (§ 4.5, QA-3). La manière (`gps`, `gps-entree`, `declaration`) est notée dans la saisie (`Edit.onsite`), **sur le téléphone seulement** : rien de nouveau ne part dans OSM (`source=survey` comme avant). Le module de démarrage n'en connaît que l'existence de la préférence (`NetStatus` charge le bandeau à la demande ; événement `rc:underground`), pour ne pas peser sur le budget JS. Mode démonstration et serveur de test : inchangés.
 
 Le calcul est **incrémental** : à chaque modification locale, on ne recalcule que le quai touché.
 
@@ -707,7 +709,10 @@ imagery_used=BDOrtho IGN      (si l'ortho a été affichée)
 locale=fr-FR
 hashtags=#stationcomplete
 stationcomplete:edit_types=platform_ref;track_ref;stop_sign
+review_requested=yes          (case « Je souhaite une relecture » de E8, QA-3)
 ```
+
+`review_requested=yes` ([Key:review_requested](https://wiki.openstreetmap.org/wiki/Key:review_requested) : « the user would like someone to review this changeset », seule valeur documentée) est posé quand la case de E8 est cochée ; elle l'est d'office pour une suppression, un point partagé déplacé, une saisie sur déclaration sur l'honneur (mode souterrain) ou un avertissement vérifié (`suggestReview`, `src/lib/core/validate.ts`). Un envoi programmé hors-ligne garde le choix fait sur E8 (file d'envoi) ; une entrée de file plus ancienne prend le choix par défaut.
 
 Limites : 10 000 éléments par changeset ([API v0.6, capacités](https://wiki.OpenStreetMap.org/wiki/Zh-hans:API_0.6)). Fermeture automatique après 1 h d'inactivité, 24 h au maximum ([Changeset](https://wiki.openstreetmap.org/wiki/Changeset)). stationcomplete s'impose une limite bien plus basse (§ 8.3).
 
@@ -754,6 +759,26 @@ Reprise après une coupure ou une fermeture de l'appli :
 > **À retenir.** Lecture par l'API OSM seule (`/map` sur l'emprise précalculée, découpée si besoin, filtrée puis mise en cache), versions exactes relues avant l'envoi, un changeset par gare, et une machine à états écrite avant chaque appel pour ne jamais créer de doublon.
 
 ---
+
+#### 4.5.6 Contrôles automatiques avant envoi (QA-2, 13 novembre 2026)
+
+Fonctions pures `src/lib/core/validate.ts` (tests `validate.test.ts`), appliquées à la **vue locale** (données de la gare en cache + saisies en attente, comme la carte) sur les objets touchés par les saisies **à envoyer** seulement : sur E8 (affichage), puis de nouveau dans `sendStation` juste avant `planUpload` (aussi pour un envoi programmé). Inspirées des validateurs d'iD (`crossing_ways`, `close_nodes`), de JOSM et d'Osmose / OpenRailwayMap (étude QA § 2.2), sans dépendance.
+
+| Règle                           | Niveau     | Quand                                                                                                                                                                                                                                                                                                                            |
+| ------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `shape`                         | erreur     | contour d'un quai dessiné ou reformé : `checkShape` (au moins 3 points, côtés qui se croisent, 20 à 800 m)                                                                                                                                                                                                                       |
+| `trackCrossing`                 | erreur     | ce contour croise une voie **du même niveau** (une voie en tunnel sous un quai en surface ne compte pas)                                                                                                                                                                                                                         |
+| `duplicateNode`                 | erreur     | dans un way modifié, un point déplacé ou ajouté à moins de 5 cm d'un autre point du même way                                                                                                                                                                                                                                     |
+| `signOffTrack`, `signDirection` | erreur     | pancarte (nouvelle, ou tags `railway:signal:*` modifiés) hors d'une voie `railway=rail`, ou sans `railway:signal:direction`                                                                                                                                                                                                      |
+| `tagValue`                      | erreur     | valeur hors liste pour un tag que l'appli écrit : `incline` up/down, `conveying` forward/backward/reversible, oui/non (`handrail*`, `tactile_paving`, `shelter`, `bench`, `passenger_information_display`), `wheelchair`, `step_count` 1–500, `level`, `check_date`, `railway:signal:direction/position`, `height` non numérique |
+| `refFormat`, `refWord`          | erreur     | `ref`, `local_ref`, `railway:track_ref` : espace ou doublon autour de « ; », valeur vide (Osmose 3060) ; mot « voie », « quai », « track »… (Osmose 9015009/9015010)                                                                                                                                                             |
+| `trackRefPlace`                 | erreur     | `railway:track_ref` ailleurs que sur une voie (Osmose 9015008)                                                                                                                                                                                                                                                                   |
+| `height`                        | à vérifier | hauteur de quai hors 0,2–1,5 m                                                                                                                                                                                                                                                                                                   |
+| `duplicateTrackRef`             | à vérifier | le numéro de voie saisi est déjà celui d'une autre voie à quai non reliée (règle Q7)                                                                                                                                                                                                                                             |
+| `platformRef`                   | à vérifier | numéro du quai différent des `railway:track_ref` des voies qu'il longe (règle Q3 de l'appli) ; si la saisie porte sur une voie ou la forme, seulement quand l'incohérence vient d'elle (une incohérence déjà dans OSM reste une quête)                                                                                           |
+| `duplicateEquipment`            | à vérifier | équipement ajouté à moins de 5 m d'un autre du même type                                                                                                                                                                                                                                                                         |
+
+Une saisie avec une erreur, ou un avertissement non coché « J'ai vérifié » (clés gardées dans `Edit.verified`), **ne part pas** (`heldBack`) ; les autres partent. Une nouvelle alerte n'est pas couverte par une vérification ancienne. Une gare de la file d'envoi dont aucune saisie ne peut partir sort de la file (ce n'est pas une erreur temporaire). Écart assumé avec l'étude QA § 2.2 (« pas d'envoi quand même ») : demande de Loïc, les avertissements se vérifient ; les erreurs, elles, bloquent toujours. Sans gare en cache (cas qui ne se produit pas en usage normal), aucun contrôle local : la relecture du serveur (`planUpload`) reste le garde-fou.
 
 ## 5. Authentification OAuth2 PKCE (sans serveur)
 
@@ -1009,7 +1034,7 @@ D'après le paquet `@sveltejs/kit` 3.1.1 (`src/exports/vite/public.d.ts`) : « W
 
 ### 8.3 Données personnelles minimales
 
-Le téléphone stocke uniquement le jeton, le pseudo et l'identifiant OSM. Il ne garde **aucun historique GPS** : seul le dernier relevé, valable 20 minutes, sert au contrôle « sur place ».
+Le téléphone stocke uniquement le jeton, le pseudo et l'identifiant OSM. Il ne garde **aucun historique GPS** : seul le dernier relevé, valable 10 minutes, en mémoire, sert au contrôle « sur place ». Le mode souterrain garde la gare et l'heure d'expiration (jamais une position) ; chaque saisie note la manière dont « sur place » a été établi, effacée avec la saisie, jamais envoyée.
 
 ### 8.4 Garde-fous anti-vandalisme et anti-erreur
 

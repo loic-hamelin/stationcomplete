@@ -47,36 +47,42 @@ Légende : ⚠ = terme incertain, à faire valider (raison en note). Ne se tradu
 
 ## OpenStreetMap et appli
 
-| fr                                | en                      | de                       | it                        | es                          |
-| --------------------------------- | ----------------------- | ------------------------ | ------------------------- | --------------------------- |
-| contribution                      | contribution            | Beitrag                  | contributo                | contribución                |
-| saisie (modification locale)      | edit                    | Änderung                 | modifica                  | edición                     |
-| envoi / envoyer                   | upload                  | Upload / hochladen       | invio / inviare           | envío / enviar              |
-| groupe de modifications           | changeset               | Änderungssatz            | gruppo di modifiche       | conjunto de cambios         |
-| description publique de l'envoi   | public description      | öffentliche Beschreibung | descrizione pubblica      | descripción pública         |
-| pseudo                            | username                | Benutzername             | nome utente               | nombre de usuario           |
-| serveur de test                   | test server             | Testserver               | server di prova           | servidor de pruebas         |
-| mode démonstration                | demo mode               | Demomodus                | modalità dimostrativa     | modo demostración           |
-| sur place / à distance            | on site / remote        | vor Ort / aus der Ferne  | sul posto / a distanza    | in situ / a distancia       |
-| hors-ligne                        | offline                 | offline                  | offline                   | sin conexión                |
-| photo aérienne                    | aerial photo            | Luftbild                 | foto aerea                | foto aérea                  |
-| tableau de bord (E4)              | dashboard               | Übersicht                | pannello                  | panel                       |
-| fiche (E7)                        | details                 | Details                  | scheda                    | ficha                       |
-| favorite (gare)                   | favourite               | Favorit                  | preferita                 | favorita                    |
-| reprendre (gare en cours)         | resume                  | fortsetzen               | riprendere                | reanudar                    |
-| jauge (quais · voies · pancartes) | gauge                   | Anzeige                  | indicatore                | indicador                   |
-| à compléter / N à faire           | to complete / N to do   | zu ergänzen / N offen    | da completare / N da fare | por completar / N por hacer |
-| pays des gares                    | country of the stations | Land der Bahnhöfe        | paese delle stazioni      | país de las estaciones      |
-| renseigner                        | fill in                 | erfassen                 | compilare                 | completar                   |
-| relever (sur place)               | note                    | erfassen                 | rilevare                  | anotar                      |
-| à revoir (conflit)                | to review               | zu überprüfen            | da rivedere               | por revisar                 |
-| tags                              | tags                    | Tags                     | tag                       | etiquetas                   |
-| croix (réticule)                  | crosshair               | Fadenkreuz               | mirino                    | cruz                        |
-| accrocher à la voie               | snap to the track       | am Gleis einrasten       | agganciare al binario     | ajustar a la vía            |
-| contour, point                    | outline, point          | Umriss, Punkt            | contorno, punto           | contorno, punto             |
-| redessiner en surface             | redraw as an area       | als Fläche neu zeichnen  | ridisegnare come area     | redibujar como área         |
-| relation                          | relation                | Relation                 | relazione                 | relación                    |
-| légende                           | legend                  | Legende                  | legenda                   | leyenda                     |
+| fr                                | en                                  | de                                      | it                          | es                          |
+| --------------------------------- | ----------------------------------- | --------------------------------------- | --------------------------- | --------------------------- |
+| contribution                      | contribution                        | Beitrag                                 | contributo                  | contribución                |
+| saisie (modification locale)      | edit                                | Änderung                                | modifica                    | edición                     |
+| envoi / envoyer                   | upload                              | Upload / hochladen                      | invio / inviare             | envío / enviar              |
+| groupe de modifications           | changeset                           | Änderungssatz                           | gruppo di modifiche         | conjunto de cambios         |
+| description publique de l'envoi   | public description                  | öffentliche Beschreibung                | descrizione pubblica        | descripción pública         |
+| pseudo                            | username                            | Benutzername                            | nome utente                 | nombre de usuario           |
+| serveur de test                   | test server                         | Testserver                              | server di prova             | servidor de pruebas         |
+| mode démonstration                | demo mode                           | Demomodus                               | modalità dimostrativa       | modo demostración           |
+| sur place / à distance            | on site / remote                    | vor Ort / aus der Ferne                 | sul posto / a distanza      | in situ / a distancia       |
+| hors-ligne                        | offline                             | offline                                 | offline                     | sin conexión                |
+| photo aérienne                    | aerial photo                        | Luftbild                                | foto aerea                  | foto aérea                  |
+| tableau de bord (E4)              | dashboard                           | Übersicht                               | pannello                    | panel                       |
+| fiche (E7)                        | details                             | Details                                 | scheda                      | ficha                       |
+| favorite (gare)                   | favourite                           | Favorit                                 | preferita                   | favorita                    |
+| reprendre (gare en cours)         | resume                              | fortsetzen                              | riprendere                  | reanudar                    |
+| jauge (quais · voies · pancartes) | gauge                               | Anzeige                                 | indicatore                  | indicador                   |
+| à compléter / N à faire           | to complete / N to do               | zu ergänzen / N offen                   | da completare / N da fare   | por completar / N por hacer |
+| pays des gares                    | country of the stations             | Land der Bahnhöfe                       | paese delle stazioni        | país de las estaciones      |
+| renseigner                        | fill in                             | erfassen                                | compilare                   | completar                   |
+| relever (sur place)               | note                                | erfassen                                | rilevare                    | anotar                      |
+| à revoir (conflit)                | to review                           | zu überprüfen                           | da rivedere                 | por revisar                 |
+| tags                              | tags                                | Tags                                    | tag                         | etiquetas                   |
+| croix (réticule)                  | crosshair                           | Fadenkreuz                              | mirino                      | cruz                        |
+| accrocher à la voie               | snap to the track                   | am Gleis einrasten                      | agganciare al binario       | ajustar a la vía            |
+| contour, point                    | outline, point                      | Umriss, Punkt                           | contorno, punto             | contorno, punto             |
+| redessiner en surface             | redraw as an area                   | als Fläche neu zeichnen                 | ridisegnare come area       | redibujar como área         |
+| relation                          | relation                            | Relation                                | relazione                   | relación                    |
+| légende                           | legend                              | Legende                                 | legenda                     | leyenda                     |
+| mode souterrain                   | underground mode                    | Untergrundmodus                         | modalità sotterranea        | modo subterráneo            |
+| déclaration sur l'honneur         | declaration on my honour            | Ehrenerklärung (ehrenwörtlich erklären) | dichiarazione sul mio onore | declaración por mi honor    |
+| contrôles avant envoi             | checks before sending               | Prüfungen vor dem Hochladen             | controlli prima dell'invio  | controles antes del envío   |
+| à vérifier (avertissement)        | to check                            | zu prüfen                               | da verificare               | por comprobar               |
+| J'ai vérifié                      | I have checked                      | Ich habe es geprüft                     | Ho verificato               | Lo he comprobado            |
+| demande de relecture              | review request (`review_requested`) | Überprüfung (Wunsch)                    | revisione (richiesta)       | revisión (solicitud)        |
 
 ## Objets voisins d'un quai (messages `obj.*`)
 

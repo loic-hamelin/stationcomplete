@@ -3,7 +3,7 @@
 
 import { deleteEdit, getAllEdits, putEdit, readPref, writePref } from './cache.js';
 import type { CountryCode } from './core/countries.js';
-import { mergeEdit, targets, type Edit } from './core/edits.js';
+import { mergeEdit, targets, type Edit, type OnsiteMethod } from './core/edits.js';
 import { server } from './osmserver.svelte.js';
 
 export const pending = $state<{ list: Edit[]; loaded: boolean }>({ list: [], loaded: false });
@@ -25,6 +25,20 @@ export const editsOf = (station: string) => mine().filter((e) => e.station === s
 export const editsReplacedByDelete = (station: string, target: string) =>
 	editsOf(station).filter((e) => targets(e) && e.target === target);
 
+// Manière dont « sur place » est établi (onsite.svelte.ts la fournit en se chargeant ; ce module
+// n'en dépend pas, pour rester léger).
+let methodOf: (station: string) => OnsiteMethod | undefined = () => undefined;
+export const setSurveyMethod = (f: typeof methodOf) => {
+	methodOf = f;
+};
+/** La plus « faible » des manières l'emporte (une déclaration reste visible après fusion). */
+const RANK: OnsiteMethod[] = ['gps', 'gps-entree', 'declaration'];
+const weakest = (list: (OnsiteMethod | undefined)[]) =>
+	list.reduce<OnsiteMethod | undefined>(
+		(a, b) => (!b ? a : !a || RANK.indexOf(b) > RANK.indexOf(a) ? b : a),
+		undefined
+	);
+
 /**
  * Enregistre une saisie ; la fusionne avec les saisies précédentes sur le même objet.
  * Le pays de la gare est obligatoire : il choisit la photo citée dans le changeset.
@@ -37,7 +51,12 @@ export async function saveEdit(edit: Edit & { country: CountryCode }) {
 		...(settings.demo ? { demo: true } : {})
 	});
 	if (!merged.edit) return;
-	const { edit: out, drop } = merged;
+	const { drop } = merged;
+	let out = merged.edit;
+	// « Sur place » : GPS, GPS à l'entrée (mode souterrain) ou déclaration ; local seulement.
+	const before = mine().filter((e) => e.id === out.id || drop.includes(e.id));
+	const onsite = weakest([methodOf(edit.station), ...before.map((e) => e.onsite)]);
+	if (onsite) out = { ...out, onsite };
 	for (const id of drop.filter((d) => d !== out.id)) await deleteEdit(id);
 	await putEdit($state.snapshot(out) as Edit);
 	pending.list = [...pending.list.filter((e) => e.id !== out.id && !drop.includes(e.id)), out];

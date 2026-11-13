@@ -1214,5 +1214,51 @@
 		"stepCountBad": "Stufenzahl unklar: eine ganze Zahl von 1 bis 500.",
 		"nothing": "Beantworte mindestens eine Frage oder tippe auf „Stimmt so“.",
 		"summary": "{kind}: {items}"
+	},
+	"underground": {
+		"label": "Unterirdischer Bahnhof",
+		"start": "Ich gehe in einen unterirdischen Bahnhof",
+		"hint": "Unter der Erde gibt es weder GPS noch Netz. Prüfe deinen Standort am Eingang, oberirdisch: Danach kannst du 2 Stunden lang in diesem Bahnhof vor Ort erfassen, auch offline.",
+		"downloading": "Bahnhof wird für die Offline-Nutzung geladen… {done} / {total}",
+		"downloadFailed": "Download unvollständig ({error}). Versuche es wenn möglich erneut, bevor du hinuntergehst.",
+		"notDownloaded": "Kein Netz: Der Bahnhof ist nicht heruntergeladen, Luftbilder können fehlen.",
+		"locating": "Standort wird geprüft…",
+		"away": "Dein Standort liegt außerhalb des Bahnhofs. Geh zu einem Eingang, oberirdisch, und versuche es erneut.",
+		"noGps": "Das GPS antwortet nicht. Wenn du wirklich in diesem Bahnhof bist, kannst du es erklären.",
+		"swear": "Ich erkläre ehrenwörtlich, dass ich im Bahnhof <b>{name}</b> bin. Ich erfasse nur, was ich sehe, hinter der Sicherheitslinie.",
+		"declare": "Untergrundmodus einschalten",
+		"active": "Untergrundmodus für diesen Bahnhof aktiv bis {time}.",
+		"band": "Untergrundmodus",
+		"leftHours": "noch {h} h {m}",
+		"leftMinutes": "noch {m} min",
+		"stop": "Beenden",
+		"stopLabel": "Untergrundmodus beenden"
+	},
+	"validate": {
+		"shape": "Form des Bahnsteigs: {detail}",
+		"trackCrossing": "Der Bahnsteig kreuzt ein Gleis.",
+		"duplicateNode": "Zwei Punkte derselben Linie liegen an derselben Stelle (weniger als 5 cm).",
+		"signOffTrack": "Die Haltetafel liegt nicht auf einem Gleis.",
+		"signDirection": "Die Richtung der Haltetafel fehlt.",
+		"tagValue": "Unerwarteter Wert für {key}: „{value}“.",
+		"refFormat": "Nummer falsch geschrieben für {key}: „{value}“ (Leerzeichen, Doppelung oder leerer Wert um „;“).",
+		"refWord": "„{value}“: Schreib nur die Nummer, ohne „Gleis“ oder „Bahnsteig“.",
+		"trackRefPlace": "Eine Gleisnummer (railway:track_ref) gehört nur an ein Gleis.",
+		"height": "Ungewöhnliche Höhe: {value} m (meist zwischen {min} und {max} m).",
+		"duplicateTrackRef": "Ein anderes Gleis des Bahnhofs hat bereits die Nummer {ref}.",
+		"platformRef": "Die Bahnsteignummer ({ref}) passt nicht zu den Gleisen daneben ({tracks}).",
+		"duplicateEquipment": "Ein Objekt derselben Art gibt es schon in {distance} Entfernung.",
+		"error": "Fehler:",
+		"warning": "Zu prüfen:",
+		"fix": "Korrigieren",
+		"verified": "Ich habe es geprüft",
+		"errorsHint": "{count, plural, one {# Änderung wird erst hochgeladen, wenn sie korrigiert ist.} other {# Änderungen werden erst hochgeladen, wenn sie korrigiert sind.}}",
+		"warningsHint": "Eine Änderung „zu prüfen“ wird hochgeladen, wenn du „Ich habe es geprüft“ ankreuzt.",
+		"held": "Prüfungen vor dem Hochladen: Keine Änderung kann hochgeladen werden. Korrigiere sie oder kreuze „Ich habe es geprüft“ an."
+	},
+	"reviewRequest": {
+		"label": "Ich wünsche eine Überprüfung",
+		"help": "Erfahrene Mapper können diesen Änderungssatz auf OSMCha überprüfen.",
+		"why": "Vorab angekreuzt: Dieser Upload enthält eine Löschung, einen verschobenen gemeinsamen Punkt, eine Erfassung per Erklärung oder eine geprüfte Warnung."
 	}
 }

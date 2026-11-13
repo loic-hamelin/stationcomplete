@@ -76,7 +76,7 @@
 
 <style>
 	.screen {
-		min-height: 100dvh;
+		min-height: calc(100dvh - var(--band));
 		max-width: 520px;
 		margin: 0 auto;
 		padding: 16px 24px 32px;

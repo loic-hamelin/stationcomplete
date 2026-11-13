@@ -1214,5 +1214,51 @@
 		"stepCountBad": "Numero di gradini non valido: un intero da 1 a 500.",
 		"nothing": "Rispondi ad almeno una domanda, o tocca «È corretto».",
 		"summary": "{kind}: {items}"
+	},
+	"underground": {
+		"label": "Stazione sotterranea",
+		"start": "Vado in una stazione sotterranea",
+		"hint": "Sottoterra non ci sono né GPS né rete. Verifica la tua posizione all’ingresso, in superficie: potrai poi rilevare sul posto in questa stazione per 2 ore, anche offline.",
+		"downloading": "Download della stazione per l’uso offline… {done} / {total}",
+		"downloadFailed": "Download incompleto ({error}). Se puoi, riprova prima di scendere.",
+		"notDownloaded": "Nessuna rete: la stazione non è scaricata, le foto aeree potrebbero mancare.",
+		"locating": "Verifica della posizione…",
+		"away": "La tua posizione è fuori dalla stazione. Avvicinati a un ingresso, in superficie, e riprova.",
+		"noGps": "Il GPS non risponde. Se sei davvero in questa stazione, puoi dichiararlo.",
+		"swear": "Dichiaro sul mio onore di trovarmi nella stazione di <b>{name}</b>. Rilevo solo ciò che vedo, dietro la linea di sicurezza.",
+		"declare": "Attiva la modalità sotterranea",
+		"active": "Modalità sotterranea attiva per questa stazione fino alle {time}.",
+		"band": "Modalità sotterranea",
+		"leftHours": "ancora {h} h {m}",
+		"leftMinutes": "ancora {m} min",
+		"stop": "Termina",
+		"stopLabel": "Termina la modalità sotterranea"
+	},
+	"validate": {
+		"shape": "Forma del marciapiede: {detail}",
+		"trackCrossing": "Il marciapiede attraversa un binario.",
+		"duplicateNode": "Due punti della stessa linea sono nello stesso posto (meno di 5 cm).",
+		"signOffTrack": "La tabella di fermata non è su un binario.",
+		"signDirection": "Manca il senso della tabella di fermata.",
+		"tagValue": "Valore inatteso per {key}: «{value}».",
+		"refFormat": "Numero scritto male per {key}: «{value}» (spazio, doppione o valore vuoto attorno a «;»).",
+		"refWord": "«{value}»: scrivi solo il numero, senza «binario» o «marciapiede».",
+		"trackRefPlace": "Un numero di binario (railway:track_ref) va solo su un binario.",
+		"height": "Altezza insolita: {value} m (di solito tra {min} e {max} m).",
+		"duplicateTrackRef": "Un altro binario della stazione ha già il numero {ref}.",
+		"platformRef": "Il numero del marciapiede ({ref}) non corrisponde ai binari lungo di esso ({tracks}).",
+		"duplicateEquipment": "Esiste già un elemento dello stesso tipo a {distance}.",
+		"error": "Errore:",
+		"warning": "Da verificare:",
+		"fix": "Correggi",
+		"verified": "Ho verificato",
+		"errorsHint": "{count, plural, one {# modifica non sarà inviata finché non è corretta.} other {# modifiche non saranno inviate finché non sono corrette.}}",
+		"warningsHint": "Una modifica «da verificare» viene inviata se spunti «Ho verificato».",
+		"held": "Controlli prima dell’invio: nessuna modifica può partire. Correggile o spunta «Ho verificato»."
+	},
+	"reviewRequest": {
+		"label": "Desidero una revisione",
+		"help": "Mappatori esperti potranno rivedere questo gruppo di modifiche su OSMCha.",
+		"why": "Spuntata d’ufficio: questo invio contiene una cancellazione, un punto condiviso spostato, una modifica su dichiarazione o un avviso verificato."
 	}
 }

@@ -4,11 +4,27 @@
 	import Icon from './Icon.svelte';
 	import { net, queue, watchNetwork } from './queue.svelte.js';
 	import { t } from './i18n/t.js';
-	import { onMount } from 'svelte';
+	import { readPref } from './cache.js';
+	import { onMount, type Component } from 'svelte';
 
-	onMount(() => watchNetwork());
+	// Mode souterrain : bandeau en haut de chaque page, chargé à la demande seulement si une
+	// préférence « rc:underground » existe (rien de plus au démarrage). Le module du mode
+	// prévient par l'événement « rc:underground » quand il démarre ou s'arrête.
+	let Band = $state<Component>();
+	onMount(() => {
+		watchNetwork();
+		const look = () =>
+			!Band &&
+			readPref('underground', null) &&
+			import('./UndergroundBand.svelte').then((m) => (Band = m.default));
+		look();
+		addEventListener('rc:underground', look);
+		return () => removeEventListener('rc:underground', look);
+	});
 	const last = $derived(queue.last);
 </script>
+
+<Band />
 
 {#if !net.online}
 	<p class="offline" role="status">
@@ -41,7 +57,7 @@
 	.offline {
 		position: fixed;
 		z-index: 50;
-		top: env(safe-area-inset-top);
+		top: calc(env(safe-area-inset-top) + var(--band));
 		left: 50%;
 		transform: translateX(-50%);
 		max-width: calc(100% - 32px);

@@ -24,6 +24,10 @@ import {
 	usageToCheck
 } from './core/upload.js';
 import { uploadBlock } from './core/remote.js';
+import { heldBack, suggestReview, validateEdits, type Issue } from './core/validate.js';
+import { stationCacheKey } from './core/storage.js';
+import { getCachedStation } from './cache.js';
+import { findStation } from './stations.js';
 import { account, osmFetch } from './auth.svelte.js';
 import { refreshConfig } from './remote.svelte.js';
 import { editsOf, removeEdits, updateEdits } from './edits.svelte.js';
@@ -50,6 +54,8 @@ export interface SendResult {
 	changeset?: number;
 	sent: number;
 	conflicts: number;
+	/** Saisies retenues par les contrôles avant envoi (erreur, ou avertissement non vérifié). */
+	held?: number;
 	/** Message à afficher si l'envoi n'a pas pu se faire maintenant. */
 	error?: string;
 }
@@ -211,10 +217,24 @@ async function resume(station: string): Promise<SendResult | undefined> {
 	return undefined;
 }
 
+/**
+ * Contrôles avant envoi (QA-2) sur la vue locale de la gare : données en cache + saisies en
+ * attente. Sans données en cache (cas improbable : la saisie s'est faite sur ces données),
+ * aucun contrôle local : la relecture du serveur (planUpload) reste le garde-fou.
+ */
+export async function checkBeforeSend(station: string, edits: Edit[]): Promise<Issue[]> {
+	const cached = await getCachedStation(stationCacheKey(server.id, station));
+	const st = await findStation(station).catch(() => undefined);
+	if (!cached || !st) return [];
+	return validateEdits(cached.elements, editsOf(station), edits, st.bbox, st.country);
+}
+
 export async function sendStation(
 	station: string,
 	stationName: string,
-	comment: string
+	comment: string,
+	/** « Je souhaite une relecture » ; absent (file d'envoi plus ancienne) : choix par défaut. */
+	review?: boolean
 ): Promise<SendResult> {
 	if (!srv().canUpload) return { sent: 0, conflicts: 0, error: t('send.unavailable') };
 	if (!navigator.onLine) return { sent: 0, conflicts: 0, error: t('send.offline') };
@@ -234,8 +254,13 @@ export async function sendStation(
 		const resumed = await resume(station);
 		if (resumed) return resumed;
 
-		const edits = editsOf(station).filter((e) => !e.conflict);
-		if (!edits.length) return { sent: 0, conflicts: 0 };
+		const candidates = editsOf(station).filter((e) => !e.conflict);
+		if (!candidates.length) return { sent: 0, conflicts: 0 };
+		// Contrôles avant envoi : une saisie fautive (ou « à vérifier » non vérifiée) reste ici.
+		const issues = await checkBeforeSend(station, candidates);
+		const held = heldBack(candidates, issues);
+		const edits = candidates.filter((e) => !held.has(e.id));
+		if (!edits.length) return { sent: 0, conflicts: 0, held: held.size, error: t('validate.held') };
 
 		sending.step = 'reading';
 		const plan = planUpload(edits, await readFresh(edits));
@@ -243,7 +268,8 @@ export async function sendStation(
 			await updateEdits(
 				plan.conflicts.map((c) => ({ ...edits.find((e) => e.id === c.id)!, conflict: c.reason }))
 			);
-		if (!plan.sent.length) return { sent: 0, conflicts: plan.conflicts.length };
+		if (!plan.sent.length)
+			return { sent: 0, conflicts: plan.conflicts.length, held: held.size || undefined };
 
 		const sentEdits = edits.filter((e) => plan.sent.includes(e.id));
 		// Relevé sur place : numéros, pancartes, et « n'existe plus ». Image : dessin et formes.
@@ -269,7 +295,9 @@ export async function sendStation(
 					e.kind !== 'tags' &&
 					!(e.kind === 'point' && e.placed === 'platform') &&
 					!(isRemoval(e) && e.reason === 'gone')
-			)
+			),
+			// Demande de relecture (QA-3) : choix de l'utilisateur sur E8, sinon choix par défaut.
+			review: review ?? suggestReview(sentEdits, issues)
 		});
 
 		sending.step = 'opening';
@@ -315,7 +343,12 @@ export async function sendStation(
 		sending.step = 'closing';
 		await closeChangeset(changeset);
 		setJob(station, undefined);
-		return { changeset, sent: plan.sent.length, conflicts: plan.conflicts.length };
+		return {
+			changeset,
+			sent: plan.sent.length,
+			conflicts: plan.conflicts.length,
+			held: held.size || undefined
+		};
 	} catch (e) {
 		if (e instanceof HttpError) {
 			if (e.status === 429 || e.status === 509)

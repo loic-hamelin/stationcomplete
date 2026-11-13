@@ -9,6 +9,13 @@ import { t as tr, tk } from '../i18n/t.ts';
 
 export type ElementKey = `${'node' | 'way' | 'relation'}/${number}`;
 
+/**
+ * Manière dont la règle « sur place » a été établie pour une saisie (mode souterrain) : GPS au
+ * moment de la saisie, GPS vérifié à l'entrée d'une gare souterraine (valable 2 h), ou
+ * déclaration sur l'honneur faute de GPS. Gardée sur le téléphone seulement, jamais envoyée.
+ */
+export type OnsiteMethod = 'gps' | 'gps-entree' | 'declaration';
+
 interface EditBase {
 	/** Identifiant local unique (horodatage + hasard). */
 	id: string;
@@ -22,6 +29,13 @@ interface EditBase {
 	demo?: boolean;
 	/** Pays de la gare (lot P1). Absent dans les saisies plus anciennes : France (recordCountry). */
 	country?: CountryCode;
+	/** « Sur place » établi par GPS, GPS à l'entrée ou déclaration (local seulement). */
+	onsite?: OnsiteMethod;
+	/**
+	 * Avertissements des contrôles avant envoi (core/validate.ts) que l'utilisateur a vérifiés
+	 * (« J'ai vérifié ») : clés des avertissements. Une nouvelle alerte n'est pas couverte.
+	 */
+	verified?: string[];
 }
 
 /** Ajoute, change ou retire des tags d'un objet existant (null = retirer le tag). */

@@ -11,6 +11,7 @@
 L'utilisateur choisit une gare. L'appli lit les données de la gare par l'API OSM (requête <code>map</code> sur l'emprise de la gare, au plus une fois par jour) et propose de petites tâches : un quai sans numéro, une voie sans numéro local, une pancarte d'arrêt à placer, une donnée à vérifier. Les saisies restent sur le téléphone jusqu'à ce que l'utilisateur les relise et les envoie.
 
 * Les numéros ne peuvent être saisis '''que sur place''' (position vérifiée sur le téléphone, jamais envoyée). À distance, on peut seulement placer ou vérifier des objets, dessiner un quai absent ou corriger la forme d'un quai sur la photo aérienne.
+* Gare souterraine (sans GPS ni réseau) : la position est vérifiée une fois à l'entrée, en surface (ou, si le GPS ne répond pas, déclarée sur l'honneur), et vaut 2 heures pour cette gare seulement ; ces saisies portent <code>source=survey</code> comme les autres.
 * Fond de carte : BD ORTHO de l'IGN (Licence Ouverte 2.0), précision visée de l'ordre du mètre.
 * Sur la page d'une gare française, l'appli affiche aussi l'état officiel des ascenseurs et escaliers mécaniques publié en open data par SNCF Gares & Connexions (ODbL), en lecture seule : '''rien n'est écrit dans OSM''' (aucun état de panne), rien n'est envoyé à la SNCF, et les pannes se signalent aux canaux officiels de l'exploitant.
 * L'appli ne modifie que les clés listées ci-dessous. Elle peut aussi corriger la '''forme''' d'un quai, '''supprimer''' un quai (en double, ou disparu constaté sur place) '''supprimer''' une pancarte d'arrêt (en double, mal placée, ou disparue constatée sur place) et '''supprimer''' un ascenseur ou un distributeur de billets isolé (mêmes motifs), selon les règles décrites plus bas ; elle ne supprime aucun autre type d'objet, et '''jamais une voie'''.
@@ -53,6 +54,8 @@ L'utilisateur choisit une gare. L'appli lit les données de la gare par l'API OS
 == Groupes de modifications (changesets) ==
 * '''Un changeset par gare''', envoyé après relecture par l'utilisateur, sous son propre compte.
 * Tags : <code>created_by=stationcomplete <version></code>, <code>hashtags=#stationcomplete</code>, <code>comment</code> (modifiable par l'utilisateur), <code>source=survey</code> pour les saisies faites sur place, <code>imagery_used=BDOrtho IGN</code> quand un objet a été placé sur la photo.
+* <code>review_requested=yes</code> quand l'utilisateur coche « Je souhaite une relecture » ; la case est cochée d'office pour une suppression, le déplacement d'un point partagé, une saisie en gare souterraine faite sur déclaration sur l'honneur, ou un avertissement des contrôles automatiques que l'utilisateur a vérifié.
+* Avant l'envoi, des contrôles automatiques (forme des quais, quai qui croise une voie, pancarte hors voie ou sans sens, points en double, valeurs des tags écrits, numéros) bloquent une saisie fautive ; certains avertissements (hauteur inhabituelle, numéro de voie en double, numéro de quai incohérent, équipement en double) demandent à l'utilisateur de vérifier.
 * Avant l'envoi, les objets sont relus sur l'API : si quelqu'un les a modifiés entre-temps, la saisie est mise de côté « à revoir » au lieu d'écraser son travail.
 * Pour retrouver tous les changesets : recherche du hashtag ''#stationcomplete'' sur [https://osmcha.org OSMCha].
 

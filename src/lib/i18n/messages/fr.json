@@ -1214,5 +1214,51 @@
 		"stepCountBad": "Nombre de marches illisible : un nombre entier de 1 à 500.",
 		"nothing": "Répondez à au moins une question, ou touchez « C’est correct ».",
 		"summary": "{kind} : {items}"
+	},
+	"underground": {
+		"label": "Gare souterraine",
+		"start": "Je vais dans une gare souterraine",
+		"hint": "Sous terre, ni GPS ni réseau. Vérifiez votre position à l’entrée, en surface : vous pourrez relever sur place pendant 2 heures dans cette gare, même hors-ligne.",
+		"downloading": "Téléchargement de la gare pour le hors-ligne… {done} / {total}",
+		"downloadFailed": "Téléchargement incomplet ({error}). Réessayez avant de descendre si vous le pouvez.",
+		"notDownloaded": "Pas de réseau : la gare n’est pas téléchargée, les photos aériennes peuvent manquer.",
+		"locating": "Vérification de votre position…",
+		"away": "Votre position est hors de la gare. Approchez-vous d’une entrée, en surface, puis réessayez.",
+		"noGps": "Le GPS ne répond pas. Si vous êtes bien dans cette gare, vous pouvez le déclarer.",
+		"swear": "Je déclare sur l’honneur être dans la gare <b>{name}</b>. Je ne relève que ce que je vois, derrière la ligne de sécurité.",
+		"declare": "Activer le mode souterrain",
+		"active": "Mode souterrain actif pour cette gare jusqu’à {time}.",
+		"band": "Mode souterrain",
+		"leftHours": "encore {h} h {m}",
+		"leftMinutes": "encore {m} min",
+		"stop": "Arrêter",
+		"stopLabel": "Arrêter le mode souterrain"
+	},
+	"validate": {
+		"shape": "Forme du quai : {detail}",
+		"trackCrossing": "Le quai croise une voie ferrée.",
+		"duplicateNode": "Deux points du même tracé sont au même endroit (moins de 5 cm).",
+		"signOffTrack": "La pancarte n’est pas posée sur une voie ferrée.",
+		"signDirection": "Le sens de la pancarte manque.",
+		"tagValue": "Valeur inattendue pour {key} : « {value} ».",
+		"refFormat": "Numéro mal écrit pour {key} : « {value} » (espace, doublon ou valeur vide autour de « ; »).",
+		"refWord": "« {value} » : n’écrivez que le numéro, sans « voie » ni « quai ».",
+		"trackRefPlace": "Un numéro de voie (railway:track_ref) ne se met que sur une voie ferrée.",
+		"height": "Hauteur inhabituelle : {value} m (d’habitude entre {min} et {max} m).",
+		"duplicateTrackRef": "Une autre voie de la gare porte déjà le numéro {ref}.",
+		"platformRef": "Le numéro du quai ({ref}) ne correspond pas aux voies qu’il longe ({tracks}).",
+		"duplicateEquipment": "Un équipement du même type existe déjà à {distance}.",
+		"error": "Erreur :",
+		"warning": "À vérifier :",
+		"fix": "Corriger",
+		"verified": "J’ai vérifié",
+		"errorsHint": "{count, plural, one {# saisie ne partira pas tant qu’elle n’est pas corrigée.} other {# saisies ne partiront pas tant qu’elles ne sont pas corrigées.}}",
+		"warningsHint": "Une saisie « à vérifier » part si vous cochez « J’ai vérifié ».",
+		"held": "Contrôles avant envoi : aucune saisie ne peut partir. Corrigez-les ou cochez « J’ai vérifié »."
+	},
+	"reviewRequest": {
+		"label": "Je souhaite une relecture",
+		"help": "Des contributeurs expérimentés pourront relire ce groupe de modifications sur OSMCha.",
+		"why": "Cochée d’office : cet envoi contient une suppression, un point partagé déplacé, une saisie sur déclaration ou un avertissement vérifié."
 	}
 }

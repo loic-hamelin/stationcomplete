@@ -112,6 +112,16 @@ describe('XML', () => {
 		});
 	});
 
+	it('changeset : review_requested=yes seulement si la relecture est demandée (QA-3)', () => {
+		const base = { comment: 'Gare X', version: '0.4', survey: true, imagery: false };
+		expect(changesetTags(base)).not.toHaveProperty('review_requested');
+		expect(changesetTags({ ...base, review: false })).not.toHaveProperty('review_requested');
+		const t = changesetTags({ ...base, review: true });
+		expect(changesetXml(t)).toContain('<tag k="review_requested" v="yes"/>');
+		// La manière dont « sur place » a été établi (mode souterrain) n'est jamais un tag.
+		expect(Object.keys(t).join()).not.toMatch(/onsite|underground|gps/);
+	});
+
 	it('diffResult et message de conflit', () => {
 		const d = parseDiffResult(
 			'<diffResult><node old_id="-1" new_id="99" new_version="1"/><way old_id="10" new_id="10" new_version="4"/></diffResult>'

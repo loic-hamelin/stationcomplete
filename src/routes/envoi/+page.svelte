@@ -12,7 +12,8 @@
 		isRemoval,
 		type Edit
 	} from '#lib/core/edits.js';
-	import { openStation } from '#lib/current.svelte.js';
+	import { current, openStation } from '#lib/current.svelte.js';
+	import { heldBack, suggestReview, validateEdits, type Issue } from '#lib/core/validate.js';
 	import { editsOf, loadEdits, pending, removeEdit, updateEdits } from '#lib/edits.svelte.js';
 	import {
 		APP_VERSION,
@@ -43,7 +44,7 @@
 	let commentEdited = $state(false);
 	$effect(() => {
 		if (station && pending.loaded && !commentEdited)
-			comment = proposedComment(station.name, ready.length ? ready : edits);
+			comment = proposedComment(station.name, sendable.length ? sendable : edits);
 	});
 
 	onMount(() => {
@@ -54,6 +55,8 @@
 		addEventListener('offline', up);
 		loadEdits();
 		refreshConfig();
+		// Données de la gare (cache local, aussi hors-ligne) : contrôles avant envoi (QA-2).
+		openStation(page.url.searchParams.get('id') ?? '');
 		findStation(page.url.searchParams.get('id') ?? '').then((s) => (station = s));
 		return () => {
 			removeEventListener('online', up);
@@ -64,6 +67,39 @@
 	const edits = $derived(id ? editsOf(id) : []);
 	const ready = $derived(edits.filter((e) => !e.conflict));
 	const review = $derived(edits.filter((e) => e.conflict));
+	// Contrôles avant envoi (QA-2), sur la vue locale : données de la gare + saisies.
+	const data = $derived(
+		current.value.status === 'ready' && current.value.station.id === id ? current.value : undefined
+	);
+	const issues = $derived<Issue[]>(
+		data && pending.loaded
+			? validateEdits(data.elements, edits, ready, data.station.bbox, data.station.country)
+			: []
+	);
+	const issuesOf = (e: Edit) => issues.filter((i) => i.edit === e.id);
+	const held = $derived(heldBack(ready, issues));
+	const sendable = $derived(ready.filter((e) => !held.has(e.id)));
+	const blockedCount = $derived(
+		ready.filter((e) => issuesOf(e).some((i) => i.severity === 'error')).length
+	);
+	const warned = $derived(issues.some((i) => i.severity === 'warning'));
+	// Demande de relecture (QA-3) : cochée d'office selon le contenu, tant que la personne n'y a
+	// pas touché.
+	let reviewTouched = $state(false);
+	let reviewChoice = $state(false);
+	const reviewDefault = $derived(suggestReview(sendable, issues));
+	const reviewOn = $derived(reviewTouched ? reviewChoice : reviewDefault);
+	async function setVerified(e: Edit, key: string, on: boolean) {
+		const list = (e.verified ?? []).filter((k) => k !== key);
+		await updateEdits([{ ...e, verified: on ? [...list, key] : list }]);
+	}
+	/** Lien « Corriger » : la carte pour une forme ou un objet dessiné, sinon la fiche. */
+	const fixHref = (e: Edit) =>
+		e.kind === 'shape' || e.kind === 'way' || e.kind === 'point' || isRemoval(e)
+			? resolve(`/gare/carte?id=${encodeURIComponent(id)}&focus=${editKey(e)}`)
+			: resolve(
+					`/gare/${editFamily(e) === 'equip' ? 'equipement' : 'saisie'}?id=${encodeURIComponent(id)}&osm=${e.kind === 'node' ? `way/${e.way}` : editKey(e)}`
+				);
 	const busy = $derived(sending.step !== 'idle');
 	const real = $derived(server.id === 'prod');
 	// Arrêt d'urgence ou phase pilote (config.json) ; revérifié au moment de l'envoi.
@@ -86,7 +122,7 @@
 
 	async function send() {
 		result = undefined;
-		result = await sendStation(id, station?.name ?? id, comment);
+		result = await sendStation(id, station?.name ?? id, comment, reviewOn);
 		// Données relues après un envoi, ou après un conflit (pour refaire sur la carte à jour).
 		if (result.changeset || result.conflicts) openStation(id, { force: true });
 	}
@@ -186,13 +222,42 @@
 				<h2 class="overline">{t('sendPage.ready', { count: ready.length })}</h2>
 				<ul class="group">
 					{#each ready as e (e.id)}
-						<li class={family(e)}>
+						{@const found = issuesOf(e)}
+						<li class={family(e)} class:checks={found.length}>
 							<Icon name={icon(e)} size={20} />
 							<span class="txt"
 								><span class="sum">{e.summary}</span><span class="meta"
 									>{editLabel(e)}{e.demo ? ` · ${t('sendPage.demo')}` : ''}</span
 								></span
 							>
+							{#if found.length}
+								<ul class="issues">
+									{#each found as i (i.key)}
+										<li class={i.severity}>
+											<Icon name={i.severity === 'error' ? 'alert' : 'question'} size={18} />
+											<span
+												><strong
+													>{i.severity === 'error'
+														? t('validate.error')
+														: t('validate.warning')}</strong
+												>
+												{i.message}</span
+											>
+											{#if i.severity === 'error'}
+												<a class="btn-sm" href={fixHref(e)}>{t('validate.fix')}</a>
+											{:else}
+												<label class="tick">
+													<input
+														type="checkbox"
+														checked={(e.verified ?? []).includes(i.key)}
+														onchange={(ev) => setVerified(e, i.key, ev.currentTarget.checked)}
+													/>{t('validate.verified')}
+												</label>
+											{/if}
+										</li>
+									{/each}
+								</ul>
+							{/if}
 							{#if real && e.demo}
 								<span class="acts">
 									<button class="btn-sm" type="button" onclick={() => removeEdit(e.id)}
@@ -203,6 +268,10 @@
 						</li>
 					{/each}
 				</ul>
+				{#if blockedCount}<p class="hint" role="status">
+						{t('validate.errorsHint', { count: blockedCount })}
+					</p>{/if}
+				{#if warned}<p class="hint">{t('validate.warningsHint')}</p>{/if}
 			{/if}
 			{#if review.length}
 				<h2 class="overline">{t('sendPage.review', { count: review.length })}</h2>
@@ -253,6 +322,22 @@
 						oninput={() => (commentEdited = true)}></textarea>
 				</label>
 				<p class="hint">{t('sendPage.commentHint')}</p>
+				<!-- QA-3 : review_requested=yes sur le changeset (wiki Key:review_requested). -->
+				<label class="tick review-req">
+					<input
+						type="checkbox"
+						checked={reviewOn}
+						onchange={(ev) => {
+							reviewTouched = true;
+							reviewChoice = ev.currentTarget.checked;
+						}}
+					/>{t('reviewRequest.label')}
+				</label>
+				<p class="hint">
+					{reviewDefault
+						? `${t('reviewRequest.help')} ${t('reviewRequest.why')}`
+						: t('reviewRequest.help')}
+				</p>
 			{/if}
 		{/if}
 	</main>
@@ -279,15 +364,17 @@
 					<button class="btn btn-secondary" type="button" onclick={() => dequeue(id)}
 						>{t('sendPage.cancelQueue')}</button
 					>
+				{:else if !sendable.length}
+					<p class="hint" role="status">{t('validate.held')}</p>
 				{:else if online}
 					<button class="btn" type="button" onclick={send}>
-						{t('sendPage.send', { count: ready.length })}
+						{t('sendPage.send', { count: sendable.length })}
 					</button>
 				{:else}
 					<button
 						class="btn"
 						type="button"
-						onclick={() => enqueue(id, station?.name ?? id, comment)}
+						onclick={() => enqueue(id, station?.name ?? id, comment, reviewOn)}
 					>
 						{t('sendPage.sendLater')}
 					</button>
@@ -299,7 +386,7 @@
 
 <style>
 	.screen {
-		min-height: 100dvh;
+		min-height: calc(100dvh - var(--band));
 		display: flex;
 		flex-direction: column;
 	}
@@ -347,8 +434,60 @@
 	li.equip > :global(svg) {
 		color: var(--equip);
 	}
-	li.review {
+	li.review,
+	li.checks {
 		flex-wrap: wrap;
+	}
+	/* Contrôles avant envoi : icône + texte (jamais la couleur seule). */
+	.issues {
+		flex: 1 1 100%;
+		margin: 0;
+		padding: 0 0 0 32px;
+		list-style: none;
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+	.issues li {
+		min-height: 0;
+		padding: 8px 10px;
+		gap: 8px;
+		flex-wrap: wrap;
+		align-items: flex-start;
+		border-radius: var(--radius);
+		font-size: 0.875rem;
+	}
+	.issues li > span {
+		flex: 1 1 180px;
+	}
+	.issues li.error {
+		background: var(--danger-soft);
+	}
+	.issues li.error > :global(svg) {
+		color: var(--danger);
+	}
+	.issues li.warning {
+		background: var(--missing-soft);
+	}
+	.issues li.warning > :global(svg) {
+		color: var(--missing);
+	}
+	.tick {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		min-height: 44px;
+		font-weight: 600;
+		cursor: pointer;
+	}
+	.tick input {
+		width: 22px;
+		height: 22px;
+		margin: 0;
+		accent-color: var(--primary);
+	}
+	.review-req {
+		margin-bottom: -6px;
 	}
 	li.review > :global(svg) {
 		color: var(--danger);

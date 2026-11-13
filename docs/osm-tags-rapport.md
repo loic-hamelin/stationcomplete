@@ -266,7 +266,7 @@ Une pancarte ne se voit pas sur une orthophoto : elle se relève **sur le terrai
 - Tags recommandés :
   - `comment`, rédigé par un humain et non automatique ;
   - `created_by` (logiciel) ; `source` ; `imagery_used` ; `locale` ; `hashtags` (séparés par `;`) ; `host` ;
-  - `review_requested=yes` si besoin.
+  - `review_requested=yes` si besoin : d'après [Key:review_requested](https://wiki.openstreetmap.org/wiki/Key:review_requested) (lu le 13/11/2026), « changeset tag; indicates that the user would like someone to review this changeset », seule valeur documentée `yes`, posée par une case cochée par le contributeur à l'enregistrement (iD, JOSM, Rapid : « I would like someone to review my edits ») ; OSMCha signale ces changesets (filtre « Reason for flagging » = « Review requested »). La page prévient que ces demandes sont « followed quite rarely ». stationcomplete l'utilise depuis QA-3 (case de E8, cochée d'office pour les suppressions, points partagés déplacés, déclarations sur l'honneur et avertissements vérifiés ; `docs/architecture.md` § 4.5.2).
 - Limites :
   - 10 000 éléments par changeset ;
   - fermeture automatique après 1 h d'inactivité, ouverture de 24 h au maximum ;

@@ -54,7 +54,11 @@ Pour chaque changeset #stationcomplete du pilote :
 - [ ] Les numéros de voies (`railway:track_ref`) sont posés sur les bonnes voies.
 - [ ] Les pancartes sont sur la bonne voie, du bon côté (`railway:signal:position`) et dans le bon sens (`railway:signal:direction`), à environ 1 m près.
 - [ ] Les quais dessinés ne touchent pas les voies et ont une forme correcte (le validateur de JOSM ne signale rien).
-- [ ] Aucune modification hors de ces clés, aucune suppression.
+- [ ] Formes modifiées : les objets qui partagent un point déplacé (gare, toit, bord de quai…) restent cohérents.
+- [ ] Suppressions (quai, pancarte, équipement isolé) : le motif du commentaire est plausible, rien d'autre n'a disparu.
+- [ ] Aucune modification hors des clés listées sur la page wiki.
+
+**Priorité : les demandes de relecture.** Dans OSMCha (connecté avec un compte OSM), filtre sauvegardé : _Editor_ (`created_by`) contient `stationcomplete`, _Show flagged_ = yes, _Reason for flagging_ = **Review requested** (`review_requested=yes`), suivi par RSS. L'appli coche d'office cette demande pour une suppression, un point partagé déplacé, une saisie en gare souterraine faite sur déclaration sur l'honneur, ou un avertissement des contrôles avant envoi que le testeur a déclaré vérifié ; le testeur peut aussi la cocher lui-même. Relire ces changesets en premier, sous 2 jours ouvrés.
 
 Notez chaque problème : changeset, objet, ce qui est faux.
 

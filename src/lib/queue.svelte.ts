@@ -13,6 +13,8 @@ interface Queued {
 	station: string;
 	name: string;
 	comment: string;
+	/** « Je souhaite une relecture » choisi sur E8 (absent : choix par défaut à l'envoi). */
+	review?: boolean;
 	at: number;
 }
 const queueKey = () => `queue:${server.id}`;
@@ -22,10 +24,10 @@ export const queue = $state<{ list: Queued[]; last?: SendResult & { name: string
 const saveQueue = () => writePref(queueKey(), $state.snapshot(queue.list));
 export const isQueued = (id: string) => queue.list.some((q) => q.station === id);
 
-export function enqueue(station: string, name: string, comment: string) {
+export function enqueue(station: string, name: string, comment: string, review?: boolean) {
 	queue.list = [
 		...queue.list.filter((q) => q.station !== station),
-		{ station, name, comment, at: Date.now() }
+		{ station, name, comment, review, at: Date.now() }
 	];
 	saveQueue();
 }
@@ -46,9 +48,10 @@ export async function flushQueue() {
 		if (!mod) return;
 		const { sendStation } = mod;
 		for (const q of [...queue.list]) {
-			const r = await sendStation(q.station, q.name, q.comment);
+			const r = await sendStation(q.station, q.name, q.comment, q.review);
 			// Erreur temporaire (réseau, limite) : la gare reste en file pour le prochain retour.
-			if (r.error && !r.changeset) {
+			// (Saisies retenues par les contrôles avant envoi : pas temporaire, la gare sort de la file.)
+			if (r.error && !r.changeset && !r.held) {
 				queue.last = { ...r, name: q.name };
 				break;
 			}

@@ -1214,5 +1214,51 @@
 		"stepCountBad": "Number of steps not understood: a whole number from 1 to 500.",
 		"nothing": "Answer at least one question, or tap “It is correct”.",
 		"summary": "{kind}: {items}"
+	},
+	"underground": {
+		"label": "Underground station",
+		"start": "I’m going into an underground station",
+		"hint": "Underground there is no GPS and no network. Check your position at the entrance, above ground: you can then survey on site in this station for 2 hours, even offline.",
+		"downloading": "Downloading the station for offline use… {done} / {total}",
+		"downloadFailed": "Download incomplete ({error}). Try again before going down if you can.",
+		"notDownloaded": "No network: the station is not downloaded, aerial photos may be missing.",
+		"locating": "Checking your position…",
+		"away": "Your position is outside the station. Go to an entrance, above ground, then try again.",
+		"noGps": "GPS is not responding. If you really are in this station, you can declare it.",
+		"swear": "I declare on my honour that I am in <b>{name}</b> station. I only record what I see, behind the safety line.",
+		"declare": "Turn on underground mode",
+		"active": "Underground mode on for this station until {time}.",
+		"band": "Underground mode",
+		"leftHours": "{h} h {m} left",
+		"leftMinutes": "{m} min left",
+		"stop": "Stop",
+		"stopLabel": "Stop underground mode"
+	},
+	"validate": {
+		"shape": "Platform shape: {detail}",
+		"trackCrossing": "The platform crosses a railway track.",
+		"duplicateNode": "Two points of the same line are at the same place (less than 5 cm).",
+		"signOffTrack": "The stop marker is not on a railway track.",
+		"signDirection": "The stop marker direction is missing.",
+		"tagValue": "Unexpected value for {key}: “{value}”.",
+		"refFormat": "Badly written number for {key}: “{value}” (space, duplicate or empty value around “;”).",
+		"refWord": "“{value}”: write only the number, without “track” or “platform”.",
+		"trackRefPlace": "A track number (railway:track_ref) belongs on a railway track only.",
+		"height": "Unusual height: {value} m (usually between {min} and {max} m).",
+		"duplicateTrackRef": "Another track in the station already has number {ref}.",
+		"platformRef": "The platform number ({ref}) does not match the tracks along it ({tracks}).",
+		"duplicateEquipment": "An item of the same type already exists {distance} away.",
+		"error": "Error:",
+		"warning": "To check:",
+		"fix": "Fix",
+		"verified": "I have checked",
+		"errorsHint": "{count, plural, one {# edit will not be sent until it is fixed.} other {# edits will not be sent until they are fixed.}}",
+		"warningsHint": "An edit “to check” is sent if you tick “I have checked”.",
+		"held": "Checks before sending: no edit can be sent. Fix them or tick “I have checked”."
+	},
+	"reviewRequest": {
+		"label": "I would like someone to review my edits",
+		"help": "Experienced mappers will be able to review this changeset on OSMCha.",
+		"why": "Ticked by default: this upload contains a deletion, a moved shared point, an edit made on declaration or a checked warning."
 	}
 }

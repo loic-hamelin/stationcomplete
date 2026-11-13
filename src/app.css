@@ -105,6 +105,11 @@
 	--target: 48px;
 	--target-min: 44px;
 	--font: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+	/* hauteur du bandeau du mode souterrain (0 quand il est inactif) */
+	--band: 0px;
+}
+:root.band {
+	--band: 40px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -185,6 +190,9 @@
 	box-sizing: border-box;
 }
 
+body {
+	padding-top: var(--band);
+}
 html,
 body {
 	margin: 0;

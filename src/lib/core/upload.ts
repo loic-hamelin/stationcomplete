@@ -782,6 +782,8 @@ export function changesetTags(o: {
 	imagery: boolean;
 	locale?: string;
 	country?: CountryCode;
+	/** « Je souhaite une relecture » (QA-3) : review_requested=yes (wiki Key:review_requested). */
+	review?: boolean;
 }): Tags {
 	const t: Tags = {
 		created_by: `stationcomplete ${o.version}`,
@@ -791,5 +793,6 @@ export function changesetTags(o: {
 	};
 	if (o.survey) t.source = 'survey';
 	if (o.imagery) t.imagery_used = imageryOf(o.country ?? DEFAULT_COUNTRY).imageryUsed;
+	if (o.review) t.review_requested = 'yes';
 	return t;
 }

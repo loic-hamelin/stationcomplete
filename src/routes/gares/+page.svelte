@@ -438,7 +438,7 @@
 <style>
 	/* Coque d'appli : seul le contenu défile, la barre basse ne recouvre jamais rien. */
 	.screen {
-		height: 100dvh;
+		height: calc(100dvh - var(--band));
 		display: flex;
 		flex-direction: column;
 	}
