@@ -3,5 +3,5 @@
 	"minVersion": "0.4",
 	"message": null,
 	"pilotUsers": ["LoicHam"],
-	"officialStatusEnabled": false
+	"officialStatusEnabled": true
 }
